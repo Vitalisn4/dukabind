@@ -1,16 +1,54 @@
-# Model weights — never commit these to git
+# Model weights — never commit (ADTC rule)
 model/*.gguf
 model/*.bin
 model/*.safetensors
+# Keep checksum manifest
+!model/SHA256SUMS.txt
+!model/.gitkeep
 
-# macOS
+# Local databases (seed from SQL; do not commit live shop data)
+data/*.sqlite
+data/*.sqlite-wal
+data/*.sqlite-shm
+!data/.gitkeep
+
+# macOS / editors
 .DS_Store
+.idea/
+.vscode/
 
 # Python
 __pycache__/
 *.pyc
 .venv/
+.venv311/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
 
-# Local profiler output
+# Local profiler / bench raw dumps
 submission.json
 audit.json
+benchmarks/raw/
+
+# Vendored llama.cpp clone + build (rebuild via scripts/setup_llama.sh)
+third_party/
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# ── Local-only strategy / working docs (keep on disk, do not publish) ─────────
+# Full phase pack, prompts, roadmap, progress logs — for your build process.
+# Public judge-facing docs are allowlisted below via negation if needed.
+docs/ADTC-2026-Phase*.md
+docs/ADTC-2026-Master-Prompt-Framework.md
+docs/ADTC-2026-Rules-Resources-Audit.md
+docs/ADTC-2026-ROADMAP.md
+docs/ADTC-2026-Build-Kickoff.md
+docs/ADTC-2026-INDEX.md
+docs/PROGRESS.md
+docs/STAGE-*.md
+docs/COMPLIANCE_CHECKLIST.md
+TEMPLATE_README.md
