@@ -2,13 +2,13 @@ NOTICE — DukaBind / ADTC 2026
 
 1. This repository was initialized from the official ADTC 2026 submission template:
    https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template
-   Template LICENSE file is GNU GPL v3 as distributed by ADTF.
+   The repository LICENSE is GNU GPL v3, matching that template distribution.
 
-2. Original DukaBind application code under app/, tests/, and project docs/ is
-   authored for this challenge. Prefer citing both this NOTICE and LICENSE
-   until legal counsel confirms final dual-license posture for Gate 1.
+2. Original DukaBind application code under app/, tests/, scripts/, and project
+   docs/ is released under the same GNU GPL v3 terms as LICENSE in this repo.
 
 3. Model weights are not in git. Qwen2.5 weights are subject to their upstream
    Apache-2.0 license on Hugging Face — verify the model card at download time.
+   Upstream model licensing is separate from this repository's GPL-3.0 code license.
 
 4. Demo fixtures are synthetic. Do not commit real customer PII.

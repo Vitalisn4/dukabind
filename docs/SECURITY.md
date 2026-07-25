@@ -19,7 +19,7 @@ This document is the authoritative threat model for the binder. Every security-s
 
 ## 2. Trust boundaries
 
-```
+```text
 [Untrusted] Staff utterance / UI input
       │
       ▼
@@ -70,4 +70,4 @@ If asked “what stops the model inventing a balance?”:
 - [Devpost overview](https://adtc-2026.devpost.com/) — 7 GB / OOM DQ, thermal −10  
 - OWASP Injection prevention cheat sheet  
 - Python `sqlite3` — DB-API parameter substitution  
-- Phase 5 architecture (`docs/ADTC-2026-Phase5-Technical-Architecture.md`)
+- Phase 5 architecture summary: [`docs/DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) (load-bearing binder; no vector RAG at Gate 1)

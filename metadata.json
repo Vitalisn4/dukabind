@@ -17,11 +17,11 @@
   "test_prompts": [
     {
       "prompt_id": "tp_001",
-      "prompt": "PLACEHOLDER — freeze after held-out set (Phase 7). Must include LEDGER citation block for credit arithmetic."
+      "prompt": "LEDGER_JSON is authoritative. Customer Amina Wanjiru has credit_limit=8000 XAF and outstanding=6250 XAF. CRATE-SODA-300ML unit_price=720. Staff ask: Can I give Amina three crates on credit? Answer using only these numbers; refuse if any required field is missing."
     },
     {
       "prompt_id": "tp_002",
-      "prompt": "PLACEHOLDER — freeze after held-out set (Phase 7). Prefer Swahili refuse when balance_owed is null."
+      "prompt": "LEDGER_JSON inaonyesha supplier Bidco Distributors na balance_owed=null. Swali: Tunadaiwa Bidco Distributors kiasi gani? Jibu kwa Kiswahili: kataa kwa sababu kiasi hakipo kwenye faili; usibuni namba."
     }
   ],
   "model": {

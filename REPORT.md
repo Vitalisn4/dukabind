@@ -14,7 +14,7 @@ When a micro/small shop owner is away from the counter, semi-trained staff canno
 
 **DukaBind** is an offline llama.cpp/GGUF assistant that answers only from a local SQLite ledger bind and fails closed when data is missing. Target users: counter staff (primary), shop owners (secondary). African context: commodity 8 GB laptops, intermittent mobile data, owner-absent shifts — designed from Cameroon MSME shop reality (demo fixture: Douala, XAF).
 
-See `docs/ADTC-2026-Phase4-Winner-Selection.md` for selection rationale vs other candidates.
+See [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) for selection rationale and alternatives considered.
 
 ---
 

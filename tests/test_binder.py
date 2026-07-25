@@ -70,6 +70,19 @@ def test_swahili_credit_path(db: sqlite3.Connection) -> None:
     assert r.citation_rows or r.refuse_reason
 
 
+def test_english_stock_stays_english(db: sqlite3.Connection) -> None:
+    r = handle_ask(db, "What stock of soda do we have on hand?")
+    assert r.lang == "en"
+    assert r.ok is True
+
+
+def test_credit_named_rice_uses_rice_price(db: sqlite3.Connection) -> None:
+    # 1 * 18500 + 6250 = 24750 > 8000
+    r = handle_ask(db, "Can I give Amina 1 bag of rice on credit?")
+    assert r.ok is True
+    assert "18500" in r.message or "24750" in r.message
+
+
 def test_flip_ledger_changes_answer(db: sqlite3.Connection) -> None:
     before = handle_ask(db, "Can I give Amina 3 crates on credit?")
     assert "No" in before.message or "exceeds" in before.message.lower() or "inazidi" in before.message

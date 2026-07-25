@@ -56,9 +56,10 @@ Each decision lists **options**, **choice**, **evidence**, and **how to reverse*
 
 | | |
 |---|---|
-| **Template** | Forked from ADTC template (GPL-3.0 LICENSE file present) |
-| **App intent** | Original DukaBind application code documented as Apache-2.0-compatible; keep NOTICE of template origin |
-| **Action** | Do not remove attribution; clarify in REPORT before Gate 1 freeze |
+| **Repository** | **GNU GPL v3** (`LICENSE`) — governing license for this codebase |
+| **Provenance** | Initialized from the ADTC submission template (also GPL-3.0) |
+| **Model weights** | Not in git; Qwen2.5 GGUF remains under its upstream Apache-2.0 terms on Hugging Face (separate from repo code license) |
+| **Action** | Keep `NOTICE` + `LICENSE` consistent; do not claim Apache-2.0 for application code while `LICENSE` is GPL-3.0 |
 
 ## D8 — Demo data: synthetic only
 

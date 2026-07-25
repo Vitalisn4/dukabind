@@ -3,6 +3,8 @@
 Fail-closed refuses skip the LLM (Phase 5 / SECURITY C4).
 Successful binder decisions may be narrated if llama-server is up;
 otherwise we return the deterministic binder message (still correct).
+
+`message` is ALWAYS the binder decision. Optional polish is in `narration`.
 """
 
 from __future__ import annotations
@@ -22,9 +24,11 @@ def ask(
     use_llm: bool = True,
     base_url: str = "http://127.0.0.1:8080",
 ) -> dict[str, Any]:
+    """Run binder; optionally attach local narration without overriding truth."""
     result = handle_ask(conn, text)
     payload = result_with_citation_json(result)
     payload["narrated"] = False
+    payload["narration"] = None
     payload["source"] = "binder"
 
     # Hard refuse: never ask the model to invent a fill-in.
@@ -50,8 +54,9 @@ def ask(
         payload["llm_note"] = str(exc)
         return payload
 
-    payload["binder_message"] = result.message
-    payload["message"] = narrated
+    # Binder remains authoritative for cashiers / judges / tests.
+    payload["message"] = result.message
+    payload["narration"] = narrated
     payload["narrated"] = True
     payload["source"] = "binder+llm"
     return payload

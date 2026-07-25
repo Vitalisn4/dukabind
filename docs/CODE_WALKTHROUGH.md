@@ -9,7 +9,7 @@ Read this top-to-bottom once. Then re-run the commands. Then change one seed num
 
 ## 1. Big picture (30 seconds)
 
-```
+```text
 Staff question (EN/SW)
         │
         ▼
@@ -91,7 +91,7 @@ Eight tests: allowlist rejection, over-limit No, NULL refuse, Nest 42000, stock 
 ## 4. Commands you should memorize
 
 ```bash
-cd /home/vitalis/Hackathon/Tech
+# From the repository root (wherever you cloned dukabind)
 source .venv/bin/activate
 
 # Re-run truth tests (no internet, no GGUF)
@@ -112,13 +112,13 @@ PYTHONPATH=. python -m app.cli "How much do we owe Bidco Distributors?"
 | Missing | Why it waits |
 |---|---|
 | FastAPI / HTMX UI | After RSS headroom proven |
-| Frozen `tp_001` / `tp_002` | After held-out eval set (anti-overfit) |
+| Frozen held-out eval set | After bilingual smoke; `metadata.json` currently has provisional domain prompts |
 | Profiler numbers in REPORT | Never invent — measure with adtc-profiler |
-| Public GitHub repo | Create under Vitalisn4 when ready to push |
+| Public GitHub repo | In progress under Vitalisn4/dukabind |
 
 ## 5b. What THIS stage added (llama + narration)
 
-Full teach-in: [`STAGE-llama-narration.md`](./STAGE-llama-narration.md)
+See also [`docs/SECURITY.md`](./SECURITY.md) (C4/C5) and [`docs/DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) (runtime choices).
 
 | New piece | Role |
 |---|---|
@@ -126,8 +126,8 @@ Full teach-in: [`STAGE-llama-narration.md`](./STAGE-llama-narration.md)
 | `scripts/setup_llama.sh` | Clone + build |
 | `scripts/start_llama_server.sh` | Loopback CPU server |
 | `app/prompts/narrate.py` | System/user prompts (no SQL) |
-| `app/llm/client.py` | HTTP to 127.0.0.1:8080 |
-| `app/llm/ask.py` | Binder first; LLM only if healthy + not refuse |
+| `app/llm/client.py` | HTTP to 127.0.0.1:8080 only |
+| `app/llm/ask.py` | Binder first; optional `narration` field; `message` stays binder |
 | `app/narrate_cli.py` | End-to-end CLI |
 | `.venv311` + `adtc-profiler` | Official metrics (Python 3.11+) |
 

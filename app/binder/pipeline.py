@@ -34,10 +34,13 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
         if not rows:
             return refuse_not_found(parsed.lang, parsed.customer)
         row = rows[0]
-        # Default demo sku price for soda crate when qty present; else qty=1 price lookup
+        # Default demo SKU only when the ask named no product (common "crates on credit").
         qty = parsed.qty or 1
-        sku_rows = run_query(conn, "sku_stock", {"name": "CRATE-SODA-300ML"})
-        unit_price = int(sku_rows[0]["unit_price"]) if sku_rows else 0
+        sku_name = parsed.sku or "CRATE-SODA-300ML"
+        sku_rows = run_query(conn, "sku_stock", {"name": sku_name})
+        if not sku_rows or int(sku_rows[0]["unit_price"]) <= 0:
+            return refuse_not_found(parsed.lang, sku_name)
+        unit_price = int(sku_rows[0]["unit_price"])
         return credit_decision(parsed.lang, row, qty, unit_price)
 
     if parsed.intent == Intent.SUPPLIER_BALANCE:

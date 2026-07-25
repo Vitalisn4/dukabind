@@ -14,15 +14,13 @@ Staff ask about credit, payables, or stock (English or Swahili). DukaBind runs *
 
 | Doc | Purpose |
 |---|---|
-| [`docs/CODE_WALKTHROUGH.md`](docs/CODE_WALKTHROUGH.md) | **Understand every piece of code** |
-| [`docs/COMPLIANCE_CHECKLIST.md`](docs/COMPLIANCE_CHECKLIST.md) | Devpost / Rules / Template compliance |
-| [`docs/ADTC-2026-INDEX.md`](docs/ADTC-2026-INDEX.md) | Full strategy document map |
-| [`docs/ADTC-2026-ROADMAP.md`](docs/ADTC-2026-ROADMAP.md) | Milestones to Gate 1 / Gate 3 |
-| [`docs/ADTC-2026-Build-Kickoff.md`](docs/ADTC-2026-Build-Kickoff.md) | Tools + Day 1–5 |
+| [`docs/CODE_WALKTHROUGH.md`](docs/CODE_WALKTHROUGH.md) | Understand every piece of shipped code |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Threat model and binder security rules |
 | [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) | Research-backed design choices |
+| [`docs/README.md`](docs/README.md) | Public docs index |
+| [`REPORT.md`](REPORT.md) | Gate 1 technical writeup |
 
-Official template requirements: see [`TEMPLATE_README.md`](TEMPLATE_README.md) (from [adtc-2026-submission-template](https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template)).
+Official ADTC template: [adtc-2026-submission-template](https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template).
 
 ## Quick start (after Ubuntu + Python 3.10+)
 
@@ -30,7 +28,7 @@ Official template requirements: see [`TEMPLATE_README.md`](TEMPLATE_README.md) (
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Optional for Day 2 smoke: download GGUF (~1.1 GB, needs network once)
+# Optional: download GGUF (~1.1 GB, needs network once)
 # ./download_model.sh
 
 # Binder unit tests (no model required)
@@ -39,6 +37,13 @@ PYTHONPATH=. pytest tests/ -q
 # Init demo ledger + try the binder yourself
 python -m app.db.connection
 PYTHONPATH=. python -m app.cli "Can I give Amina three crates on credit?"
+```
+
+With local llama-server:
+
+```bash
+bash scripts/start_llama_server.sh   # terminal A
+PYTHONPATH=. python -m app.narrate_cli "Can I give Amina three crates on credit?"  # terminal B
 ```
 
 ## Contest links

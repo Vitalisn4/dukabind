@@ -36,7 +36,8 @@ _CREDIT_SW = re.compile(r"\b(deni|mkopo|naweza\s+kumpa|kumpa)\b", re.I)
 _SUPPLIER_EN = re.compile(r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.I)
 _SUPPLIER_SW = re.compile(r"\b(msambazaji|tunadaiwa|deni\s+la|sali[o]?)\b", re.I)
 _STOCK_EN = re.compile(r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.I)
-_STOCK_SW = re.compile(r"\b(idadi|stock|ipo\s+ngapi|bee?bi)\b", re.I)
+# Do not include English "stock" here — it would mis-label EN asks as Swahili.
+_STOCK_SW = re.compile(r"\b(idadi|ipo\s+ngapi|bee?bi)\b", re.I)
 
 # Simple entity patterns for demo fixtures — extend carefully; do not exec user regex.
 _QTY = re.compile(r"\b(\d+)\s*(crates?|bags?|units?|crate|bag)?\b", re.I)
@@ -78,8 +79,25 @@ KNOWN_CUSTOMERS = ["Amina Wanjiru", "Jean Mbarga", "Pauline Ngo", "Amina"]
 KNOWN_SUPPLIERS = ["Bidco Distributors", "Nest Wholesale", "Bidco"]
 KNOWN_SKUS = ["CRATE-SODA-300ML", "BAG-RICE-25KG", "JERRY-OIL-5L", "soda", "rice", "oil"]
 
+_SKU_ALIASES = {
+    "soda": "CRATE-SODA-300ML",
+    "crate-soda-300ml": "CRATE-SODA-300ML",
+    "rice": "BAG-RICE-25KG",
+    "bag-rice-25kg": "BAG-RICE-25KG",
+    "oil": "JERRY-OIL-5L",
+    "jerry-oil-5l": "JERRY-OIL-5L",
+}
+
+
+def normalize_sku(raw: str | None) -> str | None:
+    """Map demo aliases to canonical sku_id / name keys."""
+    if not raw:
+        return None
+    return _SKU_ALIASES.get(raw.lower(), raw)
+
 
 def detect_lang(text: str) -> str:
+    """Return 'sw' only when Swahili-specific cues are present."""
     if _CREDIT_SW.search(text) or _SUPPLIER_SW.search(text) or _STOCK_SW.search(text):
         return "sw"
     if re.search(r"\b(naweza|tunadaiwa|msambazaji|hakuna|muulize)\b", text, re.I):
@@ -88,14 +106,16 @@ def detect_lang(text: str) -> str:
 
 
 def parse_ask(text: str) -> ParsedAsk:
+    """Map a staff utterance to intent + slots (no LLM, no SQL)."""
     lang = detect_lang(text)
     qty = _extract_qty(text)
+    sku = normalize_sku(_extract_known_name(text, KNOWN_SKUS))
 
     if _CREDIT_EN.search(text) or _CREDIT_SW.search(text):
         cust = _extract_known_name(text, KNOWN_CUSTOMERS)
         if cust == "Amina":
             cust = "Amina Wanjiru"
-        return ParsedAsk(Intent.CREDIT_CHECK, lang, customer=cust, qty=qty)
+        return ParsedAsk(Intent.CREDIT_CHECK, lang, customer=cust, sku=sku, qty=qty)
 
     if _SUPPLIER_EN.search(text) or _SUPPLIER_SW.search(text):
         sup = _extract_known_name(text, KNOWN_SUPPLIERS)
@@ -104,13 +124,6 @@ def parse_ask(text: str) -> ParsedAsk:
         return ParsedAsk(Intent.SUPPLIER_BALANCE, lang, supplier=sup)
 
     if _STOCK_EN.search(text) or _STOCK_SW.search(text):
-        sku = _extract_known_name(text, KNOWN_SKUS)
-        if sku and sku.lower() == "soda":
-            sku = "CRATE-SODA-300ML"
-        elif sku and sku.lower() == "rice":
-            sku = "BAG-RICE-25KG"
-        elif sku and sku.lower() == "oil":
-            sku = "JERRY-OIL-5L"
         return ParsedAsk(Intent.STOCK_CHECK, lang, sku=sku, qty=qty)
 
     return ParsedAsk(Intent.UNKNOWN, lang)
