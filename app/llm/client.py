@@ -1,7 +1,7 @@
-"""HTTP client for local llama-server (127.0.0.1 only — SECURITY C5).
+"""HTTP client for local llama-server.
 
-Docs: Phase 5 architecture streams via llama-server; contest requires offline
-inference with zero outbound calls once weights are on disk.
+Requests are restricted to loopback (control C5) so a staff question and its
+ledger citations can never leave the machine.
 """
 
 from __future__ import annotations

@@ -47,7 +47,7 @@ def test_supplier_bidco_null_balance_refuses(db: sqlite3.Connection) -> None:
     r = handle_ask(db, "How much do we owe Bidco Distributors?")
     assert r.ok is False
     assert r.refuse_reason == "balance_owed_null"
-    # Must not invent a shilling figure in the refuse message beyond naming the supplier
+    # 42000 is the other supplier's balance; leaking it here would be a hallucination.
     assert "42000" not in r.message
 
 

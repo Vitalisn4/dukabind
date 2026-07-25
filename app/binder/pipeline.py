@@ -1,7 +1,6 @@
-"""End-to-end binder pipeline (no LLM required for truth).
+"""Binder pipeline: utterance → intent → allowlisted SQL → decision or refuse.
 
-Flow: utterance → intent → allowlisted SQL → deterministic decision / refuse.
-The LLM (later) only narrates citation_rows; it must not invent amounts.
+Produces the authoritative answer without any model call.
 """
 
 from __future__ import annotations
@@ -22,6 +21,7 @@ from app.binder.refuse import (
 
 
 def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
+    """Answer a staff question from the ledger, or refuse when data is missing."""
     parsed = parse_ask(text)
 
     if parsed.intent == Intent.UNKNOWN:
@@ -34,7 +34,7 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
         if not rows:
             return refuse_not_found(parsed.lang, parsed.customer)
         row = rows[0]
-        # Default demo SKU only when the ask named no product (common "crates on credit").
+        # "crates on credit" names no product, so fall back to the demo crate SKU.
         qty = parsed.qty or 1
         sku_name = parsed.sku or "CRATE-SODA-300ML"
         sku_rows = run_query(conn, "sku_stock", {"name": sku_name})
@@ -92,6 +92,7 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
 
 
 def result_with_citation_json(result: BinderResult) -> dict[str, Any]:
+    """Serialize a binder result with its ledger citations attached."""
     return {
         "ok": result.ok,
         "intent": result.intent.value,

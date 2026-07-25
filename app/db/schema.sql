@@ -1,6 +1,6 @@
--- DukaBind ledger schema (Gate 1)
--- Security: app never executes arbitrary SQL from users/LLM — only allowlisted statements in Python.
--- See docs/SECURITY.md controls C1–C4.
+-- DukaBind ledger schema.
+-- Nullable money columns are intentional: NULL means "not on file" and must
+-- produce a refusal rather than a computed answer. See docs/SECURITY.md (C1–C4).
 
 PRAGMA foreign_keys = ON;
 
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS shop_meta (
 CREATE TABLE IF NOT EXISTS customers (
     customer_id     TEXT PRIMARY KEY,
     display_name    TEXT NOT NULL,
-    credit_limit    INTEGER,          -- NULL means "not on file" → must refuse credit decisions
+    credit_limit    INTEGER,          -- NULL → refuse credit decisions
     outstanding     INTEGER NOT NULL DEFAULT 0,
     currency        TEXT NOT NULL DEFAULT 'XAF',
     status          TEXT NOT NULL DEFAULT 'active'

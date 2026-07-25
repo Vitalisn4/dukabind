@@ -1,7 +1,6 @@
 """SQLite connection helpers.
 
-Security: connections are local-file only; callers must use parameterized SQL
-via the allowlist module — never ad-hoc user SQL.
+Connections are local-file only; queries must go through the allowlist module.
 """
 
 from __future__ import annotations
@@ -16,6 +15,7 @@ SEED = Path(__file__).with_name("seed_demo.sql")
 
 
 def connect(db_path: Path | None = None) -> sqlite3.Connection:
+    """Open the ledger with row access by name, foreign keys, and WAL."""
     path = db_path or DEFAULT_DB
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path))
@@ -26,6 +26,7 @@ def connect(db_path: Path | None = None) -> sqlite3.Connection:
 
 
 def init_db(db_path: Path | None = None, seed: bool = True) -> Path:
+    """Create the schema and optionally load synthetic demo rows."""
     path = db_path or DEFAULT_DB
     conn = connect(path)
     try:

@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# Download DukaBind GGUF weights (ADTC-required, public URL, idempotent).
-#
-# Evidence: official Qwen2.5-1.5B-Instruct-GGUF publishes q4_k_m on Hugging Face.
-# Design: docs/DESIGN_DECISIONS.md D3
-# Security: optional sha256 check when EXPECTED_SHA256 is set (control C7).
+# Download DukaBind GGUF weights from the official Qwen repo. Idempotent.
+# Model choice is justified in docs/DESIGN_DECISIONS.md (D3).
 
 set -euo pipefail
 
@@ -13,8 +10,7 @@ MODEL_FILE="$MODEL_DIR/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 
 MODEL_URL="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 
-# Pinned after first successful download from official Qwen GGUF repo (2026-07-25).
-# Control C7 — supply-chain integrity.
+# Pinned on 2026-07-25 for supply-chain integrity (control C7); override to re-pin.
 EXPECTED_SHA256="${EXPECTED_SHA256:-6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e}"
 
 mkdir -p "$MODEL_DIR"

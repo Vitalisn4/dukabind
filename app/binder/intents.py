@@ -1,7 +1,6 @@
 """Rule-based intent detection (EN + SW keywords).
 
-Research: keep routing deterministic and RAM-cheap. LLM JSON parse is a later
-fallback — not required for the vertical-slice binder proof.
+Routing is deterministic: the model never chooses the intent or the query.
 """
 
 from __future__ import annotations
@@ -39,7 +38,6 @@ _STOCK_EN = re.compile(r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)
 # Do not include English "stock" here — it would mis-label EN asks as Swahili.
 _STOCK_SW = re.compile(r"\b(idadi|ipo\s+ngapi|bee?bi)\b", re.I)
 
-# Simple entity patterns for demo fixtures — extend carefully; do not exec user regex.
 _QTY = re.compile(r"\b(\d+)\s*(crates?|bags?|units?|crate|bag)?\b", re.I)
 _WORD_QTY = {
     "one": 1,

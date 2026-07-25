@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start local llama-server on 127.0.0.1 only (SECURITY C5 / Phase 5).
+# Start local llama-server bound to 127.0.0.1 only (control C5).
 # Requires: built llama.cpp + downloaded GGUF via ./download_model.sh
 
 set -euo pipefail
@@ -20,7 +20,7 @@ done
 MODEL="$HERE/model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 HOST="127.0.0.1"
 PORT="${PORT:-8080}"
-# Conservative context for 8 GB target machines (Phase 6).
+# Kept small to protect peak RAM on the 8 GB contest laptop profile.
 CTX="${CTX:-2048}"
 THREADS="${THREADS:-$(nproc)}"
 

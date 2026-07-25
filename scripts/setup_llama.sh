@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Clone + build official llama.cpp (ADTC required runtime).
-# Docs: Build Kickoff Day 2 · Phase 5 · TEMPLATE_README.md
+# Clone + build upstream llama.cpp — the only inference runtime ADTC permits.
 
 set -euo pipefail
 

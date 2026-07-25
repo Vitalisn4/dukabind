@@ -1,1 +1,1 @@
-"""Fail-closed SQLite binder (load-bearing integration)."""
+"""Fail-closed SQLite binder."""

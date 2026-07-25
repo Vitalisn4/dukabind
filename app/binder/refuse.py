@@ -113,7 +113,6 @@ def credit_decision(
 
     if projected > limit_i:
         over = projected - limit_i
-        # Helpful alternative: max qty that still fits
         room = limit_i - outstanding
         max_qty = max(0, room // unit_price) if unit_price else 0
         return BinderResult(

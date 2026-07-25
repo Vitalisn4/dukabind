@@ -1,10 +1,7 @@
-"""End-to-end ask: binder truth → optional llama-server narration.
+"""End-to-end ask: binder decision plus optional local narration.
 
-Fail-closed refuses skip the LLM (Phase 5 / SECURITY C4).
-Successful binder decisions may be narrated if llama-server is up;
-otherwise we return the deterministic binder message (still correct).
-
-`message` is ALWAYS the binder decision. Optional polish is in `narration`.
+`message` is always the binder decision; model output stays in `narration`.
+Refusals skip the model entirely (control C4).
 """
 
 from __future__ import annotations
@@ -31,7 +28,7 @@ def ask(
     payload["narration"] = None
     payload["source"] = "binder"
 
-    # Hard refuse: never ask the model to invent a fill-in.
+    # Never hand a refusal to the model — it would be tempted to fill in a number.
     if not result.ok and result.refuse_reason:
         return payload
 
@@ -54,7 +51,6 @@ def ask(
         payload["llm_note"] = str(exc)
         return payload
 
-    # Binder remains authoritative for cashiers / judges / tests.
     payload["message"] = result.message
     payload["narration"] = narrated
     payload["narrated"] = True

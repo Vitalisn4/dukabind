@@ -1,5 +1,5 @@
--- Synthetic demo shop (fictional). Not real PII. Currency XAF for Cameroon context.
--- Fixture A — used in demos. Fixture B (different balances) lives in evals/fixtures/.
+-- Synthetic demo shop. Fictional names and balances — never real customer PII.
+-- Pauline Ngo and Bidco carry NULL money fields on purpose, to exercise refusals.
 
 INSERT OR REPLACE INTO shop_meta(key, value) VALUES
   ('shop_name', 'Boutique Demo Douala'),

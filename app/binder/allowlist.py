@@ -1,8 +1,7 @@
-"""Allowlisted SQL — the only queries this program may run (control C1/C2).
+"""Allowlisted SQL — the only queries this program may run (controls C1/C2).
 
-Research: OWASP A03 / CWE-89 — never concatenate user text into SQL.
-The LLM never sees this module's SQL strings as executable; it only sees
-citation JSON produced from query results.
+User and model text is never concatenated into SQL; callers pass a query name
+and bound parameters only.
 """
 
 from __future__ import annotations
@@ -20,7 +19,7 @@ class AllowlistedQuery:
     required_params: tuple[str, ...]
 
 
-# Finite surface — add new intents by extending this map, never by free-form SQL.
+# Add new intents by extending this map — never by building SQL at call sites.
 QUERIES: dict[str, AllowlistedQuery] = {
     "customer_credit": AllowlistedQuery(
         name="customer_credit",
@@ -63,10 +62,11 @@ def run_query(
     query_name: str,
     params: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
+    """Execute one allowlisted query; raise ValueError for anything else."""
     if query_name not in QUERIES:
         raise ValueError(f"query not allowlisted: {query_name}")
     q = QUERIES[query_name]
-    # Same user-facing name bound twice for OR match on id/display — still parameterized.
+    # `name` repeats in required_params because each query matches display_name OR id.
     values = tuple(params[p] for p in q.required_params)
     cur = conn.execute(q.sql, values)
     rows = cur.fetchall()

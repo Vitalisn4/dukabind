@@ -1,8 +1,7 @@
-"""System / user prompt builders for llama.cpp narration.
+"""Prompt builders for narration.
 
-Phase 5 rule: citation JSON is language-neutral; the model only narrates.
-It must NEVER invent amounts, limits, or balances not present in LEDGER_JSON.
-Refuse paths usually skip the LLM (deterministic message from refuse.py).
+Citation JSON is language-neutral; the model only rewrites the binder decision
+and must not introduce figures absent from LEDGER_JSON.
 """
 
 from __future__ import annotations
