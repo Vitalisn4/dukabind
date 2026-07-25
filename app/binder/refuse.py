@@ -13,6 +13,8 @@ from app.binder.intents import Intent
 
 @dataclass(frozen=True)
 class BinderResult:
+    """Authoritative binder answer: message, citations, and optional refuse reason."""
+
     ok: bool
     intent: Intent
     lang: str
@@ -22,10 +24,12 @@ class BinderResult:
 
 
 def _msg(lang: str, en: str, sw: str) -> str:
+    """Pick the English or Swahili cashier string."""
     return sw if lang == "sw" else en
 
 
 def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
+    """Refuse when credit_limit is NULL — never invent a limit."""
     return BinderResult(
         ok=False,
         intent=Intent.CREDIT_CHECK,
@@ -41,6 +45,7 @@ def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
 
 
 def refuse_supplier_missing_balance(lang: str, name: str) -> BinderResult:
+    """Refuse when balance_owed is NULL — never invent an amount."""
     return BinderResult(
         ok=False,
         intent=Intent.SUPPLIER_BALANCE,
@@ -56,6 +61,7 @@ def refuse_supplier_missing_balance(lang: str, name: str) -> BinderResult:
 
 
 def refuse_not_found(lang: str, what: str) -> BinderResult:
+    """Refuse when the named customer, supplier, or SKU is absent."""
     return BinderResult(
         ok=False,
         intent=Intent.UNKNOWN,
@@ -71,6 +77,7 @@ def refuse_not_found(lang: str, what: str) -> BinderResult:
 
 
 def refuse_unknown(lang: str) -> BinderResult:
+    """Refuse intents outside credit, supplier balance, and stock."""
     return BinderResult(
         ok=False,
         intent=Intent.UNKNOWN,

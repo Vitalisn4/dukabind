@@ -15,11 +15,13 @@ from app.db.connection import DEFAULT_DB, connect, init_db
 
 
 def _ensure_db() -> None:
+    """Create and seed the demo ledger if it is missing."""
     if not DEFAULT_DB.exists():
         init_db()
 
 
 def run_one(text: str) -> None:
+    """Print one binder answer as JSON."""
     conn = connect()
     try:
         result = handle_ask(conn, text)
@@ -30,6 +32,7 @@ def run_one(text: str) -> None:
 
 
 def main(argv: list[str]) -> int:
+    """One-shot or interactive binder CLI (no LLM)."""
     _ensure_db()
     if len(argv) > 1:
         run_one(" ".join(argv[1:]))

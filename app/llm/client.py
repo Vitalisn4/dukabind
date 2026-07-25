@@ -24,6 +24,7 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """Reject redirects so a poisoned Location cannot leave loopback."""
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
+        """Block every redirect so citations cannot leave loopback."""
         raise LlamaServerError(
             f"Refusing HTTP redirect from {req.full_url!r} to {newurl!r} "
             "(llama-server client allows 127.0.0.1 only)."
@@ -44,6 +45,7 @@ def assert_loopback_http(url: str) -> None:
 
 
 def _opener() -> urllib.request.OpenerDirector:
+    """Build a urllib opener that refuses HTTP redirects."""
     return urllib.request.build_opener(_NoRedirect())
 
 

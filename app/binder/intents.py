@@ -11,6 +11,8 @@ from enum import Enum
 
 
 class Intent(str, Enum):
+    """Supported binder intents; UNKNOWN triggers a refuse."""
+
     CREDIT_CHECK = "credit_check"
     SUPPLIER_BALANCE = "supplier_balance"
     STOCK_CHECK = "stock_check"
@@ -19,6 +21,8 @@ class Intent(str, Enum):
 
 @dataclass(frozen=True)
 class ParsedAsk:
+    """Slots extracted from a staff utterance before any SQL runs."""
+
     intent: Intent
     lang: str  # "en" | "sw"
     customer: str | None = None
@@ -54,6 +58,7 @@ _WORD_QTY = {
 
 
 def _extract_qty(text: str) -> int | None:
+    """Parse a digit or word quantity (one…ten) from the utterance."""
     m = _QTY.search(text)
     if m:
         return int(m.group(1))
@@ -65,6 +70,7 @@ def _extract_qty(text: str) -> int | None:
 
 
 def _extract_known_name(text: str, known: list[str]) -> str | None:
+    """Return the first known entity name contained in the text."""
     lower = text.lower()
     for name in known:
         if name.lower() in lower:

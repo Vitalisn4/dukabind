@@ -7,6 +7,7 @@ from typing import Any
 
 
 def citations_to_json(rows: list[dict[str, Any]], *, as_of: str | None = None) -> str:
+    """Serialize ledger rows as compact JSON for narration prompts."""
     payload: dict[str, Any] = {"ledger_rows": rows}
     if as_of:
         payload["as_of"] = as_of

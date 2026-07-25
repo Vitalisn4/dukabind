@@ -14,6 +14,8 @@ import sqlite3
 
 @dataclass(frozen=True)
 class AllowlistedQuery:
+    """One named, parameterized SQL statement the binder may execute."""
+
     name: str
     sql: str
     required_params: tuple[str, ...]

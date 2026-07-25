@@ -16,6 +16,7 @@ from app.llm.ask import ask
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Ask via binder, optionally polish with local llama-server."""
     p = argparse.ArgumentParser(description="DukaBind ask (binder + optional llama-server)")
     p.add_argument("question", nargs="+", help="Staff question")
     p.add_argument("--no-llm", action="store_true", help="Binder only (no llama-server)")
