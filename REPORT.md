@@ -26,7 +26,7 @@ See [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) for selection rationa
 - **Runtime:** llama.cpp only (template + FAQ requirement).
 - **Alternatives rejected:** 7B-class (RSS DQ risk); embeddings/FAISS (RAM); LLM-generated SQL (injection + hallucination).
 
-Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`, `docs/COMPLIANCE_CHECKLIST.md`.
+Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
 
 ---
 

@@ -150,5 +150,5 @@ PYTHONPATH=. python -m app.narrate_cli "Can I give Amina three crates on credit?
 
 1. Read one module + its matching test.  
 2. Break a seed value; predict the new answer; run CLI; check.  
-3. Re-read `COMPLIANCE_CHECKLIST.md` — tick anything newly done.  
+3. Re-read `docs/SECURITY.md` and `docs/DESIGN_DECISIONS.md` — confirm controls still match the code.  
 4. Ask in Discord only the open dual-source questions (bonus math, Gate 1 TZ).

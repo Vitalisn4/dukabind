@@ -35,7 +35,7 @@ def test_ask_binder_only_credit(db: sqlite3.Connection) -> None:
     out = ask(db, "Can I give Amina three crates on credit?", use_llm=False)
     assert out["ok"] is True
     assert "8410" in out["message"]
-    assert "No" in out["message"] or "exceeds" in out["message"].lower()
+    assert "No" in out["message"]
     assert out["narrated"] is False
     assert out["narration"] is None
 
