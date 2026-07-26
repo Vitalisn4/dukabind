@@ -24,10 +24,10 @@ Staff question (EN/SW)
                  →  credit arithmetic in Python (not in the model)
         │
         ▼
-  LLM (optional) →  narrates citation JSON only; never invents balances
+  LLM (optional) →  instructed to narrate citation JSON only; not trusted with balances
 ```
 
-Ledger numbers come from SQLite and deterministic Python math. The GGUF model may polish wording; it does not choose SQL or invent amounts. That separation is the product thesis for African MSME counters on offline commodity laptops.
+Ledger numbers come from SQLite and deterministic Python math. The GGUF model may polish wording; it cannot choose SQL (allowlist-enforced) and is instructed not to invent amounts. The binder's deterministic `message` remains the authoritative answer — narration is separate. That separation is the product thesis for African MSME counters on offline commodity laptops.
 
 ---
 
@@ -139,7 +139,7 @@ Security and design context: [`SECURITY.md`](./SECURITY.md), [`DESIGN_DECISIONS.
 
 ## 6. Elevator pitch (for reviewers)
 
-> DukaBind is an offline shop assistant for 8 GB commodity laptops used across African MSMEs. Counter staff ask about credit, payables, or stock in English or Swahili. Allowlisted SQL reads a local ledger; missing fields produce a hard refusal. The GGUF model only narrates citation rows — it cannot invent a balance. Change the ledger, and the answer must change. The demo fixture is a Douala boutique (XAF); the product target is African shops with intermittent connectivity, not a single-country chatbot.
+> DukaBind is an offline shop assistant for 8 GB commodity laptops used across African MSMEs. Counter staff ask about credit, payables, or stock in English or Swahili. Allowlisted SQL reads a local ledger; missing fields produce a hard refusal. The GGUF model narrates the cited rows and is instructed not to invent a balance — and because the binder's deterministic message stays authoritative, narration never becomes the source of truth. Change the ledger, and the answer must change. The demo fixture is a Douala boutique (XAF); the product target is African shops with intermittent connectivity, not a single-country chatbot.
 
 ---
 
@@ -158,5 +158,6 @@ When you change behaviour, update this file in the same PR:
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Qualify narration wording to match enforcement (instructed, not guaranteed); binder message noted authoritative |
 | 2026-07-26 | Professional public rewrite; Africa-wide framing; dual-venv clarity; no personal email |
 | 2026-07-25 | Initial Gate 1 walkthrough |

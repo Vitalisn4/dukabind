@@ -12,7 +12,7 @@
   "cross_disciplinary_pairing": {
     "discipline": "structured_data_engineering",
     "load_bearing": true,
-    "description": "Fail-closed allowlisted SQLite ledger binder for African MSME shops: answers are a function of local credit/payable/stock rows; missing fields produce refusal; LLM narrates citations only."
+    "description": "Fail-closed allowlisted SQLite ledger binder for African MSME shops: answers are a function of local credit/payable/stock rows; missing fields produce refusal; the deterministic binder message is authoritative and the LLM is constrained to narrate cited rows only."
   },
   "test_prompts": [
     {
