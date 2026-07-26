@@ -8,7 +8,7 @@ Staff ask about credit, payables, or stock (English or Swahili). DukaBind runs *
 
 > Not another multilingual shop chatbot — a fail-closed ledger binder.
 
-**Builder:** Vitalis Ngam · Solo · [Vitalisn4](https://github.com/Vitalisn4) · Cameroon
+**Builder:** Vitalis Ngam · Solo · [Vitalisn4](https://github.com/Vitalisn4) · Africa (demo fixture: Cameroon / XAF)
 
 ## Start here
 

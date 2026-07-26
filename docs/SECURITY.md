@@ -1,10 +1,11 @@
 # Security model — DukaBind
 
-**Status:** Active Gate 1 design  
-**Last reviewed:** 2026-07-25  
-**Audience:** Builders + Gate 2 auditors
+**Status:** Active — Gate 1  
+**Last reviewed:** 2026-07-26  
+**Audience:** Contributors and Gate auditors  
+**Authority:** Security-sensitive code paths should cite a control ID from this document.
 
-This document is the authoritative threat model for the binder. Every security-sensitive code path must cite a control ID from here.
+This is the threat model for the ledger binder. Update the **Status** column when a control ships, is deferred, or changes.
 
 ---
 
@@ -12,10 +13,12 @@ This document is the authoritative threat model for the binder. Every security-s
 
 | Asset | Sensitivity | Why it matters |
 |---|---|---|
-| Shop ledger (credit limits, balances, stock) | High | Wrong disclosure or mutation loses money/trust |
-| Owner write capability | High | Unauthorized stock/payment writes corrupt truth |
-| Model weights | Low (public) | Public GGUF; integrity still required (sha256) |
-| Audit log | Medium | Evidence of refuses and queries |
+| Shop ledger (credit limits, balances, stock) | High | Wrong disclosure or mutation loses money and trust |
+| Owner write capability | High | Unauthorized stock/payment writes corrupt ground truth |
+| Model weights | Low (public GGUF) | Still require integrity checks (sha256) |
+| Audit log | Medium | Evidence of queries and refusals |
+
+---
 
 ## 2. Trust boundaries
 
@@ -29,45 +32,65 @@ This document is the authoritative threat model for the binder. Every security-s
 [Trusted] Citation JSON (rows from DB)
       │
       ▼
-[Semi-trusted] LLM narration  (may hallucinate prose; MUST NOT invent amounts)
+[Semi-trusted] LLM narration  (may polish prose; MUST NOT invent amounts)
       │
       ▼
-[Trusted] Post-check / refuse path if citation empty or policy fail
+[Trusted] Binder message remains authoritative; refuse skips the model
 ```
 
-The language model is **never** trusted to choose SQL, invent balances, or execute writes.
+The language model is never trusted to choose SQL, invent balances, or execute writes.
 
-## 3. Controls (must implement)
+---
 
-| ID | Control | Research basis |
-|---|---|---|
-| **C1** | **Allowlisted queries only** — finite named SQL statements; no string-built SQL from user or LLM text | OWASP A03 Injection; ADTC load-bearing integration requires deterministic ground truth |
-| **C2** | **Parameterized binds** — `?` placeholders via `sqlite3`; never f-string SQL | Python sqlite3 docs; CWE-89 |
-| **C3** | **No LLM-generated SQL** | Hallucination + injection surface; Phase 5 architecture decision |
-| **C4** | **Fail closed** — empty/null required fields → refuse; never invent numbers | Competition differentiator + financial safety |
-| **C5** | **Loopback bind** — `llama-server` and app listen on `127.0.0.1` only | Offline contest rule; reduce remote attack surface |
-| **C6** | **Owner-gated writes** — mutating forms require local password/PIN (hashed); LLM cannot write | Separation of duties |
-| **C7** | **Weight integrity** — `download_model.sh` verifies sha256 when known | Supply-chain hygiene for public HF downloads |
-| **C8** | **No secrets in git** — `.env` ignored; no API keys (offline product) | ADTC offline rule |
-| **C9** | **Synthetic demo data** — Gate 1 fixtures are fictional; no real PII without consent | Privacy / eligibility honesty |
-| **C10** | **Injection tests** — pytest covers “ignore ledger / invent 5000” style prompts | Phase 7 / Phase 8 exposing questions |
+## 3. Controls
+
+| ID | Control | Basis | Gate 1 status |
+|---|---|---|---|
+| **C1** | **Allowlisted queries only** — finite named SQL; no SQL built from user or model text | OWASP A03; deterministic ground truth | **Implemented** — `app/binder/allowlist.py` |
+| **C2** | **Parameterized binds** — `?` via `sqlite3`; never f-string SQL | CWE-89; Python DB-API | **Implemented** — same module |
+| **C3** | **No LLM-generated SQL** | Hallucination + injection surface | **Implemented** — model sees citation JSON only |
+| **C4** | **Fail closed** — NULL/missing required fields → refuse; never invent numbers | Financial safety | **Implemented** — `refuse.py` + tests |
+| **C5** | **Loopback only** — `llama-server` and client use `127.0.0.1`; no redirects | Offline rule; reduce remote surface | **Implemented** — start script + `assert_loopback_http` |
+| **C6** | **Owner-gated writes** — mutating actions need local PIN/password; LLM cannot write | Separation of duties | **Deferred** — no write UI at Gate 1 |
+| **C7** | **Weight integrity** — `download_model.sh` verifies sha256 | Supply-chain hygiene | **Implemented** — pinned digest |
+| **C8** | **No secrets in git** — no API keys; offline product | ADTC offline rule | **Implemented** — weights/env ignored |
+| **C9** | **Synthetic demo data** — fictional fixtures; no real PII without consent | Privacy / eligibility honesty | **Implemented** — `seed_demo.sql` |
+| **C10** | **Injection / hallucination tests** — refuse and ledger-flip coverage; expand “invent amount” cases | Judge exposure questions | **Partial** — core refuse/flip tests; expand before Gate 3 |
+
+---
 
 ## 4. Explicit non-goals (Gate 1)
 
-- Full disk encryption (recommend OS-level; document for operators)
-- SQLCipher (defer unless calendar slack — CPU cost)
-- Multi-user auth / network multi-tenant (single shop laptop)
+- Full-disk encryption (recommend OS-level for operators)
+- SQLCipher (CPU cost on contest laptops)
+- Multi-user network auth or multi-tenant hosting
 - Cloud sync or telemetry
 
-## 5. Incident posture for judges
+---
 
-If asked “what stops the model inventing a balance?”:  
-**Architectural:** the model only sees citation JSON from allowlisted SQL; missing fields trigger refuse before narration; tests assert no numeric hallucination path when rows are empty.
+## 5. Reviewer FAQ
+
+**What stops the model inventing a balance?**  
+Architecture: the model only receives citation JSON from allowlisted SQL. Missing fields refuse before narration. Cashier-facing `message` stays the binder decision; optional polish is stored in `narration`. Tests cover NULL refuse and ledger flip.
+
+**Where is the policy encoded?**  
+Controls **C1–C5** and **C7–C9** in code under `app/binder/` and `app/llm/`. Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
+
+---
 
 ## 6. References
 
-- [ADTC submission template rules](https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template) — offline, llama.cpp, no weights in git  
-- [Devpost overview](https://adtc-2026.devpost.com/) — 7 GB / OOM DQ, thermal −10  
+- [ADTC submission template](https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template) — offline, llama.cpp, no weights in git  
+- [Devpost overview](https://adtc-2026.devpost.com/) — memory / OOM / thermal rules  
 - OWASP Injection prevention cheat sheet  
-- Python `sqlite3` — DB-API parameter substitution  
-- Phase 5 architecture summary: [`docs/DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) (load-bearing binder; no vector RAG at Gate 1)
+- Python `sqlite3` parameterized queries  
+- Architecture choices: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md)
+
+---
+
+## Change log
+
+| Date | Change |
+|---|---|
+| 2026-07-26 | Added Gate 1 implementation status per control; clarified binder-authoritative message |
+| 2026-07-25 | Initial threat model |

@@ -1,159 +1,162 @@
-# Code walkthrough — understand every piece
+# Code walkthrough
 
-**Audience:** Vitalis (solo builder)  
-**Goal:** You should be able to explain any file to a Gate 3 judge in plain language.
+**Status:** Living document — update when modules, commands, or Gate milestones change  
+**Last updated:** 2026-07-26  
+**Audience:** Contributors, Gate reviewers, and auditors reading a clean checkout
 
-Read this top-to-bottom once. Then re-run the commands. Then change one seed number and watch the answer flip — that is the product thesis.
+This guide explains the shipped codebase: what each module does, how data flows, and which commands verify behaviour. Prefer short updates here over adding one-off scratch notes to the public tree.
 
 ---
 
-## 1. Big picture (30 seconds)
+## 1. Architecture (30 seconds)
 
 ```text
 Staff question (EN/SW)
         │
         ▼
-  intents.py     →  which task? (credit / supplier / stock)
+  intents.py     →  intent + slots (credit / supplier / stock)
         │
         ▼
-  allowlist.py   →  run ONE pre-approved SQL with ? binds
+  allowlist.py   →  one named SQL statement with bound parameters
         │
         ▼
-  refuse.py      →  if field NULL → hard refuse
-                 →  if credit math over limit → say No + numbers
+  refuse.py      →  NULL / missing fields → hard refuse
+                 →  credit arithmetic in Python (not in the model)
         │
         ▼
-  (later) LLM    →  only narrates citation JSON — never invents balances
+  LLM (optional) →  narrates citation JSON only; never invents balances
 ```
 
-**Why this wins vs a chatbot:** the money numbers come from SQLite + Python arithmetic, not from model imagination. Judges care about African MSME reality + anti-hallucination.
+Ledger numbers come from SQLite and deterministic Python math. The GGUF model may polish wording; it does not choose SQL or invent amounts. That separation is the product thesis for African MSME counters on offline commodity laptops.
 
 ---
 
-## 2. Contest-required files (must ship)
+## 2. Contest-required files
 
-| File | What it does | Rule it satisfies |
+| File | Role | Requirement |
 |---|---|---|
-| `metadata.json` | Team, domain, model, 2 prompts | Template + evaluator |
-| `download_model.sh` | Downloads GGUF to `model/` | No weights in git; public URL |
-| `REPORT.md` | Technical writeup | Devpost “what to submit” |
-| `.gitignore` | Blocks `*.gguf` | Template rule |
-| `LICENSE` / `NOTICE` | Template GPL + provenance | Cite OSS |
+| `metadata.json` | Team, domain, model, held-out prompts | Template + evaluator |
+| `download_model.sh` | Fetches GGUF into `model/` with sha256 check | No weights in git; public URL |
+| `REPORT.md` | Technical writeup | Devpost submission |
+| `.gitignore` | Ignores `*.gguf`, local strategy notes, venvs | Template + hygiene |
+| `LICENSE` / `NOTICE` | GPL-3.0 code license + provenance | Cite OSS |
 
-Your identity is already filled:
+**Submitter (public attribution)**
 
-- Name: **Vitalis Ngam**
-- GitHub: **[Vitalisn4](https://github.com/Vitalisn4)** (verified)
-- `team_id`: provisional **`vitalisn4`** (no portal ID yet)
+- Name: Vitalis Ngam  
+- GitHub: [Vitalisn4](https://github.com/Vitalisn4)  
+- `team_id`: provisional `vitalisn4` (replace if ADTF issues an official ID)  
 - Solo · domain `corporate_enterprise` · `african_alpha_claim: true`
 
----
-
-## 3. Application code (the product)
-
-### `app/db/schema.sql`
-Creates tables: `customers`, `suppliers`, `skus`, `audit_log`, `shop_meta`.  
-`credit_limit` and `balance_owed` may be **NULL** — that NULL is intentional so we can demo **refuse**.
-
-### `app/db/seed_demo.sql`
-Fake Douala shop (“Boutique Demo Douala”). Not real people. Currency **XAF**.  
-Amina has limit 8000 / outstanding 6250 → 3 soda crates (3×720) exceeds limit.  
-Bidco has `balance_owed = NULL` → must refuse.
-
-### `app/db/connection.py`
-Opens SQLite, turns on **WAL** + foreign keys, loads schema/seed.  
-Run: `python -m app.db.connection`
-
-### `app/binder/allowlist.py`  ← security heart
-A **dict of named queries only**. Unknown name → `ValueError`.  
-Uses `?` placeholders (control **C1/C2** in `SECURITY.md`).  
-**The LLM never writes SQL.**
-
-### `app/binder/intents.py`
-Regex/keyword router for English + Swahili. Finds customer/supplier/sku names from the known demo list. Parses qty (`3` or `three`).
-
-### `app/binder/refuse.py`
-Fail-closed messages. Credit decision does **integer math in Python** so the model cannot botch arithmetic.
-
-### `app/binder/citations.py`
-Packs DB rows into compact JSON for (future) LLM context.
-
-### `app/binder/pipeline.py`
-`handle_ask(conn, text)` — full path without needing a model.  
-This is what you demo before llama.cpp is wired.
-
-### `tests/test_binder.py`
-Eight tests: allowlist rejection, over-limit No, NULL refuse, Nest 42000, stock 14, Swahili path, **ledger flip → answer flips**.
+Contact email for submission lives in `metadata.json` / Devpost only — not duplicated in this walkthrough.
 
 ---
 
-## 4. Commands you should memorize
+## 3. Application modules
+
+### Database
+
+| Path | Role |
+|---|---|
+| `app/db/schema.sql` | Tables: `customers`, `suppliers`, `skus`, `audit_log`, `shop_meta`. Nullable `credit_limit` / `balance_owed` enable fail-closed refusals. |
+| `app/db/seed_demo.sql` | Synthetic Douala demo shop (XAF). Not real PII. Amina over-limit and Bidco NULL balance are intentional fixtures. |
+| `app/db/connection.py` | Opens SQLite with WAL + foreign keys; loads schema/seed. Run: `python -m app.db.connection` |
+
+### Binder (load-bearing path)
+
+| Path | Role |
+|---|---|
+| `app/binder/allowlist.py` | Finite named queries; unknown name → `ValueError`; `?` binds (controls **C1/C2**). |
+| `app/binder/intents.py` | Rule-based EN/SW routing; extracts customer, supplier, SKU, quantity. |
+| `app/binder/refuse.py` | Fail-closed messages; credit math in Python (control **C4**). |
+| `app/binder/citations.py` | Compact ledger JSON for narration prompts. |
+| `app/binder/pipeline.py` | `handle_ask` — full answer path without a model. |
+
+### Local narration
+
+| Path | Role |
+|---|---|
+| `app/prompts/narrate.py` | System/user prompts; model must copy binder numbers. |
+| `app/llm/client.py` | HTTP to `127.0.0.1` only; rejects redirects (control **C5**). |
+| `app/llm/ask.py` | Binder first; `message` stays binder; optional text in `narration`. |
+| `app/cli.py` / `app/narrate_cli.py` | Binder-only and binder+LLM CLIs. |
+
+### Tests
+
+| Path | Coverage |
+|---|---|
+| `tests/test_binder.py` | Allowlist reject, over-limit, NULL refuse, stock, Swahili, ledger flip |
+| `tests/test_ask.py` | Refuse skips LLM; binder `message` authority; loopback URL reject |
+
+---
+
+## 4. Essential commands
 
 ```bash
-# From the repository root (wherever you cloned dukabind)
+# From the repository root
 source .venv/bin/activate
 
-# Re-run truth tests (no internet, no GGUF)
-PYTHONPATH=. pytest tests/ -v
-
-# Rebuild demo DB
+PYTHONPATH=. pytest tests/ -q
 python -m app.db.connection
-
-# Ask the binder yourself
 PYTHONPATH=. python -m app.cli "Can I give Amina three crates on credit?"
 PYTHONPATH=. python -m app.cli "How much do we owe Bidco Distributors?"
 ```
 
----
+### Virtual environments
 
-## 5. What is NOT built yet (so you are not confused)
-
-| Missing | Why it waits |
+| Env | Purpose |
 |---|---|
-| FastAPI / HTMX UI | After RSS headroom proven |
-| Frozen held-out eval set | After bilingual smoke; `metadata.json` currently has provisional domain prompts |
-| Profiler numbers in REPORT | Never invent — measure with adtc-profiler |
-| Public GitHub repo | In progress under Vitalisn4/dukabind |
-
-## 5b. What THIS stage added (llama + narration)
-
-See also [`docs/SECURITY.md`](./SECURITY.md) (C4/C5) and [`docs/DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) (runtime choices).
-
-| New piece | Role |
-|---|---|
-| `third_party/llama.cpp` | Official runtime (gitignored clone) |
-| `scripts/setup_llama.sh` | Clone + build |
-| `scripts/start_llama_server.sh` | Loopback CPU server |
-| `app/prompts/narrate.py` | System/user prompts (no SQL) |
-| `app/llm/client.py` | HTTP to 127.0.0.1:8080 only |
-| `app/llm/ask.py` | Binder first; optional `narration` field; `message` stays binder |
-| `app/narrate_cli.py` | End-to-end CLI |
-| `.venv` | App + pytest + narration CLI (Python 3.10+) |
-| `.venv311` + `adtc-profiler` | Official metrics only (Python 3.11+; separate from app) |
-
-Two virtualenvs on purpose: keep the app on the contest laptop’s system Python, and put `adtc-profiler` (requires ≥3.11) in `.venv311`.
+| `.venv` | Application, pytest, narration CLI (Python 3.10+) |
+| `.venv311` | `adtc-profiler` only (requires Python ≥3.11) |
 
 ```bash
-# After ./download_model.sh finishes:
-bash scripts/start_llama_server.sh   # terminal A
-source .venv/bin/activate            # app env — not .venv311
-PYTHONPATH=. python -m app.narrate_cli "Can I give Amina three crates on credit?"  # terminal B
+# Narration (app env)
+bash scripts/start_llama_server.sh          # terminal A
+source .venv/bin/activate                   # terminal B — not .venv311
+PYTHONPATH=. python -m app.narrate_cli "Can I give Amina three crates on credit?"
 
-# Metrics (separate env):
+# Metrics (profiler env)
 # source .venv311/bin/activate && adtc-profiler --help
 ```
 
----
-
-## 6. How to explain DukaBind to a judge (elevator)
-
-> “DukaBind is an offline shop assistant for 8 GB laptops. Staff ask about credit, payables, or stock. We run allowlisted SQL against a local ledger and refuse if data is missing. The GGUF model only narrates rows — it cannot invent a balance. Change the ledger, the answer changes. Built for Cameroon MSME shops that lose connectivity.”
+Security and design context: [`SECURITY.md`](./SECURITY.md), [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 
 ---
 
-## 7. Learning loop (do this weekly)
+## 5. Current scope and next work
 
-1. Read one module + its matching test.  
-2. Break a seed value; predict the new answer; run CLI; check.  
-3. Re-read `docs/SECURITY.md` and `docs/DESIGN_DECISIONS.md` — confirm controls still match the code.  
-4. Ask in Discord only the open dual-source questions (bonus math, Gate 1 TZ).
+| Not yet shipped | Why it waits |
+|---|---|
+| FastAPI / HTMX UI | After RSS headroom is measured |
+| Frozen held-out eval set beyond `metadata.json` prompts | After bilingual smoke + profiler |
+| Profiler numbers in `REPORT.md` | Measure with `adtc-profiler`; never invent |
+| Owner-gated writes (control **C6**) | Gate 1 non-goal; binder is read-path only |
+| Number post-check on narration | Hardening after smoke quality baseline |
+
+**Shipped this stage:** llama.cpp build/start scripts, loopback client, binder-authoritative `ask()`, dual-env docs, EN/SW binder tests.
+
+---
+
+## 6. Elevator pitch (for reviewers)
+
+> DukaBind is an offline shop assistant for 8 GB commodity laptops used across African MSMEs. Counter staff ask about credit, payables, or stock in English or Swahili. Allowlisted SQL reads a local ledger; missing fields produce a hard refusal. The GGUF model only narrates citation rows — it cannot invent a balance. Change the ledger, and the answer must change. The demo fixture is a Douala boutique (XAF); the product target is African shops with intermittent connectivity, not a single-country chatbot.
+
+---
+
+## 7. Maintenance checklist
+
+When you change behaviour, update this file in the same PR:
+
+1. Module table rows if paths or responsibilities moved.  
+2. Commands if entrypoints or env names changed.  
+3. “Current scope” when a deferred item ships.  
+4. Re-run `PYTHONPATH=. pytest tests/ -q` and confirm [`SECURITY.md`](./SECURITY.md) control status still matches code.
+
+---
+
+## Change log
+
+| Date | Change |
+|---|---|
+| 2026-07-26 | Professional public rewrite; Africa-wide framing; dual-venv clarity; no personal email |
+| 2026-07-25 | Initial Gate 1 walkthrough |
