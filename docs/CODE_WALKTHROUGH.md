@@ -43,7 +43,6 @@ Staff question (EN/SW)
 Your identity is already filled:
 
 - Name: **Vitalis Ngam**
-- Email: **ngamvitailisyuh@gmail.com**
 - GitHub: **[Vitalisn4](https://github.com/Vitalisn4)** (verified)
 - `team_id`: provisional **`vitalisn4`** (no portal ID yet)
 - Solo · domain `corporate_enterprise` · `african_alpha_claim: true`
@@ -129,13 +128,19 @@ See also [`docs/SECURITY.md`](./SECURITY.md) (C4/C5) and [`docs/DESIGN_DECISIONS
 | `app/llm/client.py` | HTTP to 127.0.0.1:8080 only |
 | `app/llm/ask.py` | Binder first; optional `narration` field; `message` stays binder |
 | `app/narrate_cli.py` | End-to-end CLI |
-| `.venv311` + `adtc-profiler` | Official metrics (Python 3.11+) |
+| `.venv` | App + pytest + narration CLI (Python 3.10+) |
+| `.venv311` + `adtc-profiler` | Official metrics only (Python 3.11+; separate from app) |
+
+Two virtualenvs on purpose: keep the app on the contest laptop’s system Python, and put `adtc-profiler` (requires ≥3.11) in `.venv311`.
 
 ```bash
 # After ./download_model.sh finishes:
 bash scripts/start_llama_server.sh   # terminal A
-source .venv/bin/activate
+source .venv/bin/activate            # app env — not .venv311
 PYTHONPATH=. python -m app.narrate_cli "Can I give Amina three crates on credit?"  # terminal B
+
+# Metrics (separate env):
+# source .venv311/bin/activate && adtc-profiler --help
 ```
 
 ---
