@@ -89,6 +89,7 @@ def result_with_citation_json(result: BinderResult) -> dict[str, Any]:
     """Serialize a binder result with its ledger citations attached."""
     return {
         "ok": result.ok,
+        "approved": result.approved,
         "intent": result.intent.value,
         "lang": result.lang,
         "message": result.message,

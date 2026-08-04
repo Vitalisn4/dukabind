@@ -20,13 +20,13 @@ def connect(db_path: Path | None = None, *, readonly: bool = False) -> sqlite3.C
     Ask paths should use ``readonly=True`` so the binder cannot mutate the file.
     """
     path = db_path or DEFAULT_DB
-    path.parent.mkdir(parents=True, exist_ok=True)
     if readonly:
         if not path.exists():
             raise FileNotFoundError(f"database not found: {path}")
         uri = path.resolve().as_uri() + "?mode=ro"
         conn = sqlite3.connect(uri, uri=True)
     else:
+        path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(str(path))
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")

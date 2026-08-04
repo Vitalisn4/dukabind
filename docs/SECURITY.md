@@ -48,7 +48,7 @@ The language model is never trusted to choose SQL, invent balances, or execute w
 |---|---|---|---|
 | **C1** | **Allowlisted queries only** — finite named SQL; no SQL built from user or model text | OWASP A03; deterministic ground truth | **Implemented** — `app/binder/allowlist.py` |
 | **C2** | **Parameterized binds** — `?` via `sqlite3`; never f-string SQL | CWE-89; Python DB-API | **Implemented** — same module |
-| **C3** | **No LLM-generated SQL** | Hallucination + injection surface | **Implemented** — model sees citation JSON only |
+| **C3** | **No LLM-generated SQL** | Hallucination + injection surface | **Implemented** — model receives staff question + binder message + citation JSON; never receives SQL or chooses a query |
 | **C4** | **Fail closed** — NULL/missing required fields → refuse; never invent numbers | Financial safety | **Implemented** — `refuse.py` + tests |
 | **C5** | **Loopback only** — `llama-server` and client use `127.0.0.1`; no redirects | Offline rule; reduce remote surface | **Implemented** — start script + `assert_loopback_http` |
 | **C6** | **Owner-gated writes** — mutating actions need local PIN/password; LLM cannot write | Separation of duties | **Deferred** — no write UI at Gate 1 |

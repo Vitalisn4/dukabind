@@ -14,7 +14,12 @@ from app.binder.intents import Intent
 
 @dataclass(frozen=True)
 class BinderResult:
-    """Authoritative binder answer: message, citations, and optional refuse reason."""
+    """Authoritative binder answer: message, citations, and optional refuse reason.
+
+    ``ok`` means the binder finished a lookup/decision (or a structured refuse).
+    ``approved`` is set only for credit decisions: True = within limit, False = over
+    limit. Other intents leave it None so consumers do not treat ``ok`` as approval.
+    """
 
     ok: bool
     intent: Intent
@@ -22,6 +27,7 @@ class BinderResult:
     citation_rows: list[dict[str, Any]]
     message: str
     refuse_reason: str | None = None
+    approved: bool | None = None
 
 
 def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
@@ -112,6 +118,7 @@ def credit_decision(
             intent=Intent.CREDIT_CHECK,
             lang=lang,
             citation_rows=citation,
+            approved=False,
             message=(
                 f"No — {qty} × {unit_price} = {add}; "
                 f"{outstanding} + {add} = {projected} exceeds limit {limit_i} "
@@ -125,6 +132,7 @@ def credit_decision(
         intent=Intent.CREDIT_CHECK,
         lang=lang,
         citation_rows=citation,
+        approved=True,
         message=(
             f"Yes — {qty} × {unit_price} = {add}; "
             f"projected outstanding {projected} ≤ limit {limit_i} {currency}."

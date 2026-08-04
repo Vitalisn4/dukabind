@@ -19,7 +19,7 @@ DukaBind is an **offline shop assistant** for commodity 8 GB laptops. Counter st
 The system does **not** answer from the language model’s memory. It:
 
 1. Detects intent with English keyword rules.  
-2. Runs **one allowlisted SQL query** with bound parameters.  
+2. Runs **one or more allowlisted SQL queries** with bound parameters (credit uses `customer_credit` then `sku_stock`).  
 3. Computes credit math in Python (or **refuses** if a required money field is missing).  
 4. Optionally asks a **local** `llama-server` to polish wording — the binder `message` stays authoritative.
 
@@ -39,7 +39,7 @@ Staff question (English)
         │  intent + slots (customer / supplier / sku / qty)
         ▼
   app/binder/allowlist.py
-        │  ONE named SQL statement, ?-bound parameters
+        │  named allowlisted SQL (credit: customer + SKU), ?-bound parameters
         ▼
   app/binder/refuse.py  (+ credit_decision arithmetic)
         │  NULL / missing → hard refuse
@@ -57,13 +57,14 @@ Staff question (English)
 
 | Field | Meaning |
 |---|---|
-| `ok` | `true` if an answer was produced; `false` on refuse |
+| `ok` | `true` when the binder returned a grounded answer (including credit Yes/No); `false` on refuse |
+| `approved` | Credit only: `true` within limit, `false` over limit; `null` for non-credit / refuse |
 | `intent` | `credit_check` · `supplier_balance` · `stock_check` · `unknown` |
 | `lang` | `en` (Gate 1 Path A — English only) |
 | `message` | **Authoritative** cashier string from the binder |
 | `refuse_reason` | e.g. `balance_owed_null`, `credit_limit_null`, `not_found` |
 | `citation_json` | Compact JSON of ledger rows |
-| `narration` / `narrated` | Present only when LLM polish ran |
+| `narration` / `narrated` | Always present on the `ask()` response; `narrated=false` and `narration=null` when LLM polish does not run |
 | `source` | `binder` or `binder+llm` |
 
 ---
@@ -244,7 +245,7 @@ Full threat model: [`SECURITY.md`](./SECURITY.md).
 | ID | Rule | Where |
 |---|---|---|
 | C1/C2 | Allowlisted + parameterized SQL only | `allowlist.py` |
-| C3 | No LLM-generated SQL | `ask.py` / prompts see citations only |
+| C3 | No LLM-generated SQL | `ask.py` / prompts get staff question + binder message + citation JSON; model never receives SQL or chooses a query |
 | C4 | Fail closed on NULL money fields | `refuse.py`, seed NULLs, tests |
 | C5 | Loopback-only LLM HTTP | `client.py`, `start_llama_server.sh` |
 | C6 | Owner-gated writes | Deferred (read path only) |
@@ -290,7 +291,7 @@ When you change behaviour, update this file in the **same** change set:
 
 | Date | Change |
 |---|---|
-| 2026-08-04 | Present shop as Marché Akwa Viviane; rename `seed.sql`; English-only Path A |
+| 2026-08-04 | Address CodeRabbit: readonly mkdir, query-count docs, narration fields, C3 inputs, `approved` |
 | 2026-07-26 | Qualify narration wording; binder message authoritative |
 | 2026-07-26 | Professional public rewrite; Africa-wide framing; dual-venv clarity |
 | 2026-07-25 | Initial Gate 1 walkthrough |

@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 from app.binder.allowlist import run_query
-from app.binder.pipeline import handle_ask
-from app.db.connection import init_db
+from app.binder.pipeline import handle_ask, result_with_citation_json
+from app.db.connection import connect, init_db
 from app.db.fixture import KNOWN_SKUS
 
 
@@ -37,14 +37,20 @@ def test_credit_fotso_three_crates_refuses_over_limit(db: sqlite3.Connection) ->
     # 3 * 720 = 2160; 6250 + 2160 = 8410 > 8000
     r = handle_ask(db, "Can I give Marie-Claire three crates on credit?")
     assert r.ok is True
+    assert r.approved is False
     assert "No" in r.message
     assert "8410" in r.message
     assert r.citation_rows
+
+    payload = result_with_citation_json(r)
+    assert payload["ok"] is True
+    assert payload["approved"] is False
 
 
 def test_credit_tchamba_missing_limit_refuses(db: sqlite3.Connection) -> None:
     r = handle_ask(db, "Can I give Esther Tchamba credit for 1 crate?")
     assert r.ok is False
+    assert r.approved is None
     assert r.refuse_reason == "credit_limit_null"
     assert "ask the owner" in r.message.lower()
 
@@ -113,6 +119,7 @@ def test_credit_named_rice_uses_rice_price(db: sqlite3.Connection) -> None:
 def test_flip_ledger_changes_answer(db: sqlite3.Connection) -> None:
     before = handle_ask(db, "Can I give Fotso 3 crates on credit?")
     assert "No" in before.message
+    assert before.approved is False
 
     db.execute(
         "UPDATE customers SET credit_limit = ? WHERE display_name = ?",
@@ -122,3 +129,11 @@ def test_flip_ledger_changes_answer(db: sqlite3.Connection) -> None:
 
     after = handle_ask(db, "Can I give Fotso 3 crates on credit?")
     assert "Yes" in after.message
+    assert after.approved is True
+
+
+def test_readonly_missing_nested_path_does_not_mkdir(tmp_path: Path) -> None:
+    missing = tmp_path / "nested" / "missing" / "ledger.sqlite"
+    with pytest.raises(FileNotFoundError, match="database not found"):
+        connect(missing, readonly=True)
+    assert not (tmp_path / "nested").exists()
