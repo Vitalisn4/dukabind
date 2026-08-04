@@ -1,6 +1,7 @@
-"""Rule-based intent detection (EN + SW keywords).
+"""Rule-based intent detection (English keywords).
 
 Routing is deterministic: the model never chooses the intent or the query.
+Product language for Gate 1 is English (Path A).
 """
 
 from __future__ import annotations
@@ -8,6 +9,15 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from enum import Enum
+
+from app.db.fixture import (
+    KNOWN_CUSTOMERS,
+    KNOWN_SKUS,
+    KNOWN_SUPPLIERS,
+    normalize_customer,
+    normalize_sku,
+    normalize_supplier,
+)
 
 
 class Intent(str, Enum):
@@ -24,25 +34,21 @@ class ParsedAsk:
     """Slots extracted from a staff utterance before any SQL runs."""
 
     intent: Intent
-    lang: str  # "en" | "sw"
+    lang: str  # always "en" for Gate 1
     customer: str | None = None
     supplier: str | None = None
     sku: str | None = None
     qty: int | None = None
 
 
-_CREDIT_EN = re.compile(
+_CREDIT = re.compile(
     r"\b(credit|on\s+credit|can\s+i\s+(give|sell)|allow\s+credit)\b",
-    re.I,
+    re.IGNORECASE,
 )
-_CREDIT_SW = re.compile(r"\b(deni|mkopo|naweza\s+kumpa|kumpa)\b", re.I)
-_SUPPLIER_EN = re.compile(r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.I)
-_SUPPLIER_SW = re.compile(r"\b(msambazaji|tunadaiwa|deni\s+la|sali[o]?)\b", re.I)
-_STOCK_EN = re.compile(r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.I)
-# Do not include English "stock" here — it would mis-label EN asks as Swahili.
-_STOCK_SW = re.compile(r"\b(idadi|ipo\s+ngapi|bee?bi)\b", re.I)
+_SUPPLIER = re.compile(r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.IGNORECASE)
+_STOCK = re.compile(r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.IGNORECASE)
 
-_QTY = re.compile(r"\b(\d+)\s*(crates?|bags?|units?|crate|bag)?\b", re.I)
+_QTY = re.compile(r"\b(\d+)\s*(crates?|bags?|units?|crate|bag)?\b", re.IGNORECASE)
 _WORD_QTY = {
     "one": 1,
     "two": 2,
@@ -55,6 +61,9 @@ _WORD_QTY = {
     "nine": 9,
     "ten": 10,
 }
+
+# Bound prompt / narration cost on the 8 GB contest laptop.
+MAX_ASK_CHARS = 500
 
 
 def _extract_qty(text: str) -> int | None:
@@ -70,64 +79,37 @@ def _extract_qty(text: str) -> int | None:
 
 
 def _extract_known_name(text: str, known: list[str]) -> str | None:
-    """Return the first known entity name contained in the text."""
+    """Return the longest known entity matched on word boundaries.
+
+    Substring checks are unsafe (`rice` matches inside `price`).
+    """
     lower = text.lower()
-    for name in known:
-        if name.lower() in lower:
+    for name in sorted(known, key=len, reverse=True):
+        pattern = rf"(?<!\w){re.escape(name.lower())}(?!\w)"
+        if re.search(pattern, lower):
             return name
     return None
 
 
-# Names present in seed_demo.sql — keep in sync when fixtures change.
-KNOWN_CUSTOMERS = ["Amina Wanjiru", "Jean Mbarga", "Pauline Ngo", "Amina"]
-KNOWN_SUPPLIERS = ["Bidco Distributors", "Nest Wholesale", "Bidco"]
-KNOWN_SKUS = ["CRATE-SODA-300ML", "BAG-RICE-25KG", "JERRY-OIL-5L", "soda", "rice", "oil"]
-
-_SKU_ALIASES = {
-    "soda": "CRATE-SODA-300ML",
-    "crate-soda-300ml": "CRATE-SODA-300ML",
-    "rice": "BAG-RICE-25KG",
-    "bag-rice-25kg": "BAG-RICE-25KG",
-    "oil": "JERRY-OIL-5L",
-    "jerry-oil-5l": "JERRY-OIL-5L",
-}
-
-
-def normalize_sku(raw: str | None) -> str | None:
-    """Map demo aliases to canonical sku_id / name keys."""
-    if not raw:
-        return None
-    return _SKU_ALIASES.get(raw.lower(), raw)
-
-
-def detect_lang(text: str) -> str:
-    """Return 'sw' only when Swahili-specific cues are present."""
-    if _CREDIT_SW.search(text) or _SUPPLIER_SW.search(text) or _STOCK_SW.search(text):
-        return "sw"
-    if re.search(r"\b(naweza|tunadaiwa|msambazaji|hakuna|muulize)\b", text, re.I):
-        return "sw"
-    return "en"
-
-
 def parse_ask(text: str) -> ParsedAsk:
     """Map a staff utterance to intent + slots (no LLM, no SQL)."""
-    lang = detect_lang(text)
+    text = text.strip()
+    if not text or len(text) > MAX_ASK_CHARS:
+        return ParsedAsk(Intent.UNKNOWN, "en")
+
+    lang = "en"
     qty = _extract_qty(text)
     sku = normalize_sku(_extract_known_name(text, KNOWN_SKUS))
 
-    if _CREDIT_EN.search(text) or _CREDIT_SW.search(text):
-        cust = _extract_known_name(text, KNOWN_CUSTOMERS)
-        if cust == "Amina":
-            cust = "Amina Wanjiru"
+    if _CREDIT.search(text):
+        cust = normalize_customer(_extract_known_name(text, KNOWN_CUSTOMERS))
         return ParsedAsk(Intent.CREDIT_CHECK, lang, customer=cust, sku=sku, qty=qty)
 
-    if _SUPPLIER_EN.search(text) or _SUPPLIER_SW.search(text):
-        sup = _extract_known_name(text, KNOWN_SUPPLIERS)
-        if sup == "Bidco":
-            sup = "Bidco Distributors"
+    if _SUPPLIER.search(text):
+        sup = normalize_supplier(_extract_known_name(text, KNOWN_SUPPLIERS))
         return ParsedAsk(Intent.SUPPLIER_BALANCE, lang, supplier=sup)
 
-    if _STOCK_EN.search(text) or _STOCK_SW.search(text):
+    if _STOCK.search(text):
         return ParsedAsk(Intent.STOCK_CHECK, lang, sku=sku, qty=qty)
 
     return ParsedAsk(Intent.UNKNOWN, lang)

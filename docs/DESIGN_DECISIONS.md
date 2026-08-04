@@ -1,7 +1,7 @@
 # Design decisions
 
 **Status:** Living document — lock choices early; revise only with measurement or rule changes  
-**Last updated:** 2026-07-26  
+**Last updated:** 2026-08-04  
 **Audience:** Contributors and Gate reviewers
 
 Each decision records **options** (when relevant), **choice**, **evidence**, and **how to reverse** if measurements fail. Update the change log when a decision flips.
@@ -25,7 +25,7 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 |---|---|
 | **Choice** | `corporate_enterprise` in `metadata.json` |
 | **Evidence** | Devpost frames knowledge-work for SMEs/operators; challenge narrative centres African small-business / corner-shop contexts |
-| **Scope note** | Demo fixture uses Douala (XAF). Product intent is African MSME counters with intermittent connectivity — not a Cameroon-only chatbot |
+| **Scope note** | Seeded ledger uses Douala (XAF). Product intent is African MSME counters with intermittent connectivity — not a Cameroon-only chatbot |
 
 ---
 
@@ -34,11 +34,11 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 | | |
 |---|---|
 | **Options** | SmolLM2-135M (template demo); Qwen 1.5B; Tiny Aya ~3B; 7B-class |
-| **Choice** | Qwen2.5-1.5B Q4_K_M primary; Tiny Aya reserved as Swahili bake-off challenger |
+| **Choice** | Qwen2.5-1.5B Q4_K_M primary |
 | **Evidence** | Official quant guidance favours Q4_K_M; official Qwen GGUF ~1.12 GB; 7B risks Peak RSS DQ; SmolLM is weak for refuse/arithmetic accuracy |
 | **URL** | `https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf` |
 | **License** | Upstream Apache-2.0 for weights (confirm card at download); separate from repo GPL-3.0 |
-| **Reverse if** | Swahili held-out fails and Aya clears RSS / thermal / TPS gates |
+| **Reverse if** | Peak RSS / refuse quality fail on contest laptop — try Q3_K_M before any larger model |
 
 ---
 
@@ -67,9 +67,21 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 | | |
 |---|---|
-| **Choice** | Keyword / lexicon EN+SW → named allowlist query |
+| **Choice** | Keyword / lexicon English → named allowlist query |
 | **Evidence** | Deterministic; near-zero RAM; reduces intent hallucination |
-| **Reverse if** | Coverage gaps after bilingual eval — add constrained LLM JSON parse as fallback only |
+| **Reverse if** | Coverage gaps after English held-out — add constrained LLM JSON parse as fallback only |
+
+---
+
+## D6b — Product language: English only (Gate 1 Path A)
+
+| | |
+|---|---|
+| **Choice** | `language_scope: ["en"]` — cashier asks and binder messages in English |
+| **Evidence** | Builder has no native Swahili reviewer; contest African-language bonus is optional; Cameroon MSME use-case does not require Swahili |
+| **African claim** | `african_alpha_claim: true` is for **offline Cameroon/Douala MSME ledger use-case**, not an African-language claim |
+| **Deferred** | French localisation (Cameroon official language) and any Swahili track only after Gate 1 with a native reviewer |
+| **Reverse if** | Native Swahili reviewer available and held-out quality proven before freeze |
 
 ---
 
@@ -84,13 +96,14 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 ---
 
-## D8 — Demo data: synthetic only
+## D8 — Seeded shop ledger
 
 | | |
 |---|---|
-| **Choice** | Fictional shop fixtures (`duka_a` seed; further fixtures as needed) |
-| **Evidence** | Privacy, reproducibility, eligibility honesty — no real customer PII without consent |
-| **Reverse if** | Never reverse into committing real shop data without explicit consent and redaction policy |
+| **Choice** | Seeded SQLite shop (`marche_akwa` / Marché Akwa Viviane) with customers, suppliers, and SKUs |
+| **Evidence** | Reproducible binder behaviour under Git; same pipeline loads any shop file offline |
+| **Privacy** | Do not commit third-party personal data without explicit consent and redaction |
+| **Reverse if** | Replacing the seed with an imported shop export (still offline, still allowlisted) |
 
 ---
 
@@ -105,5 +118,7 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | D6b: English-only Path A; D3 drop Swahili Aya bake-off as Gate 1 plan |
+| 2026-08-04 | D8: seeded shop ledger (Marché Akwa Viviane) |
 | 2026-07-26 | Structured headers; Africa-wide product scope note; linked SECURITY / walkthrough |
 | 2026-07-25 | Initial decisions locked for Week 0–1 implementation |

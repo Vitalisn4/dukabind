@@ -12,7 +12,6 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-
 DEFAULT_BASE = "http://127.0.0.1:8080"
 
 
@@ -24,7 +23,6 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """Reject redirects so a poisoned Location cannot leave loopback."""
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
-        """Block every redirect so citations cannot leave loopback."""
         raise LlamaServerError(
             f"Refusing HTTP redirect from {req.full_url!r} to {newurl!r} "
             "(llama-server client allows 127.0.0.1 only)."
@@ -78,6 +76,10 @@ def chat_completion(
         with _opener().open(req, timeout=timeout_s) as resp:
             raw = resp.read().decode("utf-8")
             payload = json.loads(raw)
+    except urllib.error.HTTPError as exc:
+        raise LlamaServerError(
+            f"llama-server HTTP {exc.code} at {url}: {exc.reason}"
+        ) from exc
     except urllib.error.URLError as exc:
         raise LlamaServerError(
             f"Cannot reach llama-server at {url}. "
@@ -102,5 +104,5 @@ def health(base_url: str = DEFAULT_BASE, timeout_s: float = 2.0) -> bool:
         assert_loopback_http(url)
         with _opener().open(url, timeout=timeout_s) as resp:
             return 200 <= resp.status < 300
-    except Exception:
+    except (LlamaServerError, urllib.error.URLError, OSError, TimeoutError):
         return False

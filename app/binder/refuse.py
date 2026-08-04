@@ -1,6 +1,7 @@
 """Fail-closed refuse rules (control C4).
 
 If a required field is NULL/missing, we refuse — the LLM must not invent amounts.
+Cashier messages are English (Gate 1 Path A).
 """
 
 from __future__ import annotations
@@ -23,11 +24,6 @@ class BinderResult:
     refuse_reason: str | None = None
 
 
-def _msg(lang: str, en: str, sw: str) -> str:
-    """Pick the English or Swahili cashier string."""
-    return sw if lang == "sw" else en
-
-
 def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
     """Refuse when credit_limit is NULL — never invent a limit."""
     return BinderResult(
@@ -36,11 +32,7 @@ def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="credit_limit_null",
-        message=_msg(
-            lang,
-            f"No credit limit on file for {name} — ask the owner.",
-            f"Hakuna kikomo cha deni kwenye faili kwa {name} — muulize mmiliki.",
-        ),
+        message=f"No credit limit on file for {name} — ask the owner.",
     )
 
 
@@ -52,11 +44,7 @@ def refuse_supplier_missing_balance(lang: str, name: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="balance_owed_null",
-        message=_msg(
-            lang,
-            f"Amount owed to {name} is not on file — ask the owner.",
-            f"Kiasi kinachodaiwa {name} hakipo kwenye faili — muulize mmiliki.",
-        ),
+        message=f"Amount owed to {name} is not on file — ask the owner.",
     )
 
 
@@ -68,11 +56,7 @@ def refuse_not_found(lang: str, what: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="not_found",
-        message=_msg(
-            lang,
-            f"No ledger row found for {what} — ask the owner.",
-            f"Hakuna rekodi kwa {what} — muulize mmiliki.",
-        ),
+        message=f"No ledger row found for {what} — ask the owner.",
     )
 
 
@@ -84,10 +68,8 @@ def refuse_unknown(lang: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="unknown_intent",
-        message=_msg(
-            lang,
-            "I can only answer credit, supplier balances, or stock from this shop ledger.",
-            "Ninaweza kujibu tu kuhusu deni, salio la msambazaji, au stock kutoka leja ya duka hili.",
+        message=(
+            "I can only answer credit, supplier balances, or stock from this shop ledger."
         ),
     )
 
@@ -99,6 +81,9 @@ def credit_decision(
     unit_price: int,
 ) -> BinderResult:
     """Deterministic arithmetic — do not leave this to the LLM."""
+    if qty < 1 or unit_price <= 0:
+        return refuse_not_found(lang, "quantity" if qty < 1 else "unit_price")
+
     limit = row["credit_limit"]
     outstanding = int(row["outstanding"])
     if limit is None:
@@ -127,20 +112,11 @@ def credit_decision(
             intent=Intent.CREDIT_CHECK,
             lang=lang,
             citation_rows=citation,
-            message=_msg(
-                lang,
-                (
-                    f"No — {qty} × {unit_price} = {add}; "
-                    f"{outstanding} + {add} = {projected} exceeds limit {limit_i} "
-                    f"by {over} {currency}. "
-                    f"Max qty within limit: {max_qty}."
-                ),
-                (
-                    f"Hapana — {qty} × {unit_price} = {add}; "
-                    f"{outstanding} + {add} = {projected} inazidi kikomo {limit_i} "
-                    f"kwa {over} {currency}. "
-                    f"Idadi max ndani ya kikomo: {max_qty}."
-                ),
+            message=(
+                f"No — {qty} × {unit_price} = {add}; "
+                f"{outstanding} + {add} = {projected} exceeds limit {limit_i} "
+                f"by {over} {currency}. "
+                f"Max qty within limit: {max_qty}."
             ),
         )
 
@@ -149,15 +125,8 @@ def credit_decision(
         intent=Intent.CREDIT_CHECK,
         lang=lang,
         citation_rows=citation,
-        message=_msg(
-            lang,
-            (
-                f"Yes — {qty} × {unit_price} = {add}; "
-                f"projected outstanding {projected} ≤ limit {limit_i} {currency}."
-            ),
-            (
-                f"Ndiyo — {qty} × {unit_price} = {add}; "
-                f"deni litakaloonekana {projected} ≤ kikomo {limit_i} {currency}."
-            ),
+        message=(
+            f"Yes — {qty} × {unit_price} = {add}; "
+            f"projected outstanding {projected} ≤ limit {limit_i} {currency}."
         ),
     )

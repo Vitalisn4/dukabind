@@ -10,7 +10,12 @@ import sqlite3
 from typing import Any
 
 from app.binder.pipeline import handle_ask, result_with_citation_json
-from app.llm.client import LlamaServerError, chat_completion, health
+from app.llm.client import (
+    LlamaServerError,
+    assert_loopback_http,
+    chat_completion,
+    health,
+)
 from app.prompts.narrate import build_narration_prompt
 
 
@@ -33,6 +38,12 @@ def ask(
         return payload
 
     if not use_llm:
+        return payload
+
+    try:
+        assert_loopback_http(base_url)
+    except LlamaServerError as exc:
+        payload["llm_note"] = str(exc)
         return payload
 
     if not health(base_url):

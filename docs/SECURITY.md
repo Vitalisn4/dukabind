@@ -54,7 +54,7 @@ The language model is never trusted to choose SQL, invent balances, or execute w
 | **C6** | **Owner-gated writes** — mutating actions need local PIN/password; LLM cannot write | Separation of duties | **Deferred** — no write UI at Gate 1 |
 | **C7** | **Weight integrity** — `download_model.sh` verifies sha256 | Supply-chain hygiene | **Implemented** — pinned digest |
 | **C8** | **No secrets in git** — no API keys; offline product | ADTC offline rule | **Implemented** — weights/env ignored |
-| **C9** | **Synthetic demo data** — fictional fixtures; no real PII without consent | Privacy / eligibility honesty | **Implemented** — `seed_demo.sql` |
+| **C9** | **No third-party PII in git** — seeded shop rows only; do not commit customer files without consent | Privacy / eligibility honesty | **Implemented** — `seed.sql` + `fixture.py` |
 | **C10** | **Injection / hallucination tests** — refuse and ledger-flip coverage; expand “invent amount” cases | Judge exposure questions | **Partial** — core refuse/flip tests; expand before Gate 3 |
 
 ---
@@ -92,5 +92,6 @@ Controls **C1–C5** and **C7–C9** in code under `app/binder/` and `app/llm/`.
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | C9: no third-party PII in git; `seed.sql` |
 | 2026-07-26 | Added Gate 1 implementation status per control; clarified binder-authoritative message |
 | 2026-07-25 | Initial threat model |

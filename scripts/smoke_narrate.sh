@@ -37,5 +37,5 @@ if [[ "$ready" -ne 1 ]]; then
   exit 1
 fi
 
-QUESTION="${*:-Can I give Amina three crates on credit?}"
+QUESTION="${*:-Can I give Marie-Claire three crates on credit?}"
 PYTHONPATH=. python -m app.narrate_cli "$QUESTION"

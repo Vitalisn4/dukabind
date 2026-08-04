@@ -1,7 +1,7 @@
 {
   "team_id": "vitalisn4",
   "domain": "corporate_enterprise",
-  "language_scope": ["en", "sw"],
+  "language_scope": ["en"],
   "african_alpha_claim": true,
   "budget_laptop_claim": true,
   "submitter": {
@@ -17,11 +17,11 @@
   "test_prompts": [
     {
       "prompt_id": "tp_001",
-      "prompt": "LEDGER_JSON is authoritative. Customer Amina Wanjiru has credit_limit=8000 XAF and outstanding=6250 XAF. CRATE-SODA-300ML unit_price=720. Staff ask: Can I give Amina three crates on credit? Answer using only these numbers; refuse if any required field is missing."
+      "prompt": "LEDGER_JSON is authoritative. Customer Marie-Claire Fotso has credit_limit=8000 XAF and outstanding=6250 XAF. Caisse boisson malt 300ml unit_price=720. Staff ask: Can I give Marie-Claire three crates on credit? Answer using only these numbers; refuse if any required field is missing."
     },
     {
       "prompt_id": "tp_002",
-      "prompt": "LEDGER_JSON inaonyesha supplier Bidco Distributors na balance_owed=null. Swali: Tunadaiwa Bidco Distributors kiasi gani? Jibu kwa Kiswahili: kataa kwa sababu kiasi hakipo kwenye faili; usibuni namba."
+      "prompt": "LEDGER_JSON is authoritative. Supplier SOCA Distribution Douala has balance_owed=null. Staff ask: How much do we owe SOCA Distribution Douala? Refuse because the amount is not on file; do not invent a figure."
     }
   ],
   "model": {

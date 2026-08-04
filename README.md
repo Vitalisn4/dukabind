@@ -4,11 +4,11 @@
 
 Domain: **Corporate / Enterprise** · Runtime: **llama.cpp + GGUF** · 100% offline at inference
 
-Staff ask about credit, payables, or stock (English or Swahili). DukaBind runs **allowlisted SQL** against a local SQLite ledger and lets a small GGUF model narrate *only* the returned rows. Missing data → hard refusal. Change a ledger row → the answer must change.
+Staff ask about credit, payables, or stock in **English**. DukaBind runs **allowlisted SQL** against a local SQLite ledger and lets a small GGUF model narrate *only* the returned rows. Missing data → hard refusal. Change a ledger row → the answer must change.
 
-> Not another multilingual shop chatbot — a fail-closed ledger binder.
+> Not another shop chatbot — a fail-closed ledger binder for African MSME counters.
 
-**Builder:** Vitalis Ngam · Solo · [Vitalisn4](https://github.com/Vitalisn4) · Africa (demo fixture: Cameroon / XAF)
+**Builder:** Vitalis Ngam · Solo · [Vitalisn4](https://github.com/Vitalisn4) · Africa (ledger fixture: Cameroon / XAF)
 
 ## Start here
 
@@ -34,16 +34,16 @@ pip install -r requirements.txt
 # Binder unit tests (no model required)
 PYTHONPATH=. pytest tests/ -q
 
-# Init demo ledger + try the binder yourself
+# Init the shop ledger + try the binder yourself
 python -m app.db.connection
-PYTHONPATH=. python -m app.cli "Can I give Amina three crates on credit?"
+PYTHONPATH=. python -m app.cli "Can I give Marie-Claire three crates on credit?"
 ```
 
 With local llama-server:
 
 ```bash
 bash scripts/start_llama_server.sh   # terminal A
-PYTHONPATH=. python -m app.narrate_cli "Can I give Amina three crates on credit?"  # terminal B
+PYTHONPATH=. python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"  # terminal B
 ```
 
 ## Contest links

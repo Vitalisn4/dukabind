@@ -6,10 +6,10 @@ and bound parameters only.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, Mapping
-
 import sqlite3
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -21,7 +21,7 @@ class AllowlistedQuery:
     required_params: tuple[str, ...]
 
 
-# Add new intents by extending this map — never by building SQL at call sites.
+# Extend this map for new intents — never assemble SQL at call sites.
 QUERIES: dict[str, AllowlistedQuery] = {
     "customer_credit": AllowlistedQuery(
         name="customer_credit",
@@ -68,7 +68,10 @@ def run_query(
     if query_name not in QUERIES:
         raise ValueError(f"query not allowlisted: {query_name}")
     q = QUERIES[query_name]
-    # `name` repeats in required_params because each query matches display_name OR id.
+    missing = [p for p in dict.fromkeys(q.required_params) if p not in params]
+    if missing:
+        raise ValueError(f"missing params for {query_name}: {missing}")
+    # required_params may repeat a key (display_name OR id bind uses the same value twice).
     values = tuple(params[p] for p in q.required_params)
     cur = conn.execute(q.sql, values)
     rows = cur.fetchall()

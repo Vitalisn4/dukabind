@@ -1,7 +1,7 @@
 """Interactive CLI so you can exercise the binder without a UI or LLM.
 
 Usage:
-  PYTHONPATH=. python -m app.cli "Can I give Amina three crates on credit?"
+  PYTHONPATH=. python -m app.cli "Can I give Marie-Claire three crates on credit?"
   PYTHONPATH=. python -m app.cli   # then type questions; empty line to quit
 """
 
@@ -15,14 +15,14 @@ from app.db.connection import DEFAULT_DB, connect, init_db
 
 
 def _ensure_db() -> None:
-    """Create and seed the demo ledger if it is missing."""
+    """Create and seed the shop ledger if it is missing."""
     if not DEFAULT_DB.exists():
         init_db()
 
 
 def run_one(text: str) -> None:
     """Print one binder answer as JSON."""
-    conn = connect()
+    conn = connect(readonly=True)
     try:
         result = handle_ask(conn, text)
         payload = result_with_citation_json(result)

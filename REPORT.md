@@ -12,7 +12,7 @@
 
 When a micro/small shop owner is away from the counter, semi-trained staff cannot reliably answer credit, payables, or stock questions. Cloud POS and messaging bots fail without connectivity; general chatbots invent balances.
 
-**DukaBind** is an offline llama.cpp/GGUF assistant that answers only from a local SQLite ledger bind and fails closed when data is missing. Target users: counter staff (primary), shop owners (secondary). African context: commodity 8 GB laptops, intermittent mobile data, owner-absent shifts — designed from Cameroon MSME shop reality (demo fixture: Douala, XAF).
+**DukaBind** is an offline llama.cpp/GGUF assistant that answers only from a local SQLite ledger bind and fails closed when data is missing. Target users: counter staff (primary), shop owners (secondary). African context: commodity 8 GB laptops, intermittent mobile data, owner-absent shifts — designed from Cameroon MSME shop reality (ledger: Douala, XAF).
 
 See [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) for selection rationale and alternatives considered.
 
@@ -20,11 +20,12 @@ See [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) for selection rationa
 
 ## Design Decisions
 
-- **Base model:** Qwen2.5-1.5B-Instruct (Apache-2.0 upstream); Tiny Aya ~3B reserved as bake-off challenger for Swahili quality.
+- **Base model:** Qwen2.5-1.5B-Instruct (Apache-2.0 upstream).
 - **Quantization:** GGUF Q4_K_M — quality/size trade per Devpost quant guidance; official Qwen GGUF file ~1.12 GB.
 - **Integration (load-bearing):** Allowlisted SQL binder — not vector RAG. Protects S_eff under the 7 GB usable budget and prevents financial hallucination.
+- **Language:** English cashier asks and binder messages (`language_scope: ["en"]`). African use-case claim is Cameroon MSME offline ledger context, not an African-language claim.
 - **Runtime:** llama.cpp only (template + FAQ requirement).
-- **Alternatives rejected:** 7B-class (RSS DQ risk); embeddings/FAISS (RAM); LLM-generated SQL (injection + hallucination).
+- **Alternatives rejected:** 7B-class (RSS DQ risk); embeddings/FAISS (RAM); LLM-generated SQL (injection + hallucination); shallow Swahili without a native reviewer.
 
 Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
 
@@ -68,4 +69,4 @@ Official scores are measured by the ADTC profiler on the standard evaluation mac
 
 ## African use case claim
 
-`african_alpha_claim: true` — product is an offline MSME shop ledger assistant for African commodity laptops (Cameroon-designed demo), not a generic cloud chatbot. Swahili is a designed track with kill switch if RSS/quality fail bake-off.
+`african_alpha_claim: true` — African **use-case** claim: offline MSME shop ledger assistant for commodity laptops, designed from Cameroon (Douala / XAF) reality. Product language is **English only** (`language_scope: ["en"]`); no African-language bonus is claimed without a native reviewer.

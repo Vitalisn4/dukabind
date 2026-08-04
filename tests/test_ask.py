@@ -23,7 +23,7 @@ def db(tmp_path: Path) -> sqlite3.Connection:
 
 
 def test_ask_refuse_skips_llm(db: sqlite3.Connection) -> None:
-    out = ask(db, "How much do we owe Bidco Distributors?", use_llm=True)
+    out = ask(db, "How much do we owe SOCA Distribution Douala?", use_llm=True)
     assert out["ok"] is False
     assert out["refuse_reason"] == "balance_owed_null"
     assert out["narrated"] is False
@@ -32,7 +32,7 @@ def test_ask_refuse_skips_llm(db: sqlite3.Connection) -> None:
 
 
 def test_ask_binder_only_credit(db: sqlite3.Connection) -> None:
-    out = ask(db, "Can I give Amina three crates on credit?", use_llm=False)
+    out = ask(db, "Can I give Marie-Claire three crates on credit?", use_llm=False)
     assert out["ok"] is True
     assert "8410" in out["message"]
     assert "No" in out["message"]
@@ -46,3 +46,16 @@ def test_loopback_url_rejects_remote() -> None:
     with pytest.raises(LlamaServerError):
         assert_loopback_http("http://192.168.1.10:8080")
     assert_loopback_http("http://127.0.0.1:8080")
+
+
+def test_ask_rejects_non_loopback_base_url(db: sqlite3.Connection) -> None:
+    out = ask(
+        db,
+        "Can I give Fotso three crates on credit?",
+        use_llm=True,
+        base_url="http://example.com:8080",
+    )
+    assert out["narrated"] is False
+    assert out["message"]
+    assert "llm_note" in out
+    assert "127.0.0.1" in out["llm_note"]

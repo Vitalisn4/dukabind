@@ -18,6 +18,7 @@ from app.binder.refuse import (
     refuse_supplier_missing_balance,
     refuse_unknown,
 )
+from app.db.fixture import DEFAULT_CREDIT_SKU
 
 
 def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
@@ -34,9 +35,11 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
         if not rows:
             return refuse_not_found(parsed.lang, parsed.customer)
         row = rows[0]
-        # "crates on credit" names no product, so fall back to the demo crate SKU.
-        qty = parsed.qty or 1
-        sku_name = parsed.sku or "CRATE-SODA-300ML"
+        qty = parsed.qty if parsed.qty is not None else 1
+        if qty < 1:
+            return refuse_not_found(parsed.lang, "quantity")
+        # Unnamed "crates on credit" uses the shop's default soft-drink crate.
+        sku_name = parsed.sku or DEFAULT_CREDIT_SKU
         sku_rows = run_query(conn, "sku_stock", {"name": sku_name})
         if not sku_rows or int(sku_rows[0]["unit_price"]) <= 0:
             return refuse_not_found(parsed.lang, sku_name)
@@ -53,18 +56,12 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
         if row.get("balance_owed") is None:
             return refuse_supplier_missing_balance(parsed.lang, row["display_name"])
         bal = int(row["balance_owed"])
-        lang = parsed.lang
-        msg = (
-            f"Amount owed to {row['display_name']}: {bal}."
-            if lang == "en"
-            else f"Kiasi kinachodaiwa {row['display_name']}: {bal}."
-        )
         return BinderResult(
             ok=True,
             intent=parsed.intent,
-            lang=lang,
+            lang=parsed.lang,
             citation_rows=[dict(row)],
-            message=msg,
+            message=f"Amount owed to {row['display_name']}: {bal}.",
         )
 
     if parsed.intent == Intent.STOCK_CHECK:
@@ -74,18 +71,15 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
         if not rows:
             return refuse_not_found(parsed.lang, parsed.sku)
         row = rows[0]
-        lang = parsed.lang
-        msg = (
-            f"{row['name']}: on_hand={row['on_hand']}, unit_price={row['unit_price']} {row['currency']}."
-            if lang == "en"
-            else f"{row['name']}: idadi={row['on_hand']}, bei={row['unit_price']} {row['currency']}."
-        )
         return BinderResult(
             ok=True,
             intent=parsed.intent,
-            lang=lang,
+            lang=parsed.lang,
             citation_rows=[dict(row)],
-            message=msg,
+            message=(
+                f"{row['name']}: on_hand={row['on_hand']}, "
+                f"unit_price={row['unit_price']} {row['currency']}."
+            ),
         )
 
     return refuse_unknown(parsed.lang)

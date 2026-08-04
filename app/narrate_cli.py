@@ -1,15 +1,14 @@
 """Narrate CLI — binder first, then optional local LLM polish.
 
 Usage:
-  PYTHONPATH=. python -m app.narrate_cli "Can I give Amina three crates on credit?"
-  PYTHONPATH=. python -m app.narrate_cli --no-llm "How much do we owe Bidco?"
+  PYTHONPATH=. python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"
+  PYTHONPATH=. python -m app.narrate_cli --no-llm "How much do we owe SOCA?"
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import sys
 
 from app.db.connection import DEFAULT_DB, connect, init_db
 from app.llm.ask import ask
@@ -27,7 +26,7 @@ def main(argv: list[str] | None = None) -> int:
         init_db()
 
     text = " ".join(args.question)
-    conn = connect()
+    conn = connect(readonly=True)
     try:
         out = ask(conn, text, use_llm=not args.no_llm, base_url=args.base_url)
     finally:

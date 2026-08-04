@@ -41,5 +41,3 @@ if [[ -n "$EXPECTED_SHA256" ]]; then
 fi
 
 echo "done: $MODEL_FILE"
-echo "tip: compute digest with: sha256sum \"$MODEL_FILE\""
-echo "     then set EXPECTED_SHA256=... for supply-chain checks"
