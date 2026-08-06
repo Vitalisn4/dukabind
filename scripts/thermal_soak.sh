@@ -72,6 +72,7 @@ PY
 
 read_package_temp() {
   python - <<'PY'
+import sys
 from pathlib import Path
 best = None
 for p in Path("/sys/class/hwmon").glob("*/temp*_input"):
@@ -94,10 +95,19 @@ if best is None:
             vals.append(int(p.read_text(encoding="utf-8").strip()) / 1000.0)
         except (OSError, ValueError):
             pass
-    best = max(vals) if vals else float("nan")
+    best = max(vals) if vals else None
+if best is None:
+    print("error: no usable temperature sensor under /sys/class/hwmon", file=sys.stderr)
+    raise SystemExit(3)
 print(f"{best:.1f}")
 PY
 }
+
+# A soak without a usable temperature reading cannot produce a verdict.
+if ! read_package_temp >/dev/null 2>&1; then
+  echo "error: no usable temperature sensor under /sys/class/hwmon — cannot run thermal soak" >&2
+  exit 1
+fi
 
 cleanup() {
   local code=$?
@@ -174,7 +184,7 @@ while (( SECONDS < END )); do
 done
 
 python - "$LOG" "$fail_hot" "$contaminated" <<'PY'
-import csv, sys
+import csv, math, sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
@@ -186,6 +196,9 @@ https = [int(r["http_ok"]) for r in rows if r.get("http_ok") != ""]
 peak = max(temps) if temps else float("nan")
 mean = sum(temps) / len(temps) if temps else float("nan")
 ok_rate = (sum(https) / len(https) * 100) if https else 0.0
+if any(not math.isfinite(t) for t in temps):
+    print("RESULT: FAIL — non-finite temperature values in log (sensor unavailable?).")
+    raise SystemExit(2)
 print()
 print(f"samples: {len(rows)}")
 print(f"temp peak: {peak:.1f} C")

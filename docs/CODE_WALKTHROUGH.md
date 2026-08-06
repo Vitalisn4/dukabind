@@ -200,7 +200,7 @@ bash scripts/thermal_soak.sh    # 10-min sustained soak → benchmarks/raw/therm
 bash scripts/run_profiler_smoke.sh  # raw JSON → benchmarks/raw/submission.json (gitignored)
 ```
 
-Only measured numbers are committed: `BENCHMARKS.md` tables and `benchmarks/submission.summary.md`. Raw dumps stay gitignored under `benchmarks/raw/`.
+Only measured numbers are committed: the summary tables in `BENCHMARKS.md`, `REPORT.md`, and `benchmarks/submission.summary.md`. Raw dumps stay gitignored under `benchmarks/raw/`.
 
 ---
 

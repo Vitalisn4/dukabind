@@ -43,6 +43,7 @@ OUT_MD="benchmarks/raw/thread_matrix_${STAMP}.md"
 
 read_package_temp() {
   python - <<'PY'
+import sys
 from pathlib import Path
 best = None
 for p in Path("/sys/class/hwmon").glob("*/temp*_input"):
@@ -65,10 +66,19 @@ if best is None:
             vals.append(int(p.read_text(encoding="utf-8").strip()) / 1000.0)
         except (OSError, ValueError):
             pass
-    best = max(vals) if vals else float("nan")
+    best = max(vals) if vals else None
+if best is None:
+    print("error: no usable temperature sensor under /sys/class/hwmon", file=sys.stderr)
+    raise SystemExit(3)
 print(f"{best:.1f}")
 PY
 }
+
+# Temperature readings are the whole point of this matrix — fail fast if none exist.
+if ! read_package_temp >/dev/null 2>&1; then
+  echo "error: no usable temperature sensor under /sys/class/hwmon — cannot run thread matrix" >&2
+  exit 1
+fi
 
 echo "== DukaBind thread_matrix =="
 echo "model: $MODEL"

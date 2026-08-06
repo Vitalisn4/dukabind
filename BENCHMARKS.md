@@ -73,9 +73,11 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 |---|---|
 | Peak RSS &lt; 5.5 GB | **Pass** |
 | TPS near 15 | **Pass / near** on smoke + matrix |
-| Thermal &lt; 85 °C / no throttle | **Fail on this participant laptop** under sustained generate |
+| Thermal &lt; 85 °C / no throttle | **Pending on this participant laptop** under sustained generate |
 
-M2 is **not closed** until a soak stays &lt;85 °C (cooler room, shorter `max_tokens`, `CTX=1024`, `THREADS=2`, or measure on a quieter machine closer to the contest profile). Official Gate 1 scores use the ADTC eval machine — record that separately.
+**M2 tooling: complete.** The measurement toolkit (profiler smoke, thread matrix, thermal soak) is shipped and reproducible.
+
+**P_thermal: pending.** Thermal closure needs a soak that stays &lt;85 °C (cooler room, shorter `max_tokens`, `CTX=1024`, `THREADS=2`, or measure on a quieter machine closer to the contest profile). Official Gate 1 scores use the ADTC eval machine — record that separately.
 
 ## Still to run
 

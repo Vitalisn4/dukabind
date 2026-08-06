@@ -96,8 +96,8 @@ now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 lines = [
     "# Profiler participant smoke — summary",
     "",
-    f    "**Run:** {now} UTC",
-    "**Command:** `bash scripts/run_profiler_smoke.sh`{flag_desc}",
+    f"**Run:** {now} UTC",
+    f"**Command:** `bash scripts/run_profiler_smoke.sh`{flag_desc}",
     "",
     "> Auto-generated from the latest profiler run. The authoritative, curated benchmark story is [`BENCHMARKS.md`](../BENCHMARKS.md).",
     "**Raw JSON:** `benchmarks/raw/submission.json` (gitignored)",

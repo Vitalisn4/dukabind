@@ -78,22 +78,19 @@ conn = connect(path)  # writable for flip demo only
 try:
     before = handle_ask(conn, "Can I give Fotso 3 crates on credit?")
     assert before.approved is False and "No" in before.message, before
+    # One transaction: flip the limit, prove the answer follows, then roll back
+    # so the seed file is never left modified — even if an assert fails mid-way.
+    conn.execute("BEGIN")
     conn.execute(
         "UPDATE customers SET credit_limit = ? WHERE display_name = ?",
         (20000, "Marie-Claire Fotso"),
     )
-    conn.commit()
     after = handle_ask(conn, "Can I give Fotso 3 crates on credit?")
     assert after.approved is True and "Yes" in after.message, after
-    # Restore seed limit so the shop file stays reproducible.
-    conn.execute(
-        "UPDATE customers SET credit_limit = ? WHERE display_name = ?",
-        (8000, "Marie-Claire Fotso"),
-    )
-    conn.commit()
+    conn.execute("ROLLBACK")
     restored = handle_ask(conn, "Can I give Fotso 3 crates on credit?")
     assert restored.approved is False, restored
-    print("ledger flip + restore: OK")
+    print("ledger flip + rollback: OK")
 finally:
     conn.close()
 PY

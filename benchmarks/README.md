@@ -13,4 +13,4 @@ bash scripts/run_profiler_smoke.sh
 bash scripts/run_profiler_smoke.sh --full
 ```
 
-Raw JSON lands in `benchmarks/raw/` (gitignored). After a green run, copy measured Peak RSS / TPS / thermal into `REPORT.md` — never invent values.
+Raw JSON lands in `benchmarks/raw/` (gitignored). After each completed run — green or failed — copy measured Peak RSS / TPS / thermal into `BENCHMARKS.md` / `REPORT.md` and record the PASS/FAIL verdict — never invent values.
