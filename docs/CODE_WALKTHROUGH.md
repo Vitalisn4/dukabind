@@ -1,7 +1,7 @@
 # Code walkthrough
 
 **Status:** Living document — update when modules, commands, or Gate milestones change  
-**Last updated:** 2026-08-04  
+**Last updated:** 2026-08-06  
 **Audience:** Contributors, Gate reviewers, and anyone reproducing DukaBind from a clean checkout
 
 This guide maps the shipped product: what each file does, how a staff question becomes an answer, which commands to run, and how the Marché Akwa Viviane ledger is structured.
@@ -169,8 +169,12 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | Script | Behaviour |
 |---|---|
 | `scripts/setup_llama.sh` | Clone/build official `llama.cpp` under `third_party/` (gitignored). |
-| `scripts/start_llama_server.sh` | Starts `llama-server` on `127.0.0.1`, CPU only, ctx 2048. |
+| `scripts/start_llama_server.sh` | Starts `llama-server` on `127.0.0.1`, CPU only, ctx 2048, `THREADS=3` (frozen after 2026-08-05 thread matrix). |
 | `scripts/smoke_narrate.sh` | Starts server, waits for `/health`, one narrate ask, cleans up. |
+| `scripts/offline_check.sh` | Binder offline proof: credit / SOCA refuse / stock; optional `unshare -n`. |
+| `scripts/run_profiler_smoke.sh` | `adtc-profiler` participant mode → `benchmarks/raw/submission.json`; optional `--full`. |
+| `scripts/thread_matrix.sh` | `llama-bench` thread bake-off (`-t 2,3,4,6,8`) + temp sampling → `benchmarks/raw/`. |
+| `scripts/thermal_soak.sh` | Sustained generation soak (default 10 min) sampling package temp every 5 s → CSV + PASS/FAIL. |
 | `download_model.sh` | Downloads pinned Qwen2.5-1.5B Q4_K_M GGUF + sha256 (**C7**). |
 
 ### 5.6 Tests — `tests/`
@@ -180,7 +184,23 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `test_binder.py` | Allowlist reject; Fotso over-limit 8410; Esther NULL limit; SOCA NULL balance; Bonaberi 42000; stock; SW ask unknown; substring safety; overlong ask; zero qty; rice price; ledger flip |
 | `test_ask.py` | Refuse skips LLM; binder `message` authority; loopback reject; non-loopback `base_url` does not narrate |
 
-Run: `PYTHONPATH=. pytest tests/ -q` (expect **18 passed**).
+Run: `PYTHONPATH=. pytest tests/ -q` (expect **19 passed**).
+
+### Binder offline proof (no model)
+
+```bash
+bash scripts/offline_check.sh
+```
+
+### Benchmarks (`BENCHMARKS.md` + `benchmarks/`)
+
+```bash
+bash scripts/thread_matrix.sh   # llama-bench thread bake-off → benchmarks/raw/thread_matrix_*.{jsonl,md}
+bash scripts/thermal_soak.sh    # 10-min sustained soak → benchmarks/raw/thermal_soak_*.csv + PASS/FAIL
+bash scripts/run_profiler_smoke.sh  # raw JSON → benchmarks/raw/submission.json (gitignored)
+```
+
+Only measured numbers are committed: `BENCHMARKS.md` tables and `benchmarks/submission.summary.md`. Raw dumps stay gitignored under `benchmarks/raw/`.
 
 ---
 
@@ -262,10 +282,12 @@ Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 | Shipped | Not yet (by design) |
 |---|---|
 | Fail-closed binder + 3 intents | FastAPI / HTMX staff UI |
-| Marché Akwa Viviane ledger + tests | Profiler Peak RSS / TPS / thermal numbers in `REPORT.md` |
-| Optional local narration | Airplane-mode proof checklist artifact |
-| Loopback + readonly ask path | Owner-gated writes (C6) |
-| Public SECURITY / DESIGN / this guide | Frozen ≥25 held-out eval set |
+| Marché Akwa Viviane ledger + tests | Owner-gated writes (C6) |
+| Optional local narration | Frozen ≥25 held-out eval set |
+| Loopback + readonly ask path | Full profiler accuracy pass |
+| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C — build-laptop soak **FAIL** (mean 78 °C / peak 97 °C); `THREADS=2` re-soak + eval-machine confirm pending |
+| Profiler smoke Peak RSS ~1.8 GB | |
+| Thread/ctx matrix + thermal soak logged in `BENCHMARKS.md` | |
 
 ---
 
@@ -291,7 +313,8 @@ When you change behaviour, update this file in the **same** change set:
 
 | Date | Change |
 |---|---|
-| 2026-08-04 | Address CodeRabbit: readonly mkdir, query-count docs, narration fields, C3 inputs, `approved` |
+| 2026-08-06 | M2 bench completion: thread matrix + thermal soak scripts, `THREADS=3` freeze, `BENCHMARKS.md` measured tables (soak **FAIL**: mean 78 °C / peak 97 °C on build laptop) |
+| 2026-08-04 | M2 start: offline_check + profiler smoke scripts; Peak RSS measured |
 | 2026-07-26 | Qualify narration wording; binder message authoritative |
 | 2026-07-26 | Professional public rewrite; Africa-wide framing; dual-venv clarity |
 | 2026-07-25 | Initial Gate 1 walkthrough |

@@ -37,6 +37,9 @@ PYTHONPATH=. pytest tests/ -q
 # Init the shop ledger + try the binder yourself
 python -m app.db.connection
 PYTHONPATH=. python -m app.cli "Can I give Marie-Claire three crates on credit?"
+
+# Binder offline proof (no model)
+bash scripts/offline_check.sh
 ```
 
 With local llama-server:

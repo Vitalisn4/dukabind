@@ -1,0 +1,10 @@
+# Benchmarks & profiler outputs
+#
+# - `raw/` — gitignored dumps (`submission.json`, soak logs)
+# - Commit only summaries / tables with **measured** numbers
+# - Run: `bash scripts/run_profiler_smoke.sh` (needs `.venv311` + GGUF)
+
+*
+!.gitignore
+!README.md
+!submission.summary.md
