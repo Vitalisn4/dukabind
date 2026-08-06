@@ -55,15 +55,17 @@ Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
 
 ## Benchmarks
 
-| Metric | Value |
-|---|---|
-| Machine | _to measure on build laptop_ |
-| RAM at peak | _adtc-profiler only — never invent_ |
-| Time to first token | _to measure_ |
-| Generation speed | _target ≥15 tok/s warm (Devpost TPS_REFERENCE provisional)_ |
-| Thermal throttling | _must remain none under soak_ |
+Participant smoke on build laptop (`bash scripts/run_profiler_smoke.sh`, 2026-08-04). Full tables: [`BENCHMARKS.md`](BENCHMARKS.md). Official Gate 1 scores come from the ADTC eval machine.
 
-Official scores are measured by the ADTC profiler on the standard evaluation machine.
+| Metric | Measured (participant smoke) |
+|---|---|
+| Machine | Intel i7-8650U · 23.3 GB RAM · Ubuntu 22.04 · no GPU |
+| Peak RSS | **1825.6 MB** |
+| Generation speed | **14.73 tok/s** |
+| Time to first token | 9865.49 ms |
+| Thermal | 10-min soak **FAIL** on build laptop: mean **78.1 °C**, peak **97 °C** (12 % of samples ≥ 85 °C), 100 % HTTP ok |
+
+Memory envelope clears the &lt;5.5 GB self-limit. Thermal: the build-laptop soak fails the &lt;85 °C peak criterion (mean is comfortable); the `THREADS=2` re-soak and the official eval-machine run are the open mitigation — P_thermal is decided there.
 
 ---
 

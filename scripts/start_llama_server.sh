@@ -22,7 +22,9 @@ HOST="127.0.0.1"
 PORT="${PORT:-8080}"
 # Kept small to protect peak RAM on the 8 GB contest laptop profile.
 CTX="${CTX:-2048}"
-THREADS="${THREADS:-$(nproc)}"
+# Frozen after 2026-08-05 thread_matrix: -t 3 peak tg_tps (17.94) with temp ok;
+# -t 8 collapsed TPS and hit 85°C. Override with THREADS=… for experiments.
+THREADS="${THREADS:-3}"
 
 if [[ -z "$BIN" ]]; then
   echo "error: llama-server binary not found. Build llama.cpp first." >&2
