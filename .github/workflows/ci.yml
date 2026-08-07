@@ -39,6 +39,18 @@ jobs:
       - name: Held-out eval (T11 bind/refuse)
         run: PYTHONPATH=. python evals/run_heldout.py
 
+      - name: Held-out report freshness (M5 evidence)
+        run: |
+          PYTHONPATH=. python evals/run_heldout.py --write-report /tmp/report.generated.md
+          # The Generated-date line legitimately changes daily; strip it from
+          # both copies so the comparison covers only the evidence content.
+          sed '/^\*\*Generated:/d' evals/heldout/REPORT.md > /tmp/report.committed.md
+          sed '/^\*\*Generated:/d' /tmp/report.generated.md > /tmp/report.normalized.md
+          diff -u /tmp/report.committed.md /tmp/report.normalized.md || {
+            echo "::error::evals/heldout/REPORT.md is stale — rerun 'PYTHONPATH=. python evals/run_heldout.py --write-report' and commit the regenerated file"
+            exit 1
+          }
+
       - name: Offline binder proof (no model)
         run: bash scripts/offline_check.sh
 

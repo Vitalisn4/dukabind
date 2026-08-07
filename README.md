@@ -19,6 +19,8 @@ Staff ask about credit, payables, or stock in **English**. DukaBind runs **allow
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Threat model and binder security rules |
 | [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) | Research-backed design choices |
 | [`BENCHMARKS.md`](BENCHMARKS.md) | Measured profiler / thermal numbers (never invent) |
+| [`MODEL_CARD.md`](MODEL_CARD.md) | Model facts: Qwen2.5-1.5B Q4_K_M, intended use, limits |
+| [`evals/heldout/REPORT.md`](evals/heldout/REPORT.md) | Held-out evidence report (T11, flips, both fixtures) |
 | [`docs/README.md`](docs/README.md) | Public docs index |
 | [`REPORT.md`](REPORT.md) | Gate 1 technical writeup |
 

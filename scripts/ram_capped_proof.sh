@@ -30,8 +30,8 @@ for candidate in "$BUILD/bin/llama-server" "$BUILD/llama-server"; do
 done
 MODEL="$HERE/model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 PORT="${PORT:-8080}"
-CTX="${CTX:-2048}"
-THREADS="${THREADS:-3}"
+CTX="${CTX:-1024}"
+THREADS="${THREADS:-2}"
 
 if [[ -z "$BIN" || ! -f "$MODEL" ]]; then
   echo "error: llama-server build or model missing" >&2
