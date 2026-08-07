@@ -48,7 +48,15 @@ _CREDIT = re.compile(
 _SUPPLIER = re.compile(r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.IGNORECASE)
 _STOCK = re.compile(r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.IGNORECASE)
 
-_QTY = re.compile(r"\b(\d+)\s*(crates?|bags?|units?|crate|bag)?\b", re.IGNORECASE)
+_QTY = re.compile(r"\b(\d{1,3}(?:,\d{3})+|\d+)\s*(crates?|bags?|units?)?\b", re.IGNORECASE)
+# Bare digits at or above this are ledger amounts (limits/prices/balances),
+# not crate counts — “his limit is 8000” must not become a quantity of 8000.
+MAX_BARE_QTY = 999
+# Scaled word quantities (“eight thousand crates”) must refuse, never be read
+# as a small count by the word fallback. Sentinel is large enough that any
+# credit ask computes far over any plausible MSME limit.
+_SCALED_QTY_SENTINEL = 10**6
+_SCALED = re.compile(r"\b(hundreds?|thousands?|millions?|billions?|milliards?)\b", re.IGNORECASE)
 _WORD_QTY = {
     "one": 1,
     "two": 2,
@@ -67,11 +75,30 @@ MAX_ASK_CHARS = 500
 
 
 def _extract_qty(text: str) -> int | None:
-    """Parse a digit or word quantity (one…ten) from the utterance."""
-    m = _QTY.search(text)
-    if m:
-        return int(m.group(1))
+    """Parse a digit or word quantity (one…ten) from the utterance.
+
+    A digit is a quantity only when it carries a unit word (``3 crates``,
+    ``1 bag``), is a small bare count (< ``MAX_BARE_QTY``), or is a
+    comma-grouped magnitude parsed at its full value (``2,000 crates`` →
+    2000). Ledger amounts like limits, prices, or balances in the question
+    are never quantities — but an amount mentioned before the real quantity
+    must not swallow it (``his balance is 6250, can I give Fotso 2 crates?``
+    → 2).
+
+    Known limitations (all fail closed — toward refuse, never a wrong
+    approval): word-written amounts (``eight thousand crates``) refuse via a
+    scaled-quantity sentinel instead of being read as small counts; a
+    sub-threshold price mention (``the price is 720 per crate``) or a false
+    unit word (``2000 units of credit``) is read as a large quantity. Each
+    can only move a credit decision toward refuse, never toward a wrong Yes.
+    """
+    for m in _QTY.finditer(text):
+        qty = int(m.group(1).replace(",", ""))
+        if m.group(2) or qty < MAX_BARE_QTY:
+            return qty
     lower = text.lower()
+    if _SCALED.search(lower):
+        return _SCALED_QTY_SENTINEL
     for word, n in _WORD_QTY.items():
         if re.search(rf"\b{word}\b", lower):
             return n

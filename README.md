@@ -8,7 +8,8 @@ Staff ask about credit, payables, or stock in **English**. DukaBind runs **allow
 
 > Not another shop chatbot — a fail-closed ledger binder for African MSME counters.
 
-**Builder:** Vitalis Ngam · Solo · [Vitalisn4](https://github.com/Vitalisn4) · Africa (ledger fixture: Cameroon / XAF)
+**Builder:** Vitalis Ngam · Solo · [Vitalisn4](https://github.com/Vitalisn4) · Africa (ledger fixture: Cameroon / XAF)  
+**Gate 1 path:** English only (Path A) · African claim = MSME offline use-case · Qwen2.5-1.5B Q4_K_M
 
 ## Start here
 
@@ -17,6 +18,7 @@ Staff ask about credit, payables, or stock in **English**. DukaBind runs **allow
 | [`docs/CODE_WALKTHROUGH.md`](docs/CODE_WALKTHROUGH.md) | Understand every piece of shipped code |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Threat model and binder security rules |
 | [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) | Research-backed design choices |
+| [`BENCHMARKS.md`](BENCHMARKS.md) | Measured profiler / thermal numbers (never invent) |
 | [`docs/README.md`](docs/README.md) | Public docs index |
 | [`REPORT.md`](REPORT.md) | Gate 1 technical writeup |
 
@@ -40,6 +42,9 @@ PYTHONPATH=. python -m app.cli "Can I give Marie-Claire three crates on credit?"
 
 # Binder offline proof (no model)
 bash scripts/offline_check.sh
+
+# Held-out eval: 28 EN prompts across two shop ledgers, cross-shop anti-memorization, ledger-flip proofs
+PYTHONPATH=. .venv/bin/python evals/run_heldout.py
 ```
 
 With local llama-server:

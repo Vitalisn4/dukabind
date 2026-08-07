@@ -4,6 +4,10 @@
 **Last updated:** 2026-08-06  
 **Audience:** Contributors, Gate reviewers, and anyone reproducing DukaBind from a clean checkout
 
+**What we are building (Gate 1 Path A):** offline **English** shop assistant for African MSME counters — allowlisted SQL on Marché Akwa Viviane (Douala, XAF); hard refuse on missing money fields; optional local llama.cpp narration; binder `message` authoritative; **no Swahili claim**.
+
+Implementation schedule (local): [`ADTC-2026-Build-Kickoff.md`](./ADTC-2026-Build-Kickoff.md) · [`ADTC-2026-ROADMAP.md`](./ADTC-2026-ROADMAP.md) · [`PROGRESS.md`](./PROGRESS.md).
+
 This guide maps the shipped product: what each file does, how a staff question becomes an answer, which commands to run, and how the Marché Akwa Viviane ledger is structured.
 
 ---
@@ -109,6 +113,29 @@ Seeded by `python -m app.db.connection` into `data/marche_akwa.sqlite`.
 
 **Keep in sync:** `app/db/fixture.py` (nicknames + normalize helpers) ↔ `app/db/seed.sql` (rows).
 
+### Second shop fixture — Marché Nkolmébé (`duka_b`)
+
+A second, **fully disjoint** shop (Yaoundé, XAF) proves answers bind to the live ledger instead of being memorized from the first shop. Seeded via `seed_file=SEED_DUKA_B` (see `connection.init_db`); the held-out eval runs both shops.
+
+| Display name | credit_limit | outstanding | Notes |
+|---|---|---:|---|
+| Amina Bello | 25000 | 9800 | 2 bags of sugar @ 13500 exceed limit |
+| Chidi Okafor | 12000 | 4000 | 1 bag of flour @ 22000 exceed limit |
+| Maman Rachel | **NULL** | 0 | Refuse — no limit on file |
+
+| Supplier | balance_owed | Notes |
+|---|---:|---|
+| Sanaga Épicerie | 15500 | Known payable |
+| Ciment du Cameroun | **NULL** | Refuse — amount not confirmed |
+
+| SKU | unit_price | on_hand |
+|---|---:|---:|
+| Sucre 25kg (sugar, sucre) | 13500 | 4 |
+| Savon carton 24 (soap, savon) | 9800 | 0 |
+| Farine 50kg (flour, farine) | 22000 | 9 |
+
+**Anti-memorization rule:** asking about `duka_b` entities against the Akwa ledger (or vice versa) must **refuse** (`not_found`) and never leak the other shop's numbers — enforced by `evals/run_heldout.py` cross-shop prompts.
+
 ---
 
 ## 4. Contest-required files
@@ -133,9 +160,10 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | Path | What it does |
 |---|---|
 | `schema.sql` | Tables: `shop_meta`, `customers`, `suppliers`, `skus`, `audit_log`. **NULL** `credit_limit` / `balance_owed` means “not on file” → refuse (control **C4**). |
-| `seed.sql` | Loads Marché Akwa Viviane rows. |
-| `fixture.py` | Display names, nicknames, and `normalize_*` helpers used by the intent router. |
-| `connection.py` | Opens SQLite (WAL + foreign keys). Ask CLIs use **`readonly=True`**. `python -m app.db.connection` creates/seeds `data/marche_akwa.sqlite`. |
+| `seed.sql` | Loads Marché Akwa Viviane rows (primary demo shop). |
+| `seed_duka_b.sql` | Loads Marché Nkolmébé (`duka_b`) rows — second shop for the held-out eval. |
+| `fixture.py` | Display names, nicknames, and `normalize_*` helpers for **both** shops (disjoint aliases), used by the intent router. |
+| `connection.py` | Opens SQLite (WAL + foreign keys). Ask CLIs use **`readonly=True`**. `python -m app.db.connection` creates/seeds `data/marche_akwa.sqlite`; `init_db(seed_file=SEED_DUKA_B)` seeds the second shop. |
 
 ### 5.2 Binder — `app/binder/` (load-bearing)
 
@@ -173,18 +201,22 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `scripts/smoke_narrate.sh` | Starts server, waits for `/health`, one narrate ask, cleans up. |
 | `scripts/offline_check.sh` | Binder offline proof: credit / SOCA refuse / stock; optional `unshare -n`. |
 | `scripts/run_profiler_smoke.sh` | `adtc-profiler` participant mode → `benchmarks/raw/submission.json`; optional `--full`. |
+| `scripts/ram_capped_proof.sh` | 8 GB-class proof: full stack under a cgroup `MemoryMax` cap (default 7.5 GB), reports `memory.peak` headroom. |
 | `scripts/thread_matrix.sh` | `llama-bench` thread bake-off (`-t 2,3,4,6,8`) + temp sampling → `benchmarks/raw/`. |
 | `scripts/thermal_soak.sh` | Sustained generation soak (default 10 min) sampling package temp every 5 s → CSV + PASS/FAIL. |
+| `scripts/static_analysis.sh` | One-pass gate: `ruff` + `bandit` (skip `B101` in tests) + `shellcheck`; exit 0 only when all clean. |
 | `download_model.sh` | Downloads pinned Qwen2.5-1.5B Q4_K_M GGUF + sha256 (**C7**). |
 
 ### 5.6 Tests — `tests/`
 
 | File | Covers |
 |---|---|
-| `test_binder.py` | Allowlist reject; Fotso over-limit 8410; Esther NULL limit; SOCA NULL balance; Bonaberi 42000; stock; SW ask unknown; substring safety; overlong ask; zero qty; rice price; ledger flip |
+| `test_binder.py` | Allowlist reject; Fotso over-limit 8410; Esther NULL limit; SOCA NULL balance; Bonaberi 42000; stock; SW ask unknown; substring safety; overlong ask; zero qty; rice price; ledger flip; qty-vs-amount parsing; SQL-injection battery; narration prompt-injection invariant |
 | `test_ask.py` | Refuse skips LLM; binder `message` authority; loopback reject; non-loopback `base_url` does not narrate |
+| `test_duka_b.py` | Second-shop generalization; NULL refusal; accent-insensitive asks; cross-shop non-leak; flip on `duka_b`; full held-out suite stays green |
+| `test_metadata.py` | Contest-claims guard: domain, `language_scope: ["en"]`, honest claims, exactly 2 ledger-grounded `test_prompts`, llama.cpp runtime |
 
-Run: `PYTHONPATH=. pytest tests/ -q` (expect **19 passed**).
+Run: `PYTHONPATH=. pytest tests/ -q` (expect **44 passed**).
 
 ### Binder offline proof (no model)
 
@@ -192,15 +224,28 @@ Run: `PYTHONPATH=. pytest tests/ -q` (expect **19 passed**).
 bash scripts/offline_check.sh
 ```
 
+### 5.7 Held-out eval (no model, no network)
+
+```bash
+PYTHONPATH=. .venv/bin/python evals/run_heldout.py
+```
+
+Runs **28 EN prompts** (`evals/heldout/prompts.json`) against both disjoint shop ledgers — credit, supplier, stock, NULL-field refusals, adversarial/jailbreak prompts, and cross-shop prompts that must refuse without leaking the other shop's numbers — plus ledger-flip proofs (change a limit/stock row → the answer must change). Exit 0 = all 31 checks pass. The runner prints the **T11 bind/refuse score** (measured **100.0%, 28/28**, on 2026-08-06; target ≥90%). The 2 submission prompts in `metadata.json` are picked from a pool **disjoint** from this set (T13).
+
 ### Benchmarks (`BENCHMARKS.md` + `benchmarks/`)
 
 ```bash
 bash scripts/thread_matrix.sh   # llama-bench thread bake-off → benchmarks/raw/thread_matrix_*.{jsonl,md}
 bash scripts/thermal_soak.sh    # 10-min sustained soak → benchmarks/raw/thermal_soak_*.csv + PASS/FAIL
 bash scripts/run_profiler_smoke.sh  # raw JSON → benchmarks/raw/submission.json (gitignored)
+bash scripts/ram_capped_proof.sh    # 8 GB-class proof: full stack under cgroup MemoryMax cap → headroom report
 ```
 
 Only measured numbers are committed: the summary tables in `BENCHMARKS.md`, `REPORT.md`, and `benchmarks/submission.summary.md`. Raw dumps stay gitignored under `benchmarks/raw/`.
+
+### 5.8 Continuous integration — `.github/workflows/ci.yml`
+
+Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (44 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
 
 ---
 
@@ -282,12 +327,14 @@ Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 | Shipped | Not yet (by design) |
 |---|---|
 | Fail-closed binder + 3 intents | FastAPI / HTMX staff UI |
-| Marché Akwa Viviane ledger + tests | Owner-gated writes (C6) |
-| Optional local narration | Frozen ≥25 held-out eval set |
-| Loopback + readonly ask path | Full profiler accuracy pass |
-| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C — build-laptop soak **FAIL** (mean 78 °C / peak 97 °C); `THREADS=2` re-soak + eval-machine confirm pending |
+| Marché Akwa Viviane + Marché Nkolmébé (`duka_b`) ledgers + tests | Owner-gated writes (C6) |
+| Optional local narration | Full profiler accuracy pass |
+| Loopback + readonly ask path | Submission prompts frozen (pool is disjoint from held-out — T13) |
+| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: `THREADS=3` FAIL (peak 97 °C), `THREADS=2`/`ctx=2048` FAIL (peak 93 °C), `THREADS=2`/`ctx=1024` **PASS** (peak 84.0 °C, temperature-only) |
 | Profiler smoke Peak RSS ~1.8 GB | |
 | Thread/ctx matrix + thermal soak logged in `BENCHMARKS.md` | |
+| Held-out eval: 28 EN prompts, cross-shop non-leak, flip proofs (`evals/`) | |
+| Model lock (M3): Qwen2.5-1.5B Q4_K_M; T15 quant lock; Aya skipped (Path A) | |
 
 ---
 
@@ -313,8 +360,13 @@ When you change behaviour, update this file in the **same** change set:
 
 | Date | Change |
 |---|---|
+| 2026-08-06 | 8 GB-class proof: `scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap, headroom 6.73 GiB); definitive `--full` profiler run (Peak RSS 1825.72 MB, 16.44 tok/s, TTFT 9026.84 ms, `accuracy: []` by participant-mode design) |
+| 2026-08-06 | Thermal: `THREADS=2`/`ctx=1024` 10-min soak **PASS** on build laptop (mean 75.7 °C / peak 84.0 °C / 0 ≥ 85 °C); `THREADS=3` and `THREADS=2`@`ctx=2048` documented FAIL; eval laptop still decides P_thermal |
+| 2026-08-06 | CI: `.github/workflows/ci.yml` — pytest + ruff + static-analysis gate + held-out eval + offline binder proof + metadata validation on every push/PR |
+| 2026-08-06 | Security hardening: qty-vs-amount parsing, accent-insensitive aliases, injection-battery tests; `scripts/static_analysis.sh` gate (ruff + bandit + shellcheck) |
+| 2026-08-06 | EN held-out + `duka_b`: second shop fixture, 28-prompt offline eval (`evals/run_heldout.py`), cross-shop non-leak + flip proofs; M3 Qwen lock note |
 | 2026-08-06 | M2 bench completion: thread matrix + thermal soak scripts, `THREADS=3` freeze, `BENCHMARKS.md` measured tables (soak **FAIL**: mean 78 °C / peak 97 °C on build laptop) |
-| 2026-08-04 | M2 start: offline_check + profiler smoke scripts; Peak RSS measured |
+| 2026-08-06 | Path A framing; link Kickoff/Roadmap/Progress; M2 thermal honesty |
 | 2026-07-26 | Qualify narration wording; binder message authoritative |
 | 2026-07-26 | Professional public rewrite; Africa-wide framing; dual-venv clarity |
 | 2026-07-25 | Initial Gate 1 walkthrough |
