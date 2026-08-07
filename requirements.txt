@@ -1,7 +1,7 @@
-# DukaBind — Gate 1 Python deps (pinned ranges; lock later before freeze)
-pytest>=8.0,<9
-ruff>=0.6,<1
+# DukaBind — Gate 1 Python deps (exact versions validated by CI)
+pytest==8.4.2
+ruff==0.16.0
 
 # Static analysis gate (scripts/static_analysis.sh)
-bandit>=1.9,<2
-shellcheck-py>=0.11,<1
+bandit==1.9.4
+shellcheck-py==0.11.0.1

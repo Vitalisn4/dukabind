@@ -22,9 +22,9 @@ Use these for **implementation steps**, not for the public judge repo:
 
 | Doc | Role |
 |---|---|
-| [`ADTC-2026-Build-Kickoff.md`](./ADTC-2026-Build-Kickoff.md) | Day-by-day checklist |
-| [`ADTC-2026-ROADMAP.md`](./ADTC-2026-ROADMAP.md) | Milestone DoD M0–M7 + Path A status |
-| [`PROGRESS.md`](./PROGRESS.md) | Lived status / what is open next |
-| [`COMPLIANCE_CHECKLIST.md`](./COMPLIANCE_CHECKLIST.md) | Contest rules map |
+| `docs/ADTC-2026-Build-Kickoff.md` | Day-by-day checklist |
+| `docs/ADTC-2026-ROADMAP.md` | Milestone DoD M0–M7 + Path A status |
+| `docs/PROGRESS.md` | Lived status / what is open next |
+| `docs/COMPLIANCE_CHECKLIST.md` | Contest rules map |
 
 Strategy phase packs stay local (see `.gitignore`) so the public repo remains submission-focused.

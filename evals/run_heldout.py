@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from app.binder.pipeline import handle_ask
+from app.binder.refuse import BinderResult
 from app.db.connection import SEED, SEED_DUKA_B, init_db
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,7 +52,7 @@ FLIP_CHECKS = [
 ]
 
 
-def _check(expect: dict[str, Any], result: Any) -> list[str]:
+def _check(expect: dict[str, Any], result: BinderResult) -> list[str]:
     """Return unmet expectations for one prompt as human-readable strings."""
     problems: list[str] = []
     if "intent" in expect and result.intent.value != expect["intent"]:
@@ -112,7 +113,6 @@ def run_heldout() -> tuple[int, int, int, list[str]]:
             conn = conns[fixture]
             before = handle_ask(conn, prompt)
             conn.execute(sql)
-            conn.commit()
             after = handle_ask(conn, prompt)
             conn.rollback()
             if before.message == after.message or token not in after.message:

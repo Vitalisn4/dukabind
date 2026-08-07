@@ -166,6 +166,27 @@ def test_qty_ignores_ledger_amounts(db: sqlite3.Connection) -> None:
     assert r.approved is False  # never a wrong Yes
 
 
+def test_scaled_word_and_comma_quantities_fail_closed(db: sqlite3.Connection) -> None:
+    """Scaled or comma-grouped quantities never become a small approved count."""
+    # Ibrahim fits 8 crates (2000 + 5760 = 7760 <= 15000) but not 8000 — so
+    # reading "eight thousand" as 8 would be a wrong Yes. It must refuse.
+    r = handle_ask(db, "Can I give Ibrahim Njoya eight thousand crates on credit?")
+    assert r.ok is True
+    assert r.approved is False
+    assert "No" in r.message
+
+    # Comma-grouped digits parse at full magnitude: 2,000 crates must refuse.
+    r = handle_ask(db, "Can I give Ibrahim Njoya 2,000 crates on credit?")
+    assert r.ok is True
+    assert r.approved is False
+    assert "No" in r.message
+
+    # Ordinary word quantities inside the limit still approve.
+    r = handle_ask(db, "Can I give Ibrahim Njoya two crates on credit?")
+    assert r.ok is True
+    assert r.approved is True
+
+
 def test_sql_injection_battery_fails_closed(db: sqlite3.Connection) -> None:
     """Injection-shaped staff text never raises, never mutates, never invents."""
     attempts = [
@@ -175,10 +196,35 @@ def test_sql_injection_battery_fails_closed(db: sqlite3.Connection) -> None:
         "Can I give Fotso credit x'; DELETE FROM skus WHERE '1'='1?",
         "Give Fotso 3 crates on credit; UPDATE customers SET credit_limit=1;",
     ]
+    before_customers = [
+        tuple(row)
+        for row in db.execute(
+            "SELECT customer_id, credit_limit, outstanding FROM customers ORDER BY customer_id"
+        )
+    ]
+    before_skus = [
+        tuple(row)
+        for row in db.execute(
+            "SELECT sku_id, unit_price, on_hand FROM skus ORDER BY sku_id"
+        )
+    ]
     for text in attempts:
         result = handle_ask(db, text)
         assert result.ok in (True, False)  # grounded decision or refuse, never a crash
         assert result.message
+
+    assert [
+        tuple(row)
+        for row in db.execute(
+            "SELECT customer_id, credit_limit, outstanding FROM customers ORDER BY customer_id"
+        )
+    ] == before_customers
+    assert [
+        tuple(row)
+        for row in db.execute(
+            "SELECT sku_id, unit_price, on_hand FROM skus ORDER BY sku_id"
+        )
+    ] == before_skus
 
     n_customers = db.execute("SELECT COUNT(*) FROM customers").fetchone()[0]
     n_skus = db.execute("SELECT COUNT(*) FROM skus").fetchone()[0]

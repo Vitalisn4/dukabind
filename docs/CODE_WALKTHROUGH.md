@@ -216,7 +216,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `test_duka_b.py` | Second-shop generalization; NULL refusal; accent-insensitive asks; cross-shop non-leak; flip on `duka_b`; full held-out suite stays green |
 | `test_metadata.py` | Contest-claims guard: domain, `language_scope: ["en"]`, honest claims, exactly 2 ledger-grounded `test_prompts`, llama.cpp runtime |
 
-Run: `PYTHONPATH=. pytest tests/ -q` (expect **42 passed**).
+Run: `PYTHONPATH=. pytest tests/ -q` (expect **44 passed**).
 
 ### Binder offline proof (no model)
 
@@ -245,7 +245,7 @@ Only measured numbers are committed: the summary tables in `BENCHMARKS.md`, `REP
 
 ### 5.8 Continuous integration — `.github/workflows/ci.yml`
 
-Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (42 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
+Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (44 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
 
 ---
 
@@ -330,7 +330,7 @@ Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 | Marché Akwa Viviane + Marché Nkolmébé (`duka_b`) ledgers + tests | Owner-gated writes (C6) |
 | Optional local narration | Full profiler accuracy pass |
 | Loopback + readonly ask path | Submission prompts frozen (pool is disjoint from held-out — T13) |
-| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: `THREADS=3` FAIL (peak 97 °C), `THREADS=2`/`ctx=2048` FAIL (peak 93 °C), `THREADS=2`/`ctx=1024` **PASS** (peak 84.0 °C) |
+| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: `THREADS=3` FAIL (peak 97 °C), `THREADS=2`/`ctx=2048` FAIL (peak 93 °C), `THREADS=2`/`ctx=1024` **PASS** (peak 84.0 °C, temperature-only) |
 | Profiler smoke Peak RSS ~1.8 GB | |
 | Thread/ctx matrix + thermal soak logged in `BENCHMARKS.md` | |
 | Held-out eval: 28 EN prompts, cross-shop non-leak, flip proofs (`evals/`) | |

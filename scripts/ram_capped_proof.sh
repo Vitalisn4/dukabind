@@ -88,20 +88,45 @@ SAMPPID=$!
 cd "$HERE"
 export PYTHONPATH="$HERE"
 echo "== narrated asks =="
-for q in \
-  "Can I give Marie-Claire three crates on credit?" \
-  "How many soda crates on hand?" \
-  "How much do we owe SOCA Distribution Douala?"; do
-  out="$("$HERE/.venv/bin/python" -m app.narrate_cli "$q" 2>&1 || true)"
-  echo "$out" | python3 -c '
+ask_fail=0
+run_ask() {
+  local q="$1" validator="$2" out
+  out="$("$HERE/.venv/bin/python" -m app.narrate_cli "$q" 2>&1)" || {
+    echo "  error: app.narrate_cli failed for: $q" >&2
+    printf '%s\n' "$out" | head -20 >&2
+    ask_fail=1
+    return
+  }
+  if ! printf '%s' "$out" | python3 -c "$validator"; then
+    echo "  error: unexpected binder result for: $q" >&2
+    printf '%s\n' "$out" | head -20 >&2
+    ask_fail=1
+    return
+  fi
+  printf '%s' "$out" | python3 -c '
 import json, sys
-try:
-    d = json.load(sys.stdin)
-    print("  approved=%s narrated=%s source=%s | %s" % (
-        d.get("approved"), d.get("narrated"), d.get("source"), d.get("message")))
-except Exception:
-    print("  (ask failed)")'
-done
+d = json.load(sys.stdin)
+print("  approved=%s narrated=%s source=%s | %s" % (
+    d.get("approved"), d.get("narrated"), d.get("source"), d.get("message")))'
+}
+
+run_ask "Can I give Marie-Claire three crates on credit?" '
+import json, sys
+d = json.load(sys.stdin)
+sys.exit(0 if d.get("ok") is True and d.get("approved") is False and "No" in d.get("message", "") else 1)'
+run_ask "How many soda crates on hand?" '
+import json, sys
+d = json.load(sys.stdin)
+sys.exit(0 if d.get("ok") is True and "on_hand=14" in d.get("message", "") else 1)'
+run_ask "How much do we owe SOCA Distribution Douala?" '
+import json, sys
+d = json.load(sys.stdin)
+sys.exit(0 if d.get("ok") is False and d.get("refuse_reason") == "balance_owed_null" else 1)'
+
+if [[ "$ask_fail" -ne 0 ]]; then
+  echo "error: narrated-ask validation failed — proof invalid" >&2
+  exit 1
+fi
 
 kill "$SPID" 2>/dev/null || true
 wait "$SPID" 2>/dev/null || true

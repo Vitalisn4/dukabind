@@ -67,6 +67,8 @@ Source: `benchmarks/raw/thread_matrix_20260805T204347Z.md` (+ raw JSONL). `-t 3`
 
 ## Thermal soak (2026-08-06, `THREADS=3` `ctx=2048`, single server)
 
+**Scope of verdicts:** every soak verdict on this page is **temperature-only** — `thermal_soak.sh` samples package temperature + HTTP success, never CPU frequency or throttle states, so no claim of throttle-free operation is made on this host.
+
 Source: `benchmarks/raw/thermal_soak_20260806T071704Z.csv` — `bash scripts/thermal_soak.sh` (default 10 min, sample 5 s). All 75 completions succeeded.
 
 | Metric | Measured |
@@ -108,7 +110,7 @@ Source: `benchmarks/raw/thermal_soak_20260806T213423Z.csv` — `THREADS=2 CTX=10
 | Samples ≥ 85 °C | 0 / 68 |
 | Verdict | **PASS** — peak &lt; 85 °C |
 
-**Interpretation:** halving the context (`ctx=2048 → 1024`) removed the intermittent ≥ 85 °C bursts that failed both `THREADS=3` and `THREADS=2` at full context — the **first 10-min soak to pass on this laptop**. Note the margin is thin (peak 84.0 °C, 1 °C below the −10 threshold) and the burst appears early (peak at +139 s, then settles to 73 °C by the end). The shipped default (`THREADS=3`/`ctx=2048`) still fails on this host; the authoritative run stays on the official eval laptop.
+**Interpretation:** halving the context (`ctx=2048 → 1024`) removed the intermittent ≥ 85 °C bursts that failed both `THREADS=3` and `THREADS=2` at full context — the **first 10-min soak to pass on temperature alone on this laptop**. Note the margin is thin (peak 84.0 °C, 1 °C below the −10 threshold) and the burst appears early (peak at +139 s, then settles to 73 °C by the end). The shipped default (`THREADS=3`/`ctx=2048`) still fails on this host; the authoritative run stays on the official eval laptop.
 
 ### Other soak attempts (kept for provenance — NOT authoritative)
 
@@ -127,11 +129,11 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 |---|---|
 | Peak RSS &lt; 5.5 GB | **Pass** |
 | TPS near 15 | **Pass / near** on smoke + matrix |
-| Thermal &lt; 85 °C / no throttle | **Pass** on this laptop at `THREADS=2`/`ctx=1024` (peak 84.0 °C); shipped default `THREADS=3`/`ctx=2048` still fails here — eval laptop decides |
+| Thermal &lt; 85 °C (temperature-only — soak samples no throttle signal) | **Pass** on this laptop at `THREADS=2`/`ctx=1024` (peak 84.0 °C); shipped default `THREADS=3`/`ctx=2048` still fails here — eval laptop decides |
 
 **M2 tooling: complete.** The measurement toolkit (profiler smoke, thread matrix, thermal soak) is shipped and reproducible.
 
-**P_thermal: PASS at `THREADS=2`/`ctx=1024` on this laptop** — peak 84.0 °C, mean 75.7 °C, 0/68 samples ≥ 85 °C (first 10-min soak to clear &lt;85 °C here). `THREADS=3` (peak 97 °C) and `THREADS=2` at `ctx=2048` (peak 93 °C) still FAIL at full context, so the **shipped default (`THREADS=3`/`ctx=2048`) remains unproven on this host**; the measured thermally-safe config is `THREADS=2`/`ctx=1024` (TPS 14.96 vs 17.94 at `-t 3`). Official Gate 1 scores use the ADTC eval machine — record that separately.
+**P_thermal (temperature-only): PASS at `THREADS=2`/`ctx=1024` on this laptop** — peak 84.0 °C, mean 75.7 °C, 0/68 samples ≥ 85 °C (first 10-min soak to clear &lt;85 °C here on temperature alone; no throttle/frequency signal is sampled). `THREADS=3` (peak 97 °C) and `THREADS=2` at `ctx=2048` (peak 93 °C) still FAIL at full context, so the **shipped default (`THREADS=3`/`ctx=2048`) remains unproven on this host**; the measured thermally-safe config is `THREADS=2`/`ctx=1024` (TPS 14.96 vs 17.94 at `-t 3`). Official Gate 1 scores use the ADTC eval machine — record that separately.
 
 ## Model lock (M3 — Path A)
 
