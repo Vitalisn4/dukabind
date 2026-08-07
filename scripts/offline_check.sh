@@ -102,7 +102,9 @@ if command -v unshare >/dev/null 2>&1 && unshare -n true 2>/dev/null; then
     set -euo pipefail
     cd "'"$HERE"'"
     # shellcheck disable=SC1091
-    source .venv/bin/activate
+    if [[ -f .venv/bin/activate ]]; then
+      source .venv/bin/activate
+    fi
     export PYTHONPATH=.
     python -m app.cli "Can I give Marie-Claire three crates on credit?" | python -c "
 import json,sys

@@ -48,7 +48,10 @@ _CREDIT = re.compile(
 _SUPPLIER = re.compile(r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.IGNORECASE)
 _STOCK = re.compile(r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.IGNORECASE)
 
-_QTY = re.compile(r"\b(\d+)\s*(crates?|bags?|units?|crate|bag)?\b", re.IGNORECASE)
+_QTY = re.compile(r"\b(\d+)\s*(crates?|bags?|units?)?\b", re.IGNORECASE)
+# Bare digits at or above this are ledger amounts (limits/prices/balances),
+# not crate counts — “his limit is 8000” must not become a quantity of 8000.
+MAX_BARE_QTY = 999
 _WORD_QTY = {
     "one": 1,
     "two": 2,
@@ -67,10 +70,25 @@ MAX_ASK_CHARS = 500
 
 
 def _extract_qty(text: str) -> int | None:
-    """Parse a digit or word quantity (one…ten) from the utterance."""
-    m = _QTY.search(text)
-    if m:
-        return int(m.group(1))
+    """Parse a digit or word quantity (one…ten) from the utterance.
+
+    A digit is a quantity only when it carries a unit word (``3 crates``,
+    ``1 bag``) or is a small bare count (< ``MAX_BARE_QTY``). Ledger amounts
+    like limits, prices, or balances in the question are never quantities —
+    but an amount mentioned before the real quantity must not swallow it
+    (``his balance is 6250, can I give Fotso 2 crates?`` → 2).
+
+    Known limitations (both fail closed — toward refuse, never a wrong
+    approval): word-written amounts (``eight thousand``) hit the word-quantity
+    fallback and are read as small counts; a sub-threshold price mention
+    (``the price is 720 per crate``) or a false unit word (``2000 units of
+    credit``) is read as a large quantity. Each can only move a credit
+    decision toward refuse, never toward a wrong Yes.
+    """
+    for m in _QTY.finditer(text):
+        qty = int(m.group(1))
+        if m.group(2) or qty < MAX_BARE_QTY:
+            return qty
     lower = text.lower()
     for word, n in _WORD_QTY.items():
         if re.search(rf"\b{word}\b", lower):

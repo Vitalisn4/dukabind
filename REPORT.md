@@ -25,6 +25,7 @@ See [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) for selection rationa
 - **Integration (load-bearing):** Allowlisted SQL binder — not vector RAG. Protects S_eff under the 7 GB usable budget and prevents financial hallucination.
 - **Language:** English cashier asks and binder messages (`language_scope: ["en"]`). African use-case claim is Cameroon MSME offline ledger context, not an African-language claim.
 - **Runtime:** llama.cpp only (template + FAQ requirement).
+- **Model lock (M3):** Qwen2.5-1.5B Q4_K_M is frozen as primary on measured evidence — Peak RSS 1825.72 MB (≪ 5.5 GB limit), 16.44 tok/s (profiler `--full` run; llama-bench up to 17.94), TTFT ~9.0 s. **T15 quant lock:** Q4_K_M 1.5B stays frozen unless accuracy regresses with RSS margin; 3B Q4 only if T1–T3 stay green. Tiny Aya is explicitly **not** downloaded (no Swahili track under Path A) — no Aya benchmark is claimed.
 - **Alternatives rejected:** 7B-class (RSS DQ risk); embeddings/FAISS (RAM); LLM-generated SQL (injection + hallucination); shallow Swahili without a native reviewer.
 
 Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
@@ -55,17 +56,24 @@ Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
 
 ## Benchmarks
 
-Participant smoke on build laptop (`bash scripts/run_profiler_smoke.sh`, 2026-08-04). Full tables: [`BENCHMARKS.md`](BENCHMARKS.md). Official Gate 1 scores come from the ADTC eval machine.
+Participant smoke on build laptop (`bash scripts/run_profiler_smoke.sh --full`, definitive run 2026-08-06; earlier smoke 2026-08-04). The profiler's `accuracy` block is `[]` in participant mode by design — official accuracy comes from ADTC audit mode on the eval machine. Full tables: [`BENCHMARKS.md`](BENCHMARKS.md). Official Gate 1 scores come from the ADTC eval machine.
 
-| Metric | Measured (participant smoke) |
+| Metric | Measured (participant, definitive `--full` run) |
 |---|---|
 | Machine | Intel i7-8650U · 23.3 GB RAM · Ubuntu 22.04 · no GPU |
-| Peak RSS | **1825.6 MB** |
-| Generation speed | **14.73 tok/s** |
-| Time to first token | 9865.49 ms |
-| Thermal | 10-min soak **FAIL** on build laptop: mean **78.1 °C**, peak **97 °C** (12 % of samples ≥ 85 °C), 100 % HTTP ok |
+| Peak RSS | **1825.72 MB** |
+| Generation speed | **16.44 tok/s** |
+| Time to first token | 9026.84 ms |
+| Thermal | 10-min soak **PASS** on build laptop at `THREADS=2`/`ctx=1024`: mean **75.7 °C**, peak **84.0 °C** (0/68 ≥ 85 °C), 100 % HTTP ok |
+| 7.5 GB-capped proof | Full stack (server + asks) ran under a hard **7.5 GiB** cgroup cap — cgroup peak 0.77 GiB, llama-server VmRSS 1.80 GiB, headroom **6.73 GiB** (2026-08-06, `bash scripts/ram_capped_proof.sh`) |
 
-Memory envelope clears the &lt;5.5 GB self-limit. Thermal: the build-laptop soak fails the &lt;85 °C peak criterion (mean is comfortable); the `THREADS=2` re-soak and the official eval-machine run are the open mitigation — P_thermal is decided there.
+Memory envelope clears the &lt;5.5 GB self-limit. **8 GB-class proof:** the whole stack (llama-server + three narrated asks) ran under a hard 7.5 GiB cgroup `MemoryMax` cap with 6.73 GiB headroom; even the process-level footprint (llama-server VmRSS 1.80 GiB ≈ profiler Peak RSS 1825.72 MB) leaves ~3× margin under the 7 GB usable DQ ceiling. Thermal on the build laptop: `THREADS=3` (peak **97 °C**) and `THREADS=2` at `ctx=2048` (peak **93 °C**) 10-min soaks FAIL the &lt;85 °C criterion — the 2018-era cooling bursts under sustained full-context generation. Halving context (`THREADS=2`/`ctx=1024`) **passes**: mean **75.7 °C**, peak **84.0 °C**, 0/68 samples ≥ 85 °C, http 100 %. The shipped default (`THREADS=3`/`ctx=2048`) still fails on this host, so the authoritative P_thermal call stays with the official eval-machine run.
+
+---
+
+## Evaluation (held-out, offline)
+
+28 EN prompts (`evals/heldout/prompts.json`) run against **two disjoint shop ledgers** — Marché Akwa Viviane (Douala) and Marché Nkolmébé (`duka_b`, Yaoundé) — covering credit, payables, stock, NULL-field refusals, adversarial / jailbreak asks, and cross-shop prompts that must refuse without leaking the other shop's numbers, plus ledger-flip proofs. **31/31 checks pass** offline (`PYTHONPATH=. .venv/bin/python evals/run_heldout.py`; `pytest tests/ -q` = 42 passed). Submission prompts are chosen from a pool **disjoint** from this held-out set (T13).
 
 ---
 
