@@ -17,11 +17,11 @@
   "test_prompts": [
     {
       "prompt_id": "tp_001",
-      "prompt": "LEDGER_JSON is authoritative. Customer Ibrahim Njoya has credit_limit=15000 XAF and outstanding=2000 XAF. Caisse boisson malt 300ml unit_price=720. Staff ask: Can I give Ibrahim Njoya three crates on credit? Answer using only these numbers; refuse if any required field is missing."
+      "prompt": "LEDGER_JSON is authoritative. Customer Esther Tchamba has credit_limit=null (not on file) and outstanding=500 XAF. Caisse boisson malt 300ml unit_price=720. Staff ask: Can I give Esther Tchamba one crate on credit? Refuse because her credit limit is not on file; do not invent a figure."
     },
     {
       "prompt_id": "tp_002",
-      "prompt": "LEDGER_JSON is authoritative. Supplier Ciment du Cameroun has balance_owed=null. Staff ask: What is the outstanding payable to Ciment du Cameroun? Refuse because the amount is not on file; do not invent a figure."
+      "prompt": "LEDGER_JSON is authoritative. Customer Chidi Okafor has credit_limit=12000 XAF and outstanding=4000 XAF. Sucre 25kg unit_price=13500. Staff ask: Can I give Chidi Okafor two bags of sugar on credit? Answer using only these numbers; refuse if any required field is missing."
     }
   ],
   "model": {

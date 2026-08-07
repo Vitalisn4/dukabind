@@ -16,8 +16,8 @@ SOAK_MINUTES="${SOAK_MINUTES:-10}"
 SAMPLE_SECS="${SAMPLE_SECS:-5}"
 PORT="${PORT:-8080}"
 BASE_URL="http://127.0.0.1:${PORT}"
-export THREADS="${THREADS:-3}"
-export CTX="${CTX:-2048}"
+export THREADS="${THREADS:-2}"
+export CTX="${CTX:-1024}"
 export PORT
 
 if [[ ! -x "$HERE/third_party/llama.cpp/build/bin/llama-server" ]]; then

@@ -145,6 +145,8 @@ A second, **fully disjoint** shop (Yaoundé, XAF) proves answers bind to the liv
 | `metadata.json` | Team, domain `corporate_enterprise`, model, exactly two `test_prompts`, claims |
 | `download_model.sh` | Idempotent GGUF download + sha256 check (weights never in git) |
 | `REPORT.md` | Gate 1 technical writeup |
+| `MODEL_CARD.md` | Qwen2.5-1.5B Q4_K_M — intended use, limits, Path A language honesty, run instructions |
+| `evals/heldout/REPORT.md` | Committed held-out evidence report (T11, flips, both fixtures; regenerated via `--write-report`) |
 | `LICENSE` / `NOTICE` | GPL-3.0 application code; model weights stay upstream |
 | `.gitignore` | Ignores `*.gguf`, local strategy docs, venvs, live `*.sqlite` |
 
@@ -197,7 +199,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | Script | Behaviour |
 |---|---|
 | `scripts/setup_llama.sh` | Clone/build official `llama.cpp` under `third_party/` (gitignored). |
-| `scripts/start_llama_server.sh` | Starts `llama-server` on `127.0.0.1`, CPU only, ctx 2048, `THREADS=3` (frozen after 2026-08-05 thread matrix). |
+| `scripts/start_llama_server.sh` | Starts `llama-server` on `127.0.0.1`, CPU only. **Shipped default (M5, 2026-08-07): `CTX=1024`, `THREADS=2`** — the measured 10-min thermal-soak PASS config (peak 84.0 °C); `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs. |
 | `scripts/smoke_narrate.sh` | Starts server, waits for `/health`, one narrate ask, cleans up. |
 | `scripts/offline_check.sh` | Binder offline proof: credit / SOCA refuse / stock; optional `unshare -n`. |
 | `scripts/run_profiler_smoke.sh` | `adtc-profiler` participant mode → `benchmarks/raw/submission.json`; optional `--full`. |
@@ -230,7 +232,9 @@ bash scripts/offline_check.sh
 PYTHONPATH=. .venv/bin/python evals/run_heldout.py
 ```
 
-Runs **28 EN prompts** (`evals/heldout/prompts.json`) against both disjoint shop ledgers — credit, supplier, stock, NULL-field refusals, adversarial/jailbreak prompts, and cross-shop prompts that must refuse without leaking the other shop's numbers — plus ledger-flip proofs (change a limit/stock row → the answer must change). Exit 0 = all 31 checks pass. The runner prints the **T11 bind/refuse score** (measured **100.0%, 28/28**, on 2026-08-06; target ≥90%). The 2 submission prompts in `metadata.json` are picked from a pool **disjoint** from this set (T13).
+Runs **28 EN prompts** (`evals/heldout/prompts.json`) against both disjoint shop ledgers — credit, supplier, stock, NULL-field refusals, adversarial/jailbreak prompts, and cross-shop prompts that must refuse without leaking the other shop's numbers — plus ledger-flip proofs (change a limit/stock row → the answer must change). Exit 0 = all 31 checks pass. The runner prints the **T11 bind/refuse score** (measured **100.0%, 28/28**, 2026-08-06; target ≥90%).
+
+`PYTHONPATH=. .venv/bin/python evals/run_heldout.py --write-report` also regenerates the committed evidence report [`evals/heldout/REPORT.md`](../evals/heldout/REPORT.md) (T11, per-category + per-fixture tables, flip proofs, T13 note) — numbers are recomputed from the measured run, never hand-edited. The 2 submission prompts in `metadata.json` are picked from a pool **disjoint** from this set (T13); `tests/test_metadata.py` fails CI on any overlap.
 
 ### Benchmarks (`BENCHMARKS.md` + `benchmarks/`)
 
@@ -245,7 +249,7 @@ Only measured numbers are committed: the summary tables in `BENCHMARKS.md`, `REP
 
 ### 5.8 Continuous integration — `.github/workflows/ci.yml`
 
-Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (44 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
+Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (44 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → **held-out report freshness gate** (regenerates `evals/heldout/REPORT.md` via `--write-report` and fails if it drifts from the committed artifact; the daily `Generated:` date is excluded from the comparison) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
 
 ---
 
@@ -329,11 +333,14 @@ Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 | Fail-closed binder + 3 intents | FastAPI / HTMX staff UI |
 | Marché Akwa Viviane + Marché Nkolmébé (`duka_b`) ledgers + tests | Owner-gated writes (C6) |
 | Optional local narration | Full profiler accuracy pass |
-| Loopback + readonly ask path | Submission prompts frozen (pool is disjoint from held-out — T13) |
-| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: `THREADS=3` FAIL (peak 97 °C), `THREADS=2`/`ctx=2048` FAIL (peak 93 °C), `THREADS=2`/`ctx=1024` **PASS** (peak 84.0 °C, temperature-only) |
+| Loopback + readonly ask path | |
+| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: shipped default `THREADS=2`/`CTX=1024` **PASS** (peak 84.0 °C, temperature-only); `THREADS=3`/`ctx=2048` (97 °C) and `THREADS=2`/`ctx=2048` (93 °C) documented FAIL |
 | Profiler smoke Peak RSS ~1.8 GB | |
 | Thread/ctx matrix + thermal soak logged in `BENCHMARKS.md` | |
 | Held-out eval: 28 EN prompts, cross-shop non-leak, flip proofs (`evals/`) | |
+| Held-out evidence report + `MODEL_CARD.md` (M5, 2026-08-07) | |
+| T13 submission prompts frozen in `metadata.json` (disjoint from held-out) | |
+| Ship default `THREADS=2`/`CTX=1024` (thermal PASS config; M5 decision) | |
 | Model lock (M3): Qwen2.5-1.5B Q4_K_M; T15 quant lock; Aya skipped (Path A) | |
 
 ---
@@ -360,6 +367,7 @@ When you change behaviour, update this file in the **same** change set:
 
 | Date | Change |
 |---|---|
+| 2026-08-07 | M5 evidence pack: `MODEL_CARD.md`; committed held-out report (`evals/heldout/REPORT.md` via `--write-report`); T13-disjoint `tp_001`/`tp_002` in metadata.json; ship default frozen `THREADS=2`/`CTX=1024` in `start_llama_server.sh` (+ soak/proof scripts); REPORT/BENCHMARKS/PROGRESS/Kickoff/Roadmap/Compliance aligned to measured reality |
 | 2026-08-06 | 8 GB-class proof: `scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap, headroom 6.73 GiB); definitive `--full` profiler run (Peak RSS 1825.72 MB, 16.44 tok/s, TTFT 9026.84 ms, `accuracy: []` by participant-mode design) |
 | 2026-08-06 | Thermal: `THREADS=2`/`ctx=1024` 10-min soak **PASS** on build laptop (mean 75.7 °C / peak 84.0 °C / 0 ≥ 85 °C); `THREADS=3` and `THREADS=2`@`ctx=2048` documented FAIL; eval laptop still decides P_thermal |
 | 2026-08-06 | CI: `.github/workflows/ci.yml` — pytest + ruff + static-analysis gate + held-out eval + offline binder proof + metadata validation on every push/PR |

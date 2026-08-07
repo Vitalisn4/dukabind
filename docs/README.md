@@ -14,7 +14,7 @@ Offline **English** shop assistant: allowlisted SQLite ledger bind + optional lo
 | [DESIGN_DECISIONS.md](./DESIGN_DECISIONS.md) | Research-backed product and runtime choices | A decision flips or evidence changes |
 | [CODE_WALKTHROUGH.md](./CODE_WALKTHROUGH.md) | Module map, shop ledger, commands, security map | Modules, seed rows, envs, or milestones change |
 
-Root also ships [`BENCHMARKS.md`](../BENCHMARKS.md) (measured profiler / matrix / soak numbers), `benchmarks/submission.summary.md`, and the held-out evaluation set + offline runner under `evals/` (28 EN prompts, two disjoint shop ledgers — see [`CODE_WALKTHROUGH.md`](./CODE_WALKTHROUGH.md) §5.7).
+Root also ships [`BENCHMARKS.md`](../BENCHMARKS.md) (measured profiler / matrix / soak numbers), [`MODEL_CARD.md`](../MODEL_CARD.md) (Qwen2.5-1.5B Q4_K_M — intended use, limits, Path A honesty), `benchmarks/submission.summary.md`, and the held-out evaluation set + offline runner under `evals/` (28 EN prompts, two disjoint shop ledgers, committed evidence report at [`evals/heldout/REPORT.md`](../evals/heldout/REPORT.md) — see [`CODE_WALKTHROUGH.md`](./CODE_WALKTHROUGH.md) §5.7).
 
 ## Local-only build guides (gitignored — open on disk)
 

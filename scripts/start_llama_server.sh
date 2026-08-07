@@ -20,11 +20,13 @@ done
 MODEL="$HERE/model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 HOST="127.0.0.1"
 PORT="${PORT:-8080}"
-# Kept small to protect peak RAM on the 8 GB contest laptop profile.
-CTX="${CTX:-2048}"
-# Frozen after 2026-08-05 thread_matrix: -t 3 peak tg_tps (17.94) with temp ok;
-# -t 8 collapsed TPS and hit 85°C. Override with THREADS=… for experiments.
-THREADS="${THREADS:-3}"
+# Shipped default frozen at M5 (2026-08-07): THREADS=2/CTX=1024 is the only
+# config with a measured 10-min thermal soak PASS (<85 °C) on the build laptop
+# (peak 84.0 °C, 0/68 ≥85 °C, 2026-08-06). Risk gate: prefer thermal safety
+# over TPS. THREADS=3/CTX=2048 (peak tg_tps 17.94) stays reachable via env
+# override for eval-machine benchmarking.
+CTX="${CTX:-1024}"
+THREADS="${THREADS:-2}"
 
 if [[ -z "$BIN" ]]; then
   echo "error: llama-server binary not found. Build llama.cpp first." >&2
