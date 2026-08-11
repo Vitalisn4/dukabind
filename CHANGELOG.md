@@ -7,7 +7,7 @@ up to the Gate 1 freeze; pre-1.0 versions are milestone snapshots.
 
 ## [1.0.0-gate1] - 2026-08-11
 
-**Freeze commit:** `0000000000000000000000000000000000000000` *(filled after the follow-up commit)*
+**Freeze commit:** `fe59628` (branch `feature/dukabind-m6-freeze`, 2026-08-11)
 
 Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product features added.
 
