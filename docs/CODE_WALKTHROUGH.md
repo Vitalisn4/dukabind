@@ -199,7 +199,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | Script | Behaviour |
 |---|---|
 | `scripts/setup_llama.sh` | Clone/build official `llama.cpp` under `third_party/` (gitignored). |
-| `scripts/start_llama_server.sh` | Starts `llama-server` on `127.0.0.1`, CPU only. **Shipped default (M5, 2026-08-07): `CTX=1024`, `THREADS=2`** — the measured 10-min thermal-soak PASS config (peak 84.0 °C); `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs. |
+| `scripts/start_llama_server.sh` | Starts `llama-server` on `127.0.0.1`, CPU only. **Shipped default (M5, 2026-08-07): `CTX=1024`, `THREADS=2`** — the measured 10-min thermal-soak PASS config of 2026-08-06 (peak 84.0 °C), **superseded 2026-08-10: the PASS no longer reproduces on the build laptop (re-run peak 89.0 °C, FAIL)**; `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs, which stays the authoritative P_thermal decision. |
 | `scripts/smoke_narrate.sh` | Starts server, waits for `/health`, one narrate ask, cleans up. |
 | `scripts/offline_check.sh` | Binder offline proof: credit / SOCA refuse / stock; optional `unshare -n`. |
 | `scripts/run_profiler_smoke.sh` | `adtc-profiler` participant mode → `benchmarks/raw/submission.json`; optional `--full`. |
@@ -218,7 +218,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `test_duka_b.py` | Second-shop generalization; NULL refusal; accent-insensitive asks; cross-shop non-leak; flip on `duka_b`; full held-out suite stays green |
 | `test_metadata.py` | Contest-claims guard: domain, `language_scope: ["en"]`, honest claims, exactly 2 ledger-grounded `test_prompts`, llama.cpp runtime |
 
-Run: `PYTHONPATH=. pytest tests/ -q` (expect **44 passed**).
+Run: `PYTHONPATH=. pytest tests/ -q` (expect **46 passed**).
 
 ### Binder offline proof (no model)
 
@@ -249,7 +249,7 @@ Only measured numbers are committed: the summary tables in `BENCHMARKS.md`, `REP
 
 ### 5.8 Continuous integration — `.github/workflows/ci.yml`
 
-Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (44 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → **held-out report freshness gate** (regenerates `evals/heldout/REPORT.md` via `--write-report` and fails if it drifts from the committed artifact; the daily `Generated:` date is excluded from the comparison) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
+Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (46 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → **held-out report freshness gate** (regenerates `evals/heldout/REPORT.md` via `--write-report` and fails if it drifts from the committed artifact; the daily `Generated:` date is excluded from the comparison) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
 
 ---
 
@@ -334,13 +334,13 @@ Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 | Marché Akwa Viviane + Marché Nkolmébé (`duka_b`) ledgers + tests | Owner-gated writes (C6) |
 | Optional local narration | Full profiler accuracy pass |
 | Loopback + readonly ask path | |
-| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: shipped default `THREADS=2`/`CTX=1024` **PASS** (peak 84.0 °C, temperature-only); `THREADS=3`/`ctx=2048` (97 °C) and `THREADS=2`/`ctx=2048` (93 °C) documented FAIL |
+| `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: shipped default `THREADS=2`/`CTX=1024` **PASS 2026-08-06** (peak 84.0 °C, temperature-only) but **FAIL on 2026-08-10 re-run** (peak 89.0 °C — no longer reproducible); `THREADS=3`/`ctx=2048` (97 °C) and `THREADS=2`/`ctx=2048` (93 °C) documented FAIL |
 | Profiler smoke Peak RSS ~1.8 GB | |
 | Thread/ctx matrix + thermal soak logged in `BENCHMARKS.md` | |
 | Held-out eval: 28 EN prompts, cross-shop non-leak, flip proofs (`evals/`) | |
 | Held-out evidence report + `MODEL_CARD.md` (M5, 2026-08-07) | |
 | T13 submission prompts frozen in `metadata.json` (disjoint from held-out) | |
-| Ship default `THREADS=2`/`CTX=1024` (thermal PASS config; M5 decision) | |
+| Ship default `THREADS=2`/`CTX=1024` (2026-08-06 thermal PASS config, M5 decision — no longer thermally safe on the build laptop after the 2026-08-10 re-run) | |
 | Model lock (M3): Qwen2.5-1.5B Q4_K_M; T15 quant lock; Aya skipped (Path A) | |
 
 ---
@@ -367,6 +367,7 @@ When you change behaviour, update this file in the **same** change set:
 
 | Date | Change |
 |---|---|
+| 2026-08-10 | Thermal re-validation: shipped default `THREADS=2`/`CTX=1024` 10-min soak **FAIL** on build laptop (cold-start peak 89.0 °C, hot-start 98.0 °C) — the 2026-08-06 PASS no longer reproduces; authoritative P_thermal stays on the official eval machine |
 | 2026-08-07 | M5 evidence pack: `MODEL_CARD.md`; committed held-out report (`evals/heldout/REPORT.md` via `--write-report`); T13-disjoint `tp_001`/`tp_002` in metadata.json; ship default frozen `THREADS=2`/`CTX=1024` in `start_llama_server.sh` (+ soak/proof scripts); REPORT/BENCHMARKS/PROGRESS/Kickoff/Roadmap/Compliance aligned to measured reality |
 | 2026-08-06 | 8 GB-class proof: `scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap, headroom 6.73 GiB); definitive `--full` profiler run (Peak RSS 1825.72 MB, 16.44 tok/s, TTFT 9026.84 ms, `accuracy: []` by participant-mode design) |
 | 2026-08-06 | Thermal: `THREADS=2`/`ctx=1024` 10-min soak **PASS** on build laptop (mean 75.7 °C / peak 84.0 °C / 0 ≥ 85 °C); `THREADS=3` and `THREADS=2`@`ctx=2048` documented FAIL; eval laptop still decides P_thermal |

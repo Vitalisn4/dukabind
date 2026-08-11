@@ -1,7 +1,7 @@
 # BENCHMARKS — DukaBind
 
 **Status:** Living — update only from measured `adtc-profiler` / `llama-bench` / soak output  
-**Last updated:** 2026-08-06  
+**Last updated:** 2026-08-10  
 **Product:** Path A English offline ledger binder · Qwen2.5-1.5B Q4_K_M · participant laptop Intel i7-8650U  
 
 **Schedule docs:** [`docs/ADTC-2026-Build-Kickoff.md`](docs/ADTC-2026-Build-Kickoff.md) · [`docs/ADTC-2026-ROADMAP.md`](docs/ADTC-2026-ROADMAP.md) · [`docs/PROGRESS.md`](docs/PROGRESS.md)
@@ -65,7 +65,7 @@ Source: `benchmarks/raw/thread_matrix_20260805T204347Z.md` (+ raw JSONL). `-t 3`
 | 6 | 16.32 | 62.20 | 79.0 | ok |
 | 8 | 7.53 | 59.74 | 85.0 | hot — collapsed TPS |
 
-**Action taken (2026-08-05):** `THREADS=3`/`CTX=2048` was frozen as the default after this matrix (peak tg_tps 17.94). **Superseded 2026-08-07 (M5):** the shipped default is now `THREADS=2`/`CTX=1024` — the measured thermal-PASS config — with `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs. This matrix remains the TPS evidence for both choices.
+**Action taken (2026-08-05):** `THREADS=3`/`CTX=2048` was frozen as the default after this matrix (peak tg_tps 17.94). **Superseded 2026-08-07 (M5):** the shipped default is now `THREADS=2`/`CTX=1024` — the measured thermal-PASS config as of 2026-08-06 (FAIL on 2026-08-10 re-run — see soak sections below) — with `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs. This matrix remains the TPS evidence for both choices.
 
 ## Thermal soak (2026-08-06, `THREADS=3` `ctx=2048`, single server)
 
@@ -99,7 +99,7 @@ Source: `benchmarks/raw/thermal_soak_20260806T133807Z.csv` — `THREADS=2 SOAK_M
 
 Same burst pattern as `THREADS=3`: the thread-matrix “76 °C after a single bench” reading did not survive sustained load. **`THREADS=2` at the default `ctx=2048` is measured and ruled out on this host** — but the `CTX=1024` re-soak below **passes**. The authoritative P_thermal decision still stays on the official eval laptop.
 
-## Thermal soak (2026-08-06, `THREADS=2` `ctx=1024`, single server) — **PASS**
+## Thermal soak (2026-08-06, `THREADS=2` `ctx=1024`, single server) — **PASS (superseded 2026-08-10)**
 
 Source: `benchmarks/raw/thermal_soak_20260806T213423Z.csv` — `THREADS=2 CTX=1024 SOAK_MINUTES=10 bash scripts/thermal_soak.sh`. 68 completions, http 100%, idle baseline 73 °C.
 
@@ -113,6 +113,19 @@ Source: `benchmarks/raw/thermal_soak_20260806T213423Z.csv` — `THREADS=2 CTX=10
 | Verdict | **PASS** — peak &lt; 85 °C |
 
 **Interpretation:** halving the context (`ctx=2048 → 1024`) removed the intermittent ≥ 85 °C bursts that failed both `THREADS=3` and `THREADS=2` at full context — the **first 10-min soak to pass on temperature alone on this laptop**. Note the margin is thin (peak 84.0 °C, 1 °C below the −10 threshold) and the burst appears early (peak at +139 s, then settles to 73 °C by the end). The former default (`THREADS=3`/`CTX=2048`) still fails on this host; the authoritative run stays on the official eval laptop.
+
+**⚠ Superseded (2026-08-10):** this PASS **no longer reproduces** — re-running the identical config (`THREADS=2`/`CTX=1024`, 10 min, single server) on the same laptop, even from a *cooler* 60 °C idle baseline, **FAILED**: mean **78.6 °C**, peak **89.0 °C** at +356 s, several samples ≥ 85 °C, http 100 % (see next section). The thin margin that produced the 2026-08-06 PASS is gone on this host today — treat P_thermal on the build laptop as **unverified (FAIL on re-run)** and rely on the official eval machine for the Gate verdict.
+
+## Thermal soak (2026-08-10, `THREADS=2` `ctx=1024`, re-run) — **FAIL — PASS no longer reproduces**
+
+Re-validation of the shipped default config (`THREADS=2`/`CTX=1024`, `SOAK_MINUTES=10`, single server) after the 2026-08-06 PASS. Run 1 started immediately after the thread matrix (hot baseline); Run 2 started from a cool 60 °C idle baseline.
+
+| Run | Source | Samples | Idle baseline | Temp mean | Temp peak | Samples ≥ 85 °C | HTTP | Verdict |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| 1 (hot start) | `thermal_soak_20260810T091737Z.csv` | 70 | ~81 °C (post-bench) | 80.3 °C | 98.0 °C (at +524 s) | many | 100 % | FAIL (skewed by residual heat) |
+| 2 (cold start) | `thermal_soak_20260810T093226Z.csv` | 69 | 60 °C | 78.6 °C | 89.0 °C (at +356 s) | several | 100 % | **FAIL** |
+
+**Interpretation:** the 2026-08-06 PASS (peak 84.0 °C, 0/68 ≥ 85 °C) **does not reproduce on this laptop as of 2026-08-10**. Even from a *cooler* idle baseline (60 °C vs 73 °C on the PASS run), the same config burst ≥ 85 °C repeatedly and peaked 89.0 °C — roughly a 5 °C upward shift in this host's thermal behaviour (ambient / machine-state change). The documented "thin margin" caveat was correct: the shipped default is now **FAIL on this host**. The authoritative P_thermal decision remains the official ADTC eval machine — run the soak there before Gate.
 
 ### Other soak attempts (kept for provenance — NOT authoritative)
 
@@ -131,13 +144,13 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 |---|---|
 | Peak RSS &lt; 5.5 GB | **Pass** |
 | TPS near 15 | **Pass / near** on smoke + matrix |
-| Thermal &lt; 85 °C (temperature-only — soak samples no throttle signal) | **Pass at shipped default `THREADS=2`/`CTX=1024`** on this laptop (peak 84.0 °C); `THREADS=3`/`CTX=2048` (peak 97 °C) and `THREADS=2`/`CTX=2048` (peak 93 °C) documented FAIL — the official eval laptop is the authoritative P_thermal run |
+| Thermal &lt; 85 °C (temperature-only — soak samples no throttle signal) | **PASS 2026-08-06 but FAIL on 2026-08-10 re-run** at shipped default `THREADS=2`/`CTX=1024` on this laptop (cold-start peak 89.0 °C, hot-start 98.0 °C — no longer reproducible); `THREADS=3`/`CTX=2048` (peak 97 °C) and `THREADS=2`/`CTX=2048` (peak 93 °C) documented FAIL — the official eval laptop is the authoritative P_thermal run |
 
 **M2 tooling: complete.** The measurement toolkit (profiler smoke, thread matrix, thermal soak) is shipped and reproducible.
 
-**Ship default (M5 decision, 2026-08-07):** `scripts/start_llama_server.sh` now ships **`THREADS=2`/`CTX=1024`** — the only config with a measured 10-min thermal soak **PASS** on this laptop (peak 84.0 °C, mean 75.7 °C, 0/68 samples ≥ 85 °C, http 100 %). Risk gate applied: *prefer thermal safety over TPS* (TPS 14.96 at `-t 2` vs 17.94 at `-t 3`). `THREADS=3`/`CTX=2048` remains available via env override for the official eval-machine run, which is still the authoritative P_thermal decision.
+**Ship default (M5 decision, 2026-08-07):** `scripts/start_llama_server.sh` now ships **`THREADS=2`/`CTX=1024`** — the only config with a measured 10-min thermal soak **PASS** on this laptop (peak 84.0 °C, mean 75.7 °C, 0/68 samples ≥ 85 °C, http 100 %). Risk gate applied: *prefer thermal safety over TPS* (TPS 14.96 at `-t 2` vs 17.94 at `-t 3`). `THREADS=3`/`CTX=2048` remains available via env override for the official eval-machine run, which is still the authoritative P_thermal decision. **Re-validation 2026-08-10: the PASS config no longer reproduces on this laptop (peak 89.0 °C, FAIL) — the thermal decision must come from the official eval machine.**
 
-**P_thermal (temperature-only): PASS at the shipped default `THREADS=2`/`CTX=1024` on this laptop** — peak 84.0 °C, mean 75.7 °C, 0/68 samples ≥ 85 °C (first 10-min soak to clear &lt;85 °C here on temperature alone; no throttle/frequency signal is sampled). The former default `THREADS=3`/`CTX=2048` (peak 97 °C) and `THREADS=2` at `CTX=2048` (peak 93 °C) still FAIL at full context and are documented below. Official Gate 1 scores use the ADTC eval machine — record that separately.
+**P_thermal (temperature-only): FAIL on 2026-08-10 re-run at the shipped default `THREADS=2`/`CTX=1024` on this laptop** — cold-start peak **89.0 °C** (mean 78.6 °C); the 2026-08-06 PASS (peak 84.0 °C, 0/68 ≥ 85 °C) **no longer reproduces on this host**. The former default `THREADS=3`/`CTX=2048` (peak 97 °C) and `THREADS=2` at `CTX=2048` (peak 93 °C) also FAIL at full context (documented above). Official Gate 1 scores use the ADTC eval machine — record that separately.
 
 ## Model lock (M3 — Path A)
 
@@ -148,7 +161,7 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 ## Still to run
 
 - [x] Re-soak at `THREADS=2` — **measured FAIL** at `ctx=2048` (peak 93 °C, 2026-08-06)  
-- [x] Re-soak at `CTX=1024` — **measured PASS** (peak 84.0 °C, 2026-08-06) — thermally-safe config exists on this laptop  
+- [x] Re-soak at `CTX=1024` — **measured PASS** 2026-08-06 (peak 84.0 °C) but **FAIL on 2026-08-10 re-run** (peak 89.0 °C) — no longer a thermally-safe config on this laptop  
 - [x] **Decide ship default** — **done 2026-08-07 (M5):** freeze `THREADS=2`/`CTX=1024` in `scripts/start_llama_server.sh`; documented above (thermal safety over TPS; `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs)  
 - [x] `bash scripts/run_profiler_smoke.sh --full` — done 2026-08-06; `accuracy` block is `[]` in participant mode by design (see note above)  
 - [x] 8 GB-class memory-capped proof — done 2026-08-06, `bash scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap; see section above)  
