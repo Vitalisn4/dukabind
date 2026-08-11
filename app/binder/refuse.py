@@ -42,6 +42,18 @@ def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
     )
 
 
+def refuse_credit_missing_outstanding(lang: str, name: str) -> BinderResult:
+    """Refuse when outstanding is NULL — never invent a balance."""
+    return BinderResult(
+        ok=False,
+        intent=Intent.CREDIT_CHECK,
+        lang=lang,
+        citation_rows=[],
+        refuse_reason="outstanding_null",
+        message=f"No outstanding balance on file for {name} — ask the owner.",
+    )
+
+
 def refuse_supplier_missing_balance(lang: str, name: str) -> BinderResult:
     """Refuse when balance_owed is NULL — never invent an amount."""
     return BinderResult(
@@ -91,10 +103,14 @@ def credit_decision(
         return refuse_not_found(lang, "quantity" if qty < 1 else "unit_price")
 
     limit = row["credit_limit"]
-    outstanding = int(row["outstanding"])
     if limit is None:
         return refuse_credit_missing_limit(lang, row["display_name"])
 
+    outstanding = row["outstanding"]
+    if outstanding is None:
+        return refuse_credit_missing_outstanding(lang, row["display_name"])
+
+    outstanding = int(outstanding)
     limit_i = int(limit)
     add = qty * unit_price
     projected = outstanding + add

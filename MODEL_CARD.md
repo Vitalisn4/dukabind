@@ -28,7 +28,7 @@
 ## Known limits
 
 - **English only (Path A).** French (a Cameroon official language) localisation and any `sw` track are post–Gate 1.
-- **Thermal on hot laptops:** on the build laptop (Intel i7-8650U) a 10-minute soak passes **&lt; 85 °C only at `THREADS=2`/`ctx=1024`** (peak 84.0 °C, 0/68 samples ≥ 85 °C, 2026-08-06); `THREADS=3`/`ctx=2048` and `THREADS=2`/`ctx=2048` **fail** on that host (peaks 97 °C / 93 °C). The authoritative P_thermal call is the official ADTC eval machine. Shipped default: `THREADS=2`/`ctx=1024` (documented in [`BENCHMARKS.md`](BENCHMARKS.md)).
+- **Thermal on hot laptops:** on the build laptop (Intel i7-8650U) a 10-minute soak passed **&lt; 85 °C at `THREADS=2`/`ctx=1024`** on 2026-08-06 (peak 84.0 °C, 0/68 samples ≥ 85 °C), but that **PASS no longer reproduces**: the identical config re-run on 2026-08-10 from a cooler 60 °C idle **FAILED** (mean 78.6 °C, peak **89.0 °C**, several samples ≥ 85 °C). `THREADS=3`/`ctx=2048` and `THREADS=2`/`ctx=2048` also fail on that host (peaks 97 °C / 93 °C). Treat P_thermal on the build laptop as **unverified (FAIL on 2026-08-10 re-run)**; the authoritative P_thermal call is the official ADTC eval machine. Shipped default: `THREADS=2`/`ctx=1024` (documented in [`BENCHMARKS.md`](BENCHMARKS.md)).
 - **Allowlist coverage:** the binder answers three intents (credit, supplier balance, stock) against the seeded ledgers. Unknown intents/entities refuse with `not_found` — by design, not a completeness claim.
 - **Accuracy measurement:** the profiler's participant-mode `accuracy` block is `[]` by design; official accuracy comes from ADTC audit mode on the eval machine. Held-out bind/refuse (T11) is measured separately by `evals/run_heldout.py` — see the [held-out report](evals/heldout/REPORT.md).
 
@@ -40,7 +40,7 @@
 | Generation TPS | 16.44 tok/s (profiler); up to 17.94 (llama-bench `-t 3`) | `BENCHMARKS.md` |
 | TTFT | 9026.84 ms | profiler `--full` |
 | 7.5 GiB-capped stack | PASS — cgroup peak 0.77 GiB, headroom 6.73 GiB | `scripts/ram_capped_proof.sh` |
-| Thermal soak (10 min) | PASS at `THREADS=2`/`ctx=1024`: mean 75.7 °C, peak 84.0 °C, 0/68 ≥ 85 °C | `BENCHMARKS.md` |
+| Thermal soak (10 min) | PASS 2026-08-06 at `THREADS=2`/`ctx=1024` (mean 75.7 °C, peak 84.0 °C, 0/68 ≥ 85 °C); **FAIL 2026-08-10 re-run (peak 89.0 °C) — no longer reproducible** | `BENCHMARKS.md` |
 
 Full tables, methodology, and the thread/context matrix: [`BENCHMARKS.md`](BENCHMARKS.md).
 

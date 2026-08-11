@@ -55,6 +55,78 @@ def test_credit_tchamba_missing_limit_refuses(db: sqlite3.Connection) -> None:
     assert "ask the owner" in r.message.lower()
 
 
+def test_credit_missing_outstanding_refuses() -> None:
+    """NULL outstanding must refuse (fail closed) — never crash or invent."""
+    from app.binder.refuse import credit_decision
+
+    r = credit_decision(
+        "en",
+        {
+            "display_name": "Marie-Claire Fotso",
+            "credit_limit": 8000,
+            "outstanding": None,
+        },
+        1,
+        720,
+    )
+    assert r.ok is False
+    assert r.approved is None
+    assert r.refuse_reason == "outstanding_null"
+    assert "ask the owner" in r.message.lower()
+
+
+def test_pipeline_refuses_null_outstanding_row(tmp_path: Path) -> None:
+    """End-to-end: a ledger row with NULL outstanding refuses, never crashes."""
+    path = tmp_path / "null_outstanding.sqlite"
+    conn = sqlite3.connect(str(path))
+    conn.row_factory = sqlite3.Row
+    conn.executescript(
+        """
+        CREATE TABLE customers (
+            customer_id     TEXT PRIMARY KEY,
+            display_name    TEXT NOT NULL,
+            credit_limit    INTEGER,
+            outstanding     INTEGER,
+            currency        TEXT NOT NULL DEFAULT 'XAF',
+            status          TEXT NOT NULL DEFAULT 'active',
+            updated_at      TEXT NOT NULL
+        );
+        CREATE TABLE skus (
+            sku_id      TEXT PRIMARY KEY,
+            name        TEXT NOT NULL,
+            unit_price  INTEGER NOT NULL CHECK (unit_price >= 0),
+            on_hand     INTEGER NOT NULL DEFAULT 0,
+            currency    TEXT NOT NULL DEFAULT 'XAF',
+            updated_at  TEXT NOT NULL
+        );
+        """
+    )
+    conn.execute(
+        "INSERT INTO customers VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (
+            "cust_fotso",
+            "Marie-Claire Fotso",
+            8000,
+            None,  # outstanding not on file
+            "XAF",
+            "active",
+            "2026-01-01T00:00:00Z",
+        ),
+    )
+    conn.execute(
+        "INSERT INTO skus VALUES (?, ?, ?, ?, ?, ?)",
+        ("sku_malt", "Caisse boisson malt 300ml", 720, 14, "XAF", "2026-01-01T00:00:00Z"),
+    )
+    conn.commit()
+
+    r = handle_ask(conn, "Can I give Marie-Claire three crates on credit?")
+    conn.close()
+    assert r.ok is False
+    assert r.approved is None
+    assert r.refuse_reason == "outstanding_null"
+    assert "ask the owner" in r.message.lower()
+
+
 def test_supplier_soca_null_balance_refuses(db: sqlite3.Connection) -> None:
     r = handle_ask(db, "How much do we owe SOCA Distribution Douala?")
     assert r.ok is False

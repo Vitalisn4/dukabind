@@ -218,7 +218,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `test_duka_b.py` | Second-shop generalization; NULL refusal; accent-insensitive asks; cross-shop non-leak; flip on `duka_b`; full held-out suite stays green |
 | `test_metadata.py` | Contest-claims guard: domain, `language_scope: ["en"]`, honest claims, exactly 2 ledger-grounded `test_prompts`, llama.cpp runtime |
 
-Run: `PYTHONPATH=. pytest tests/ -q` (expect **44 passed**).
+Run: `PYTHONPATH=. pytest tests/ -q` (expect **46 passed**).
 
 ### Binder offline proof (no model)
 
@@ -249,7 +249,7 @@ Only measured numbers are committed: the summary tables in `BENCHMARKS.md`, `REP
 
 ### 5.8 Continuous integration — `.github/workflows/ci.yml`
 
-Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (44 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → **held-out report freshness gate** (regenerates `evals/heldout/REPORT.md` via `--write-report` and fails if it drifts from the committed artifact; the daily `Generated:` date is excluded from the comparison) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
+Runs on every push/PR: `pip install -r requirements.txt` → `pytest` (46 tests) → `ruff` → `static_analysis.sh` gate (ruff + bandit + shellcheck) → held-out eval (31 checks) → **held-out report freshness gate** (regenerates `evals/heldout/REPORT.md` via `--write-report` and fails if it drifts from the committed artifact; the daily `Generated:` date is excluded from the comparison) → offline binder proof. Contest-claims drift is caught by `tests/test_metadata.py`.
 
 ---
 
