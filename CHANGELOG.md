@@ -7,7 +7,7 @@ up to the Gate 1 freeze; pre-1.0 versions are milestone snapshots.
 
 ## [1.0.0-gate1] - 2026-08-11
 
-**Freeze commit:** `fe59628` (branch `feature/dukabind-m6-freeze`, 2026-08-11)
+**Freeze commit:** `0000000000000000000000000000000000000000` *(filled after the review-fix commit)*
 
 Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product features added.
 
@@ -15,11 +15,10 @@ Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product featur
 
 - Demo assets for README and the submission: 5 numbered screenshots
   (`demo/screenshots/01…05`) and a 114 s demo video (`demo/demo.mp4`) rendered
-  from real CLI output by `scripts/render_demo_assets.py`; video
-  metadata/transcript (`demo/VIDEO.md`). The demo storyboard
-  (`demo/storyboard.md`) is kept **local-only** (gitignored) by design —
-  production planning, not a submission artifact.
-- `CHANGELOG.md` (this file) — freeze commit hash recorded below.
+  from real CLI output by `scripts/render_demo_assets.py`. The demo
+  storyboard and video transcript (`demo/VIDEO.md`) are kept **local-only**
+  (gitignored) by design — production notes, not submission artifacts.
+- `CHANGELOG.md` (this file) — freeze commit hash recorded above.
 - `docs/FREEZE_CHECKLIST.md` — gate-freeze checklist (T1–T3, T5, T8–T9, T11, T13).
 - `benchmarks/submission.json` — freeze snapshot of the measured adtc-profiler
   participant output (2026-08-11, `--skip-accuracy`; raw dumps stay gitignored).
@@ -27,7 +26,7 @@ Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product featur
 ### Changed
 
 - `benchmarks/submission.summary.md` — regenerated from the 2026-08-11 freeze
-  re-run: Peak RSS 1825.61 MB, Generation TPS 15.9 tok/s, TTFT 11576 ms,
+  re-run: Peak RSS 1821.11 MB, Generation TPS 15.67 tok/s, TTFT 10548.82 ms,
   core temp peak 100.0 °C / throttled (honest FAIL on this laptop).
 - `benchmarks/.gitignore` — explicit `!submission.json` exception for the
   committed freeze snapshot.

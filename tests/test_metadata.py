@@ -25,7 +25,7 @@ def test_domain_locked(meta: dict) -> None:
 
 
 def test_language_scope_is_english_only(meta: dict) -> None:
-    # Path A is locked: no Swahili or French claim at Gate 1.
+    # English-only at Gate 1; additional languages are a post-Gate-1 plan.
     assert meta["language_scope"] == ["en"]
 
 

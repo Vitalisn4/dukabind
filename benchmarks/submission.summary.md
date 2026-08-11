@@ -1,7 +1,7 @@
 # Profiler participant smoke — summary
 
-**Run:** 2026-08-11T20:18:53Z UTC
-**Command:** `bash scripts/run_profiler_smoke.sh`
+**Run:** 2026-08-11T21:15:42Z UTC
+**Command:** `bash scripts/run_profiler_smoke.sh` --skip-accuracy
 
 > Auto-generated from the latest profiler run. The authoritative, curated benchmark story is [`BENCHMARKS.md`](../BENCHMARKS.md).
 **Raw JSON:** `benchmarks/raw/submission.json` (gitignored)
@@ -10,10 +10,10 @@
 
 | Field | Value |
 |---|---|
-| Peak RSS | **1825.61 MB** |
-| Steady-state RSS | 1763.23 MB |
-| Generation TPS | **15.9 tok/s** |
-| First-token latency | 11576.15 ms |
+| Peak RSS | **1821.11 MB** |
+| Steady-state RSS | 1757.46 MB |
+| Generation TPS | **15.67 tok/s** |
+| First-token latency | 10548.82 ms |
 | CPU p99 | 98.5% |
 | Core temp peak | **100.0 °C** |
 | Throttled | **True** |

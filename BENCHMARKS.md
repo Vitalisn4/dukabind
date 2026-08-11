@@ -156,7 +156,7 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 
 - **Primary (locked):** Qwen2.5-1.5B-Instruct Q4_K_M (`model/qwen2.5-1.5b-instruct-q4_k_m.gguf`, sha256-pinned in `download_model.sh`). Evidence above: Peak RSS 1825.72 MB, 16.44 tok/s (profiler `--full`; llama-bench up to 17.94), TTFT ~9.0 s — clears the 5.5 GB self-limit with margin.
 - **T15 quant lock:** Q4_K_M 1.5B stays frozen unless T11 (answer accuracy) regresses against the held-out set with RSS margin; 3B Q4 only if T1–T3 stay green.
-- **Tiny Aya — skipped (Path A):** no Swahili track, so the Aya bake-off is out of scope for Gate 1. No Aya benchmark numbers are claimed or invented.
+- **Tiny Aya — skipped:** the Aya bake-off is out of scope for Gate 1. No Aya benchmark numbers are claimed or invented.
 
 ## Still to run
 

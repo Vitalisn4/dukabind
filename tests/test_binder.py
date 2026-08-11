@@ -163,9 +163,9 @@ def test_english_stock_stays_english(db: sqlite3.Connection) -> None:
     assert r.ok is True
 
 
-def test_swahili_ask_is_unknown_without_english_cues(db: sqlite3.Connection) -> None:
-    """Path A: no Swahili lexicon — pure SW asks do not route to credit."""
-    r = handle_ask(db, "Naweza kumpa Fotso deni kwa crate 3?")
+def test_non_english_ask_is_unknown_without_english_cues(db: sqlite3.Connection) -> None:
+    """English-only lexicon: a French credit ask does not route to credit."""
+    r = handle_ask(db, "Puis-je accorder un crédit à ce client ?")
     assert r.lang == "en"
     assert r.ok is False
     assert r.refuse_reason == "unknown_intent"

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Render DukaBind M6 demo assets from real CLI output (no hand-typed pixels).
+"""Render DukaBind M6 demo assets from real CLI output.
 
-This is a packaging-only tool: every line of text in the generated screenshots
-and the demo video comes from actually running the binder / offline proof /
-profiler summary on this machine. Nothing is fabricated.
+Every line of text in the generated screenshots and the demo video comes from
+actually running the binder, the offline proof, or the profiler summary on this
+machine — nothing is fabricated.
 
-Outputs (relative to the repo root):
+Outputs:
   demo/screenshots/01-credit-answer.png    credit bind answer (with citation rows)
   demo/screenshots/02-ledger-flip.png      the bind: one row edited -> answer changes
   demo/screenshots/03-refuse-null-field.png  fail-closed refusals (missing field)
@@ -13,7 +13,7 @@ Outputs (relative to the repo root):
   demo/screenshots/05-measured-numbers.png adtc-profiler participant summary
   demo/demo.mp4                            <=2 min demo video (H.264, captions)
 
-Run (after `python -m app.db.connection` has seeded the ledger):
+Run:
   source .venv/bin/activate
   PYTHONPATH=. python scripts/render_demo_assets.py
 
@@ -58,6 +58,7 @@ _font_cache: dict[tuple[str, int], ImageFont.FreeTypeFont] = {}
 
 
 def font(path: str, size: int) -> ImageFont.FreeTypeFont:
+    """Load a TrueType font, cached per (path, size)."""
     key = (path, size)
     if key not in _font_cache:
         _font_cache[key] = ImageFont.truetype(path, size)
@@ -66,6 +67,7 @@ def font(path: str, size: int) -> ImageFont.FreeTypeFont:
 
 # ------------------------------------------------------------------- runs
 def cli_ask(question: str) -> dict:
+    """Run the binder CLI and return its JSON result dict."""
     env = dict(os.environ, PYTHONPATH=".")
     py = sys.executable
     out = subprocess.run(
@@ -77,48 +79,44 @@ def cli_ask(question: str) -> dict:
 
 
 def seed_ledger() -> None:
+    """Re-seed the shop ledger so demo answers match the committed seed."""
     env = dict(os.environ, PYTHONPATH=".")
     subprocess.run([sys.executable, "-m", "app.db.connection"], check=True, env=env)
 
 
 def flip_ask(question: str) -> tuple[dict, dict]:
-    """Ask before and after a REAL one-row UPDATE inside one transaction.
+    """Ask the binder before and after a real one-row ledger UPDATE.
 
-    Mirrors scripts/offline_check.sh: BEGIN -> UPDATE credit_limit -> ask
-    -> ROLLBACK, so the seed is never left modified. Both answers are
-    genuinely produced by the binder against the edited ledger.
+    Mirrors scripts/offline_check.sh: BEGIN -> UPDATE credit_limit -> ask ->
+    ROLLBACK, so the seed is never left modified. Both answers are genuinely
+    produced by the binder against the edited ledger.
     """
     from app.binder.pipeline import handle_ask
     from app.db.connection import DEFAULT_DB, connect
 
-    path = Path(DEFAULT_DB)
-    conn = connect(path)  # writable for the flip demo only
+    conn = connect(Path(DEFAULT_DB))  # writable for the flip demo only
     try:
         before = handle_ask(conn, question)
-        conn.execute("BEGIN")
-        conn.execute(
+        cur = conn.execute(
             "UPDATE customers SET credit_limit = ? WHERE display_name = ?",
             (20000, "Marie-Claire Fotso"),
         )
+        if cur.rowcount != 1:
+            raise RuntimeError(
+                f"flip UPDATE matched {cur.rowcount} rows; expected exactly 1"
+            )
         after = handle_ask(conn, question)
-        conn.execute("ROLLBACK")
     finally:
+        conn.rollback()
         conn.close()
     return (
-        {
-            "ok": before.ok,
-            "approved": before.approved,
-            "message": before.message,
-        },
-        {
-            "ok": after.ok,
-            "approved": after.approved,
-            "message": after.message,
-        },
+        {"ok": before.ok, "approved": before.approved, "message": before.message},
+        {"ok": after.ok, "approved": after.approved, "message": after.message},
     )
 
 
 def run(cmd: list[str]) -> str:
+    """Run a shell command and return its stdout, raising on failure."""
     env = dict(os.environ, PYTHONPATH=".")
     out = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
     if out.returncode != 0:
@@ -145,12 +143,12 @@ def pretty_citation(citation_json: str, max_rows: int = 2) -> list[str]:
 
 # ---------------------------------------------------------------- styling
 def wrap_line(text: str, width_chars: int) -> list[str]:
+    """Split a long line into chunks of at most width_chars."""
     if len(text) <= width_chars:
         return [text]
     out = []
     while len(text) > width_chars:
-        cut = text[:width_chars]
-        out.append(cut)
+        out.append(text[:width_chars])
         text = text[width_chars:]
     out.append(text)
     return out
@@ -172,10 +170,10 @@ STYLE = {
 
 
 def style_json_line(line: str) -> list[tuple[str, str]]:
-    """Very light JSON colouring: key / string / number / literal."""
+    """Light JSON colouring: key / string / number / literal."""
     m = re.match(r'^(\s*)"([^"]+)"\s*:\s*(.*)$', line)
     if not m:
-        if re.match(r'^\s*[}\]]', line):
+        if re.match(r"^\s*[}\]]", line):
             return [(line, "plain")]
         return [(line, "str")]
     indent, key, rest = m.group(1), m.group(2), m.group(3)
@@ -192,6 +190,7 @@ def style_json_line(line: str) -> list[tuple[str, str]]:
 
 
 def line_parts(text: str, style: str) -> list[tuple[str, str]]:
+    """Split a line into (text, style) spans for drawing."""
     if style == "json":
         return style_json_line(text)
     return [(text, style)]
@@ -207,11 +206,11 @@ def draw_window(
     title: str,
     radius: int = 12,
 ) -> None:
+    """Draw a terminal window (title bar, traffic lights, border)."""
     draw.rounded_rectangle([x, y, x + w, y + h], radius=radius, fill=BG, outline=BORDER)
     draw.rounded_rectangle(
         [x, y, x + w, y + 34], radius=radius, fill=TITLEBAR, outline=TITLEBAR
     )
-    # traffic lights
     for i, col in enumerate((RED, ORANGE, GREEN)):
         cx = x + 18 + i * 18
         draw.ellipse([cx - 6, y + 17 - 6, cx + 6, y + 17 + 6], fill=col)
@@ -227,7 +226,7 @@ def render_scene(
     font_size: int = 18,
     pad: int = 28,
 ) -> Image.Image:
-    """lines: list of (text, style). Renders a terminal window on a dark canvas."""
+    """Render (text, style) lines as a terminal window on a dark canvas."""
     img = Image.new("RGB", (width, height), (14, 15, 24))
     draw = ImageDraw.Draw(img)
     f = font(MONO, font_size)
@@ -235,26 +234,22 @@ def render_scene(
     line_h = font_size + 10
     max_chars = (width - 2 * pad - 40) // char_w
 
-    # wrap lines to fit
     flat: list[tuple[str, str]] = []
     for text, style in lines:
         if len(text) > max_chars:
-            for chunk in wrap_line(text, max_chars):
-                flat.append((chunk, style))
+            flat.extend((chunk, style) for chunk in wrap_line(text, max_chars))
         else:
             flat.append((text, style))
 
-    win_h = 34 + 26 + line_h * len(flat) + 22
-    win_h = min(win_h, height - 2 * pad)
+    win_h = min(34 + 26 + line_h * len(flat) + 22, height - 2 * pad)
     win_w = width - 2 * pad
     wx, wy = pad, pad
     draw_window(draw, wx, wy, win_w, win_h, title)
 
     ty = wy + 34 + 14
     for text, style in flat:
-        parts = line_parts(text, style)
         tx = wx + 22
-        for part, pstyle in parts:
+        for part, pstyle in line_parts(text, style):
             draw.text((tx, ty), part, font=f, fill=STYLE[pstyle])
             tx += int(f.getlength(part))
         ty += line_h
@@ -264,6 +259,7 @@ def render_scene(
 
 
 def save(img: Image.Image, path: Path, scale: int = 2) -> None:
+    """Save an image at 2x scale for crisp rendering on GitHub."""
     path.parent.mkdir(parents=True, exist_ok=True)
     if scale != 1:
         img = img.resize((img.width * scale, img.height * scale), Image.LANCZOS)
@@ -272,22 +268,19 @@ def save(img: Image.Image, path: Path, scale: int = 2) -> None:
 
 
 # ------------------------------------------------------------ content maps
-def boolish(v) -> str:
-    return str(v).lower() if isinstance(v, bool) else str(v)
-
-
 def credit_lines() -> list[tuple[str, str]]:
+    """Terminal lines for the credit bind answer screenshot/scene."""
     d = cli_ask("Can I give Marie-Claire three crates on credit?")
     msg = d["message"].replace("\u2014", "—").replace("\u00d7", "×")
     rows = [
         ("$ python -m app.cli \"Can I give Marie-Claire three crates on credit?\"", "prompt"),
         ("", "plain"),
         ("{", "plain"),
-        (f'  "ok" : {boolish(d["ok"])},', "json"),
-        (f'  "approved" : {boolish(d["approved"])},', "json"),
-        (f'  "intent" : "{d["intent"]}",', "json"),
-        ('  "message" : "' + msg + '",', "json"),
-        (f'  "refuse_reason" : {d["refuse_reason"]},', "json"),
+        (f'  "ok" : {json.dumps(d["ok"])},', "json"),
+        (f'  "approved" : {json.dumps(d["approved"])},', "json"),
+        (f'  "intent" : {json.dumps(d["intent"])},', "json"),
+        ('  "message" : ' + json.dumps(msg) + ",", "json"),
+        (f'  "refuse_reason" : {json.dumps(d["refuse_reason"])},', "json"),
         ('  "citation_json" :', "plain"),
     ]
     rows += [(l, "json") for l in pretty_citation(d["citation_json"])]
@@ -297,16 +290,17 @@ def credit_lines() -> list[tuple[str, str]]:
 
 
 def flip_lines() -> list[tuple[str, str]]:
+    """Terminal lines for the ledger-flip screenshot/scene (real UPDATE)."""
     before, after = flip_ask("Can I give Fotso 3 crates on credit?")
     b = before["message"].replace("\u2014", "—").replace("\u00d7", "×")
     a = after["message"].replace("\u2014", "—").replace("\u00d7", "×")
     before_json = (
-        f'{{ "ok": {boolish(before["ok"])}, "approved": {boolish(before["approved"])}, '
-        f'"message": "{b}" }}'
+        f'{{ "ok": {json.dumps(before["ok"])}, "approved": {json.dumps(before["approved"])}, '
+        f'"message": {json.dumps(b)} }}'
     )
     after_json = (
-        f'{{ "ok": {boolish(after["ok"])}, "approved": {boolish(after["approved"])}, '
-        f'"message": "{a}" }}'
+        f'{{ "ok": {json.dumps(after["ok"])}, "approved": {json.dumps(after["approved"])}, '
+        f'"message": {json.dumps(a)} }}'
     )
     return [
         ("# flip one ledger row inside a single transaction (rolled back after):", "dim"),
@@ -324,24 +318,26 @@ def flip_lines() -> list[tuple[str, str]]:
 
 
 def refuse_lines() -> list[tuple[str, str]]:
+    """Terminal lines for the fail-closed refusal screenshot/scene."""
     soca = cli_ask("How much do we owe SOCA Distribution Douala?")
     s = soca["message"].replace("\u2014", "—")
     esther = cli_ask("Can I give Esther credit for 1 crate?")
     e = esther["message"].replace("\u2014", "—")
     return [
         ("$ python -m app.cli \"How much do we owe SOCA Distribution Douala?\"", "prompt"),
-        (f'{{ "ok": {boolish(soca["ok"])}, "refuse_reason": "{soca["refuse_reason"]}",', "json"),
-        ('  "message": "' + s + '" }', "json"),
+        (f'{{ "ok": {json.dumps(soca["ok"])}, "refuse_reason": {json.dumps(soca["refuse_reason"])},', "json"),
+        ('  "message": ' + json.dumps(s) + " }", "json"),
         ("", "plain"),
         ("$ python -m app.cli \"Can I give Esther credit for 1 crate?\"", "prompt"),
-        (f'{{ "ok": {boolish(esther["ok"])}, "refuse_reason": "{esther["refuse_reason"]}",', "json"),
-        ('  "message": "' + e + '" }', "json"),
+        (f'{{ "ok": {json.dumps(esther["ok"])}, "refuse_reason": {json.dumps(esther["refuse_reason"])},', "json"),
+        ('  "message": ' + json.dumps(e) + " }", "json"),
         ("", "plain"),
         ("→ missing field → hard refusal, named field, no invented figure.", "dim"),
     ]
 
 
 def _offline_style(ln: str) -> str:
+    """Map an offline_check output line to a display style."""
     if ln.startswith(
         ("credit over-limit", "soca refuse", "bonaberi balance",
          "stock soda", "esther null limit", "ledger flip", "PASS")
@@ -353,6 +349,7 @@ def _offline_style(ln: str) -> str:
 
 
 def offline_lines() -> list[tuple[str, str]]:
+    """Full offline_check.sh output for the screenshot."""
     out = run(["bash", "scripts/offline_check.sh"])
     lines: list[tuple[str, str]] = [("$ bash scripts/offline_check.sh", "prompt")]
     for ln in out.splitlines():
@@ -389,6 +386,7 @@ def measured_stats() -> dict[str, str]:
 
 
 def measured_lines() -> list[tuple[str, str]]:
+    """Terminal lines showing the measured profiler numbers."""
     m = measured_stats()
     if not m:
         return [("benchmarks/submission.summary.md missing", "fail")]
@@ -415,6 +413,7 @@ def measured_lines() -> list[tuple[str, str]]:
 
 # ----------------------------------------------------------------- screens
 def screenshots() -> None:
+    """Render the five numbered screenshots into demo/screenshots/."""
     shots = [
         ("01-credit-answer", credit_lines, "dukabind — credit bind answer (real output)"),
         ("02-ledger-flip", flip_lines, "dukabind — the bind: edit a row, answer changes"),
@@ -468,7 +467,7 @@ SCENES = [
         "dur": 14.0,
     },
     {
-        "caption": "github.com/Vitalisn4/dukabind · English (Path A) · Cameroon MSME offline use-case",
+        "caption": "github.com/Vitalisn4/dukabind · English · Cameroon MSME offline use-case",
         "kind": "title",
         "title": "DukaBind — offline ledger binder",
         "dur": 6.0,
@@ -477,8 +476,8 @@ SCENES = [
 
 
 def draw_caption(draw: ImageDraw.ImageDraw, text: str, w: int, h: int) -> None:
+    """Draw a wrapped caption box at the bottom of a video frame."""
     f = font(SANS_B, 24)
-    # wrap the caption so it never overflows the frame width
     max_w = w - 80
     words = text.split()
     wrapped: list[str] = []
@@ -506,6 +505,7 @@ def draw_caption(draw: ImageDraw.ImageDraw, text: str, w: int, h: int) -> None:
 def render_video_frame(
     scene: dict, progress: float, out_dir: Path, idx: int
 ) -> None:
+    """Render one video frame: title card, or a terminal scene at `progress`."""
     img = Image.new("RGB", (VIDEO_W, VIDEO_H), (14, 15, 24))
     draw = ImageDraw.Draw(img)
     caption = scene.get("caption", "")
@@ -517,7 +517,7 @@ def render_video_frame(
         draw.text(((VIDEO_W - draw.textlength(title, font=f_big)) // 2, 220), title, font=f_big, fill=WHITE)
         sub = "ADTC 2026 · Corporate / Enterprise · llama.cpp + GGUF · Qwen2.5-1.5B Q4_K_M"
         draw.text(((VIDEO_W - draw.textlength(sub, font=f_sub)) // 2, 320), sub, font=f_sub, fill=BLUE)
-        tag = "no cloud · no invented balances · English (Path A)"
+        tag = "no cloud · no invented balances · English"
         draw.text(((VIDEO_W - draw.textlength(tag, font=f_small)) // 2, 380), tag, font=f_small, fill=DIM)
     else:
         caption = scene["caption"]
@@ -531,11 +531,9 @@ def render_video_frame(
                 "on 2026-08-10 re-run — authoritative P_thermal = eval machine."
             )
         lines = scene.get("_lines") or scene["lines"]()
-        # reveal lines progressively across the scene duration
         n_visible = int(progress * (len(lines) + 2))
         visible = lines[: max(0, n_visible)]
         term_h = VIDEO_H - 120
-        # cap how many lines fit inside the window so the final line is never cut
         line_h = 27
         max_fit = (term_h - 34 - 26 - 22 - 20) // line_h
         visible = visible[:max_fit]
@@ -546,15 +544,11 @@ def render_video_frame(
     img.save(out_dir / f"frame_{idx:05d}.png")
 
 
-def video() -> None:
-    import shutil
-    import tempfile
-
-    frames_dir = Path(tempfile.mkdtemp(prefix="dukabind_frames_"))
+def _render_video(frames_dir: Path) -> None:
+    """Render all frames into frames_dir and encode demo/demo.mp4 with ffmpeg."""
     total = int(sum(s["dur"] for s in SCENES) * FPS)
     print(f"rendering {total} frames at {FPS} fps")
-    # run the real commands ONCE per scene (the output is identical across
-    # frames); the ledger flip happens in a single rolled-back transaction
+    # run the real commands once per scene; the ledger flip is one rolled-back transaction
     for scene in SCENES:
         if scene["kind"] == "term":
             scene["_lines"] = scene["lines"]()
@@ -580,12 +574,24 @@ def video() -> None:
         capture_output=True, text=True, check=True,
     ).stdout.strip()
     print(f"wrote {mp4} (duration {dur}s)")
-    shutil.rmtree(frames_dir, ignore_errors=True)
+
+
+def video() -> None:
+    """Render the demo video, cleaning up the temporary frame directory."""
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="dukabind_frames_") as tmp:
+        _render_video(Path(tmp))
 
 
 def main() -> None:
-    if not ImageFont.truetype:
-        raise SystemExit("font load failed")
+    """Render all demo assets after checking prerequisites."""
+    missing = [p for p in (MONO, SANS, SANS_B) if not Path(p).exists()]
+    if missing:
+        raise SystemExit(
+            "missing DejaVu font files: " + ", ".join(missing)
+            + " (install fonts-dejavu-core, or adjust FONT_DIR)"
+        )
     seed_ledger()
     screenshots()
     video()
