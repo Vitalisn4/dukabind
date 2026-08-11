@@ -33,7 +33,9 @@ def assert_loopback_http(url: str) -> None:
     """Require exact http://127.0.0.1 with no credentials (control C5)."""
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme != "http":
-        raise LlamaServerError(f"Only http://127.0.0.1 is allowed, got scheme={parsed.scheme!r}")
+        raise LlamaServerError(
+            f"Only http://127.0.0.1 is allowed, got scheme={parsed.scheme!r}"
+        )
     if parsed.hostname != "127.0.0.1":
         raise LlamaServerError(
             f"Only hostname 127.0.0.1 is allowed, got {parsed.hostname!r}"
@@ -93,7 +95,9 @@ def chat_completion(
     try:
         return str(payload["choices"][0]["message"]["content"]).strip()
     except (KeyError, IndexError, TypeError) as exc:
-        raise LlamaServerError(f"Unexpected llama-server response: {payload!r}") from exc
+        raise LlamaServerError(
+            f"Unexpected llama-server response: {payload!r}"
+        ) from exc
 
 
 def health(base_url: str = DEFAULT_BASE, timeout_s: float = 2.0) -> bool:

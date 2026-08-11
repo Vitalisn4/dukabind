@@ -6,8 +6,6 @@
 
 **What we are building:** offline **English** shop assistant for African MSME counters — allowlisted SQL on Marché Akwa Viviane (Douala, XAF); hard refuse on missing money fields; optional local llama.cpp narration; binder `message` authoritative.
 
-Implementation schedule (local): [`ADTC-2026-Build-Kickoff.md`](./ADTC-2026-Build-Kickoff.md) · [`ADTC-2026-ROADMAP.md`](./ADTC-2026-ROADMAP.md) · [`PROGRESS.md`](./PROGRESS.md).
-
 This guide maps the shipped product: what each file does, how a staff question becomes an answer, which commands to run, and how the Marché Akwa Viviane ledger is structured.
 
 ---
@@ -64,7 +62,7 @@ Staff question (English)
 | `ok` | `true` when the binder returned a grounded answer (including credit Yes/No); `false` on refuse |
 | `approved` | Credit only: `true` within limit, `false` over limit; `null` for non-credit / refuse |
 | `intent` | `credit_check` · `supplier_balance` · `stock_check` · `unknown` |
-| `lang` | `en` (Gate 1 Path A — English only) |
+| `lang` | `en` (English only) |
 | `message` | **Authoritative** cashier string from the binder |
 | `refuse_reason` | e.g. `balance_owed_null`, `credit_limit_null`, `not_found` |
 | `citation_json` | Compact JSON of ledger rows |
@@ -145,7 +143,7 @@ A second, **fully disjoint** shop (Yaoundé, XAF) proves answers bind to the liv
 | `metadata.json` | Team, domain `corporate_enterprise`, model, exactly two `test_prompts`, claims |
 | `download_model.sh` | Idempotent GGUF download + sha256 check (weights never in git) |
 | `REPORT.md` | Gate 1 technical writeup |
-| `MODEL_CARD.md` | Qwen2.5-1.5B Q4_K_M — intended use, limits, Path A language honesty, run instructions |
+| `MODEL_CARD.md` | Qwen2.5-1.5B Q4_K_M — intended use, limits, language honesty, run instructions |
 | `evals/heldout/REPORT.md` | Committed held-out evidence report (T11, flips, both fixtures; regenerated via `--write-report`) |
 | `LICENSE` / `NOTICE` | GPL-3.0 application code; model weights stay upstream |
 | `.gitignore` | Ignores `*.gguf`, local strategy docs, venvs, live `*.sqlite` |
@@ -342,7 +340,7 @@ Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 | Held-out evidence report + `MODEL_CARD.md` (M5, 2026-08-07) | |
 | T13 submission prompts frozen in `metadata.json` (disjoint from held-out) | |
 | Ship default `THREADS=2`/`CTX=1024` (2026-08-06 thermal PASS config, M5 decision — no longer thermally safe on the build laptop after the 2026-08-10 re-run) | |
-| Model lock (M3): Qwen2.5-1.5B Q4_K_M; T15 quant lock; Aya skipped (Path A) | |
+| Model lock (M3): Qwen2.5-1.5B Q4_K_M; T15 quant lock; Aya skipped | |
 
 ---
 
@@ -369,14 +367,14 @@ When you change behaviour, update this file in the **same** change set:
 | Date | Change |
 |---|---|
 | 2026-08-10 | Thermal re-validation: shipped default `THREADS=2`/`CTX=1024` 10-min soak **FAIL** on build laptop (cold-start peak 89.0 °C, hot-start 98.0 °C) — the 2026-08-06 PASS no longer reproduces; authoritative P_thermal stays on the official eval machine |
-| 2026-08-07 | M5 evidence pack: `MODEL_CARD.md`; committed held-out report (`evals/heldout/REPORT.md` via `--write-report`); T13-disjoint `tp_001`/`tp_002` in metadata.json; ship default frozen `THREADS=2`/`CTX=1024` in `start_llama_server.sh` (+ soak/proof scripts); REPORT/BENCHMARKS/PROGRESS/Kickoff/Roadmap/Compliance aligned to measured reality |
+| 2026-08-07 | M5 evidence pack: `MODEL_CARD.md`; committed held-out report (`evals/heldout/REPORT.md` via `--write-report`); T13-disjoint `tp_001`/`tp_002` in metadata.json; ship default frozen `THREADS=2`/`CTX=1024` in `start_llama_server.sh` (+ soak/proof scripts); REPORT/BENCHMARKS aligned to measured reality |
 | 2026-08-06 | 8 GB-class proof: `scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap, headroom 6.73 GiB); definitive `--full` profiler run (Peak RSS 1825.72 MB, 16.44 tok/s, TTFT 9026.84 ms, `accuracy: []` by participant-mode design) |
 | 2026-08-06 | Thermal: `THREADS=2`/`ctx=1024` 10-min soak **PASS** on build laptop (mean 75.7 °C / peak 84.0 °C / 0 ≥ 85 °C); `THREADS=3` and `THREADS=2`@`ctx=2048` documented FAIL; eval laptop still decides P_thermal |
 | 2026-08-06 | CI: `.github/workflows/ci.yml` — pytest + ruff + static-analysis gate + held-out eval + offline binder proof + metadata validation on every push/PR |
 | 2026-08-06 | Security hardening: qty-vs-amount parsing, accent-insensitive aliases, injection-battery tests; `scripts/static_analysis.sh` gate (ruff + bandit + shellcheck) |
 | 2026-08-06 | EN held-out + `duka_b`: second shop fixture, 28-prompt offline eval (`evals/run_heldout.py`), cross-shop non-leak + flip proofs; M3 Qwen lock note |
 | 2026-08-06 | M2 bench completion: thread matrix + thermal soak scripts, `THREADS=3` freeze, `BENCHMARKS.md` measured tables (soak **FAIL**: mean 78 °C / peak 97 °C on build laptop) |
-| 2026-08-06 | Path A framing; link Kickoff/Roadmap/Progress; M2 thermal honesty |
+| 2026-08-06 | English-only framing; M2 thermal honesty |
 | 2026-07-26 | Qualify narration wording; binder message authoritative |
 | 2026-07-26 | Professional public rewrite; Africa-wide framing; dual-venv clarity |
 | 2026-07-25 | Initial Gate 1 walkthrough |

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Thread bake-off for Gate 1 / M2 (Phase 6 §1.1).
+# Thread bake-off for Gate 1.
 #
 # Runs llama-bench at -t 2,3,4,6,8 and samples package/core temp after each setting.
 # Writes JSONL + markdown under benchmarks/raw/ (gitignored).

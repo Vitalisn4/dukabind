@@ -1,7 +1,7 @@
 # Held-out evaluation report — DukaBind
 
-**Generated:** 2026-08-07 by `evals/run_heldout.py --write-report` (measured run — numbers recomputed, never hand-edited)  
-**Set:** `evals/heldout/prompts.json` — frozen 2026-08-06, Path A English only  
+**Generated:** 2026-08-11 by `evals/run_heldout.py --write-report` (measured run — numbers recomputed, never hand-edited)  
+**Set:** `evals/heldout/prompts.json` — frozen 2026-08-06, English only  
 **Command:** `PYTHONPATH=. .venv/bin/python evals/run_heldout.py`  
 **Fixtures:** Marché Akwa Viviane (`marche_akwa`) and Marché Nkolmébé (`duka_b`) — two disjoint ledgers
 

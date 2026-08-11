@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Participant-mode adtc-profiler smoke (Gate 1 / M2).
+# Participant-mode adtc-profiler smoke (Gate 1).
 #
 # Requires:
 #   - .venv311 with adtc-profiler installed

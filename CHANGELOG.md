@@ -15,9 +15,7 @@ Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product featur
 
 - Demo assets for README and the submission: 5 numbered screenshots
   (`demo/screenshots/01…05`) and a 114 s demo video (`demo/demo.mp4`) rendered
-  from real CLI output by `scripts/render_demo_assets.py`. The demo
-  storyboard and video transcript (`demo/VIDEO.md`) are kept **local-only**
-  (gitignored) by design — production notes, not submission artifacts.
+  from real CLI output by `scripts/render_demo_assets.py`.
 - `CHANGELOG.md` (this file) — freeze commit hash recorded above.
 - `docs/FREEZE_CHECKLIST.md` — gate-freeze checklist (T1–T3, T5, T8–T9, T11, T13).
 - `benchmarks/submission.json` — freeze snapshot of the measured adtc-profiler
@@ -31,9 +29,7 @@ Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product featur
 - `benchmarks/.gitignore` — explicit `!submission.json` exception for the
   committed freeze snapshot.
 - Docs: `README.md` (Demo section), `REPORT.md` (freeze re-run line),
-  `docs/CODE_WALKTHROUGH.md` (renderer row). Local-only strategy docs
-  (`docs/PROGRESS.md`, Kickoff, Roadmap, COMPLIANCE_CHECKLIST — gitignored
-  by design) updated on disk: M6 done, thermal honesty carried through.
+  `docs/CODE_WALKTHROUGH.md` (renderer row).
 
 ### Fixed
 

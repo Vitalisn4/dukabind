@@ -15,7 +15,9 @@ SEED = Path(__file__).with_name("seed.sql")
 SEED_DUKA_B = Path(__file__).with_name("seed_duka_b.sql")
 
 
-def connect(db_path: Path | None = None, *, readonly: bool = False) -> sqlite3.Connection:
+def connect(
+    db_path: Path | None = None, *, readonly: bool = False
+) -> sqlite3.Connection:
     """Open the ledger with row access by name, foreign keys, and WAL.
 
     Ask paths should use ``readonly=True`` so the binder cannot mutate the file.

@@ -2,9 +2,7 @@
 
 **Status:** Living — update only from measured `adtc-profiler` / `llama-bench` / soak output  
 **Last updated:** 2026-08-10  
-**Product:** Path A English offline ledger binder · Qwen2.5-1.5B Q4_K_M · participant laptop Intel i7-8650U  
-
-**Schedule docs:** [`docs/ADTC-2026-Build-Kickoff.md`](docs/ADTC-2026-Build-Kickoff.md) · [`docs/ADTC-2026-ROADMAP.md`](docs/ADTC-2026-ROADMAP.md) · [`docs/PROGRESS.md`](docs/PROGRESS.md)
+**Product:** English offline ledger binder · Qwen2.5-1.5B Q4_K_M · participant laptop Intel i7-8650U  
 
 ## How to reproduce
 
@@ -21,7 +19,7 @@ THREADS=3 CTX=2048 bash scripts/ram_capped_proof.sh   # 8 GB-class proof; envs p
 
 ## Participant smoke (2026-08-06, `--full` — definitive run)
 
-Source: `benchmarks/raw/submission.json` → see also `benchmarks/submission.summary.md`.
+Source: committed freeze snapshot `benchmarks/submission.json` → see also `benchmarks/submission.summary.md`.
 
 | Metric | Measured |
 |---|---|
@@ -152,7 +150,7 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 
 **P_thermal (temperature-only): FAIL on 2026-08-10 re-run at the shipped default `THREADS=2`/`CTX=1024` on this laptop** — cold-start peak **89.0 °C** (mean 78.6 °C); the 2026-08-06 PASS (peak 84.0 °C, 0/68 ≥ 85 °C) **no longer reproduces on this host**. The former default `THREADS=3`/`CTX=2048` (peak 97 °C) and `THREADS=2` at `CTX=2048` (peak 93 °C) also FAIL at full context (documented above). Official Gate 1 scores use the ADTC eval machine — record that separately.
 
-## Model lock (M3 — Path A)
+## Model lock (M3)
 
 - **Primary (locked):** Qwen2.5-1.5B-Instruct Q4_K_M (`model/qwen2.5-1.5b-instruct-q4_k_m.gguf`, sha256-pinned in `download_model.sh`). Evidence above: Peak RSS 1825.72 MB, 16.44 tok/s (profiler `--full`; llama-bench up to 17.94), TTFT ~9.0 s — clears the 5.5 GB self-limit with margin.
 - **T15 quant lock:** Q4_K_M 1.5B stays frozen unless T11 (answer accuracy) regresses against the held-out set with RSS margin; 3B Q4 only if T1–T3 stay green.

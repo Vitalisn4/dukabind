@@ -11,7 +11,7 @@ This document is written for an **auditor or judge**, not for feature contributo
 | Product | Offline English fail-closed SQLite ledger binder + optional local llama.cpp narration |
 | Domain / runtime | `corporate_enterprise` · llama.cpp + GGUF only |
 | Model | Qwen2.5-1.5B-Instruct Q4_K_M (pinned GGUF + sha256 in `download_model.sh`) |
-| Ship default | `THREADS=2` / `CTX=1024` (thermal-safety freeze, M5) |
+| Ship default | `THREADS=2` / `CTX=1024` (thermal-safety freeze) |
 | Reference commit | [`CHANGELOG.md`](CHANGELOG.md) — `[1.0.0-gate1]`, tag `v1.0.0-gate1` |
 
 ---

@@ -1,7 +1,7 @@
 """Fail-closed refuse rules (control C4).
 
 If a required field is NULL/missing, we refuse — the LLM must not invent amounts.
-Cashier messages are English (Gate 1 Path A).
+Cashier messages are English (Gate 1).
 """
 
 from __future__ import annotations

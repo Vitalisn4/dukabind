@@ -2,7 +2,7 @@
 
 Citation JSON is language-neutral; the model only rewrites the binder decision
 and must not introduce figures absent from LEDGER_JSON.
-Gate 1 narration prompts are English only (Path A).
+Gate 1 narration prompts are English only.
 """
 
 from __future__ import annotations

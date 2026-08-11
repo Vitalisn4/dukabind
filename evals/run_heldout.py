@@ -41,8 +41,10 @@ FLIP_CHECKS = [
     (
         "marche_akwa",
         "Can I give Marie-Claire three crates on credit?",
-        ("UPDATE customers SET credit_limit = 20000 "
-         "WHERE display_name = 'Marie-Claire Fotso'"),
+        (
+            "UPDATE customers SET credit_limit = 20000 "
+            "WHERE display_name = 'Marie-Claire Fotso'"
+        ),
         "Yes",
     ),
     (
@@ -194,7 +196,9 @@ def _summary_table(details: dict[str, Any]) -> list[list[Any]]:
     for name in sorted(categories):
         ok = sum(categories[name])
         rows.append([name, f"{ok}/{len(categories[name])}"])
-    rows.append(["**All prompts**", f"{sum(1 for p in prompts if p['ok'])}/{len(prompts)}"])
+    rows.append(
+        ["**All prompts**", f"{sum(1 for p in prompts if p['ok'])}/{len(prompts)}"]
+    )
     rows.append(["", ""])
     for name in sorted(fixtures):
         ok = sum(fixtures[name])
@@ -225,7 +229,7 @@ def _write_report_text(
     return f"""# Held-out evaluation report — DukaBind
 
 **Generated:** {generated} by `evals/run_heldout.py --write-report` (measured run — numbers recomputed, never hand-edited)  
-**Set:** `evals/heldout/prompts.json` — frozen 2026-08-06, Path A English only  
+**Set:** `evals/heldout/prompts.json` — frozen 2026-08-06, English only  
 **Command:** `PYTHONPATH=. .venv/bin/python evals/run_heldout.py`  
 **Fixtures:** Marché Akwa Viviane (`marche_akwa`) and Marché Nkolmébé (`duka_b`) — two disjoint ledgers
 
@@ -234,8 +238,8 @@ def _write_report_text(
 | Metric | Result |
 |---|---|
 | T11 held-out bind/refuse | {correct}/{n_prompts} (**{t11:.1f}%**) — target ≥ 90 % |
-| Ledger-flip proofs | {len(details['flips']) - flip_fail}/{len(details['flips'])} |
-| Total checks | {n_prompts + len(details['flips'])}, **{prompt_fail + flip_fail} failures** |
+| Ledger-flip proofs | {len(details["flips"]) - flip_fail}/{len(details["flips"])} |
+| Total checks | {n_prompts + len(details["flips"])}, **{prompt_fail + flip_fail} failures** |
 
 ## Per category / fixture
 

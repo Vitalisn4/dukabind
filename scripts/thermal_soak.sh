@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sustained generation thermal soak (Phase 6 §2.4 / M2 Day 3).
+# Sustained generation thermal soak.
 #
 # Starts llama-server with frozen THREADS/CTX defaults, runs repeated
 # completions, samples package/core temp every SAMPLE_SECS, writes a CSV log.
