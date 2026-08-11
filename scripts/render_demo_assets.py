@@ -32,7 +32,6 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 REPO = Path(__file__).resolve().parent.parent
-os.chdir(REPO)
 
 # ---------------------------------------------------------------- palette
 BG        = (26, 27, 38)      # #1a1b26
@@ -66,12 +65,16 @@ def font(path: str, size: int) -> ImageFont.FreeTypeFont:
 
 
 # ------------------------------------------------------------------- runs
+def _env() -> dict:
+    """Environment for subprocess runs: repo-rooted PYTHONPATH."""
+    return dict(os.environ, PYTHONPATH=str(REPO))
+
+
 def cli_ask(question: str) -> dict:
     """Run the binder CLI and return its JSON result dict."""
-    env = dict(os.environ, PYTHONPATH=".")
-    py = sys.executable
     out = subprocess.run(
-        [py, "-m", "app.cli", question], capture_output=True, text=True, env=env, check=False
+        [sys.executable, "-m", "app.cli", question],
+        capture_output=True, text=True, env=_env(), cwd=str(REPO), check=False,
     )
     if out.returncode != 0:
         raise RuntimeError(f"cli failed for {question!r}: {out.stderr}")
@@ -80,8 +83,10 @@ def cli_ask(question: str) -> dict:
 
 def seed_ledger() -> None:
     """Re-seed the shop ledger so demo answers match the committed seed."""
-    env = dict(os.environ, PYTHONPATH=".")
-    subprocess.run([sys.executable, "-m", "app.db.connection"], check=True, env=env)
+    subprocess.run(
+        [sys.executable, "-m", "app.db.connection"],
+        check=True, env=_env(), cwd=str(REPO),
+    )
 
 
 def flip_ask(question: str) -> tuple[dict, dict]:
@@ -117,8 +122,7 @@ def flip_ask(question: str) -> tuple[dict, dict]:
 
 def run(cmd: list[str]) -> str:
     """Run a shell command and return its stdout, raising on failure."""
-    env = dict(os.environ, PYTHONPATH=".")
-    out = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
+    out = subprocess.run(cmd, capture_output=True, text=True, env=_env(), cwd=str(REPO), check=False)
     if out.returncode != 0:
         raise RuntimeError(f"{cmd} failed: {out.stderr[:500]}")
     return out.stdout
@@ -271,7 +275,7 @@ def save(img: Image.Image, path: Path, scale: int = 2) -> None:
 def credit_lines() -> list[tuple[str, str]]:
     """Terminal lines for the credit bind answer screenshot/scene."""
     d = cli_ask("Can I give Marie-Claire three crates on credit?")
-    msg = d["message"].replace("\u2014", "—").replace("\u00d7", "×")
+    msg = d["message"]
     rows = [
         ("$ python -m app.cli \"Can I give Marie-Claire three crates on credit?\"", "prompt"),
         ("", "plain"),
@@ -292,8 +296,8 @@ def credit_lines() -> list[tuple[str, str]]:
 def flip_lines() -> list[tuple[str, str]]:
     """Terminal lines for the ledger-flip screenshot/scene (real UPDATE)."""
     before, after = flip_ask("Can I give Fotso 3 crates on credit?")
-    b = before["message"].replace("\u2014", "—").replace("\u00d7", "×")
-    a = after["message"].replace("\u2014", "—").replace("\u00d7", "×")
+    b = before["message"]
+    a = after["message"]
     before_json = (
         f'{{ "ok": {json.dumps(before["ok"])}, "approved": {json.dumps(before["approved"])}, '
         f'"message": {json.dumps(b)} }}'
@@ -320,9 +324,9 @@ def flip_lines() -> list[tuple[str, str]]:
 def refuse_lines() -> list[tuple[str, str]]:
     """Terminal lines for the fail-closed refusal screenshot/scene."""
     soca = cli_ask("How much do we owe SOCA Distribution Douala?")
-    s = soca["message"].replace("\u2014", "—")
+    s = soca["message"]
     esther = cli_ask("Can I give Esther credit for 1 crate?")
-    e = esther["message"].replace("\u2014", "—")
+    e = esther["message"]
     return [
         ("$ python -m app.cli \"How much do we owe SOCA Distribution Douala?\"", "prompt"),
         (f'{{ "ok": {json.dumps(soca["ok"])}, "refuse_reason": {json.dumps(soca["refuse_reason"])},', "json"),
@@ -525,10 +529,13 @@ def render_video_frame(
             stats = measured_stats()
             rss = stats.get("Peak RSS", "?")
             tps = stats.get("Generation TPS", "?")
+            temp = stats.get("Core temp peak", "?")
+            throttled = stats.get("Throttled", "?")
             caption = (
                 f"Measured: peak RSS {rss} (≪ 5.5 GB limit) · {tps} · "
-                "T11 100% (28/28). Thermal honesty: 2026-08-06 PASS does not reproduce "
-                "on 2026-08-10 re-run — authoritative P_thermal = eval machine."
+                f"core peak {temp}, throttled={throttled} on this laptop · "
+                "T11 100% (28/28). Thermal record honest — see BENCHMARKS.md; "
+                "authoritative P_thermal = eval machine."
             )
         lines = scene.get("_lines") or scene["lines"]()
         n_visible = int(progress * (len(lines) + 2))
@@ -586,6 +593,7 @@ def video() -> None:
 
 def main() -> None:
     """Render all demo assets after checking prerequisites."""
+    os.chdir(REPO)
     missing = [p for p in (MONO, SANS, SANS_B) if not Path(p).exists()]
     if missing:
         raise SystemExit(
