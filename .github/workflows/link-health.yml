@@ -1,0 +1,48 @@
+name: link-health
+
+# Guard against silent model-URL rot: if the pinned GGUF URL dies between
+# submission and audit, judges cannot fetch the weights (a pipeline DQ).
+# Runs weekly + on demand; fails loudly on a dead or redirecting URL.
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # Mondays 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gguf-url:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Extract pinned GGUF URL
+        id: extract
+        run: |
+          URL="$(grep -oE 'https://[^"]+\.gguf' download_model.sh | head -1)"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Checking: $URL"
+
+      - name: Verify GGUF URL is reachable and non-empty
+        run: |
+          URL="${{ steps.extract.outputs.url }}"
+          if [[ -z "$URL" ]]; then
+            echo "::error::no .gguf URL found in download_model.sh"
+            exit 1
+          fi
+          HTTP=$(curl -sL -o /dev/null -w '%{http_code}' --max-time 60 "$URL")
+          SIZE=$(curl -sL -I --max-time 60 "$URL" | awk 'tolower($1)=="content-length:" {print $2}' | tr -d '\r' | tail -1)
+          echo "HTTP $HTTP, content-length: ${SIZE:-unknown}"
+          if [[ "$HTTP" != "200" ]]; then
+            echo "::error::GGUF URL returned HTTP $HTTP (expected 200) — model download will fail for judges"
+            exit 1
+          fi
+          if [[ -n "$SIZE" && "$SIZE" -lt 1000000000 ]]; then
+            echo "::error::GGUF content-length $SIZE is below 1 GB — possibly a stub page, not the model"
+            exit 1
+          fi
+          echo "OK: GGUF URL is alive"
