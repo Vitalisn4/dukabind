@@ -29,8 +29,8 @@ pip install -r requirements.txt
 # 1. Binder tests — no model required (46 tests)
 PYTHONPATH=. pytest tests/ -q
 
-# 2. Try the binder directly (no model, read-only)
-python -m app.db.connection
+# 2. Try the binder directly (no model; the ask path is read-only)
+python -m app.db.connection        # create + seed the shop ledger
 PYTHONPATH=. python -m app.cli "Can I give Marie-Claire three crates on credit?"
 
 # 3. Offline proof — answers track the ledger with no cloud dependency
