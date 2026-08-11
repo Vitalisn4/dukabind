@@ -389,8 +389,14 @@ def measured_stats() -> dict[str, str]:
     return out
 
 
+def _num(value: str) -> float | None:
+    """Extract the leading number from a summary cell like '1821.11 MB'."""
+    m = re.match(r"([-+]?\d*\.?\d+)", value)
+    return float(m.group(1)) if m else None
+
+
 def measured_lines() -> list[tuple[str, str]]:
-    """Terminal lines showing the measured profiler numbers."""
+    """Terminal lines showing the measured profiler numbers, threshold-checked."""
     m = measured_stats()
     if not m:
         return [("benchmarks/submission.summary.md missing", "fail")]
@@ -398,8 +404,9 @@ def measured_lines() -> list[tuple[str, str]]:
     tps = m.get("Generation TPS", "?")
     ttft = m.get("First-token latency", "?")
     temp = m.get("Core temp peak", "?")
+    throttled = m.get("Throttled", "?")
     cpu = m.get("CPU", "?")
-    return [
+    lines = [
         ("$ cat benchmarks/submission.summary.md   # adtc-profiler participant", "prompt"),
         ("", "plain"),
         ("| metric                    | value", "dim"),
@@ -407,12 +414,28 @@ def measured_lines() -> list[tuple[str, str]]:
         (f"| Generation TPS             | {tps}", "json"),
         (f"| First-token latency        | {ttft}", "json"),
         (f"| Core temp peak (smoke)     | {temp}", "json"),
+        (f"| Throttled                  | {throttled}", "json"),
         (f"| CPU                        | {cpu}", "json"),
         ("", "plain"),
-        ("→ full stack fits well under the 5.5 GB self-limit; TPS above 15 target.", "dim"),
-        ("→ thermal: 2026-08-06 PASS at THREADS=2/CTX=1024 does NOT reproduce on", "warn"),
-        ("  2026-08-10 re-run (peak 89.0 °C) — authoritative P_thermal = eval machine.", "warn"),
     ]
+    rss_n, tps_n, temp_n = (_num(x) for x in (rss, tps, temp))
+    if rss_n is not None and rss_n < 5500:
+        lines.append((f"→ peak RSS {rss} clears the 5.5 GB self-limit.", "ok"))
+    else:
+        lines.append(("→ peak RSS check inconclusive — inspect benchmarks/submission.summary.md.", "warn"))
+    if tps_n is not None and tps_n >= 15:
+        lines.append((f"→ generation TPS {tps} clears the 15 tok/s target.", "ok"))
+    else:
+        lines.append(("→ generation TPS below the 15 tok/s target on this laptop.", "warn"))
+    if (temp_n is not None and temp_n >= 85) or str(throttled).lower() == "true":
+        thermal_note = (
+            f"→ core peak {temp}, throttled={throttled} on this laptop — soak record "
+            "in BENCHMARKS.md; authoritative P_thermal = eval machine."
+        )
+        lines.append((thermal_note, "warn"))
+    else:
+        lines.append((f"→ core peak {temp}, throttled={throttled} — thermal OK on this smoke.", "ok"))
+    return lines
 
 
 # ----------------------------------------------------------------- screens
