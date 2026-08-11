@@ -7,7 +7,7 @@ up to the Gate 1 freeze; pre-1.0 versions are milestone snapshots.
 
 ## [1.0.0-gate1] - 2026-08-11
 
-**Freeze commit:** `9e8a1fe` (branch `feature/dukabind-m6-freeze`, 2026-08-11)
+**Freeze commit:** `0000000000000000000000000000000000000000` *(filled after the follow-up commit)*
 
 Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product features added.
 
@@ -15,8 +15,10 @@ Code freeze for ADTC 2026 Gate 1 (M6). Packaging/demo only — no product featur
 
 - Demo assets for README and the submission: 5 numbered screenshots
   (`demo/screenshots/01…05`) and a 114 s demo video (`demo/demo.mp4`) rendered
-  from real CLI output by `scripts/render_demo_assets.py`; storyboard
-  (`demo/storyboard.md`) and video metadata/transcript (`demo/VIDEO.md`).
+  from real CLI output by `scripts/render_demo_assets.py`; video
+  metadata/transcript (`demo/VIDEO.md`). The demo storyboard
+  (`demo/storyboard.md`) is kept **local-only** (gitignored) by design —
+  production planning, not a submission artifact.
 - `CHANGELOG.md` (this file) — freeze commit hash recorded below.
 - `docs/FREEZE_CHECKLIST.md` — gate-freeze checklist (T1–T3, T5, T8–T9, T11, T13).
 - `benchmarks/submission.json` — freeze snapshot of the measured adtc-profiler

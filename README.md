@@ -58,7 +58,7 @@ PYTHONPATH=. python -m app.narrate_cli "Can I give Marie-Claire three crates on 
 
 ## Demo
 
-**114-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (edit a row, the answer changes) → fail-closed refusal → offline proof → measured numbers. English only (Path A); captions burned in. Storyboard: [`demo/storyboard.md`](demo/storyboard.md) · Transcript: [`demo/VIDEO.md`](demo/VIDEO.md).
+**114-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (edit a row, the answer changes) → fail-closed refusal → offline proof → measured numbers. English only (Path A); captions burned in. Transcript: [`demo/VIDEO.md`](demo/VIDEO.md).
 
 ![Credit bind answer](demo/screenshots/01-credit-answer.png)
 *Credit ask answered from the ledger rows it read — arithmetic shown, no recall.*

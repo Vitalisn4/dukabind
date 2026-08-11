@@ -25,7 +25,7 @@ Legend: ✅ pass · 🟡 measured on build laptop, authoritative run = ADTC eval
 - [x] Ship defaults documented and unchanged: Qwen2.5-1.5B Q4_K_M · `THREADS=2` · `CTX=1024` (`scripts/start_llama_server.sh`)
 - [x] `REPORT.md` freeze wording confirmed after thermal honesty (thread / `n_ctx` / quant flags)
 - [x] Screenshots for README — `demo/screenshots/` (5 numbered stills, real output)
-- [x] ≤ 2 min demo video — `demo/demo.mp4` (114 s) + `demo/storyboard.md` + `demo/VIDEO.md`
+- [x] ≤ 2 min demo video — `demo/demo.mp4` (114 s) + `demo/VIDEO.md` (storyboard kept local-only)
 - [x] `CHANGELOG.md` created with Keep-a-Changelog format; freeze commit hash recorded
 - [x] `benchmarks/submission.json` — measured participant output committed as the freeze snapshot
 - [x] CI green: `pytest tests/` (46) + `evals/run_heldout.py` (31/31) + ruff

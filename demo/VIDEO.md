@@ -6,7 +6,6 @@
 | **Duration** | 114 s (≤ 120 s gate) |
 | **Format** | H.264 MP4 · 1280×720 · ~0.56 MB |
 | **Captions** | Burned in (watchable muted) |
-| **Storyboard** | [`demo/storyboard.md`](./storyboard.md) |
 | **Renderer** | [`scripts/render_demo_assets.py`](../scripts/render_demo_assets.py) — frames every on-screen line from real CLI output (no hand-typed text) |
 | **Rendered on** | Build laptop, 2026-08-11 (branch `feature/dukabind-m6-freeze`) |
 
