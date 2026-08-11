@@ -63,8 +63,8 @@ echo "finished:   $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "wrote:      $OUT"
 
 FLAG_DESC=""
-if [[ "${1:-}" == "--full" ]]; then
-  FLAG_DESC=" --full"
+if (( $# > 0 )); then
+  FLAG_DESC=" $*"
 fi
 
 python - "$OUT" "$FLAG_DESC" <<'PY'

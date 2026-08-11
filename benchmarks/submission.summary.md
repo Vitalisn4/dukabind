@@ -1,7 +1,7 @@
 # Profiler participant smoke — summary
 
-**Run:** 2026-08-06T22:28:10Z UTC
-**Command:** `bash scripts/run_profiler_smoke.sh` --full
+**Run:** 2026-08-11T21:15:42Z UTC
+**Command:** `bash scripts/run_profiler_smoke.sh` --skip-accuracy
 
 > Auto-generated from the latest profiler run. The authoritative, curated benchmark story is [`BENCHMARKS.md`](../BENCHMARKS.md).
 **Raw JSON:** `benchmarks/raw/submission.json` (gitignored)
@@ -10,11 +10,11 @@
 
 | Field | Value |
 |---|---|
-| Peak RSS | **1825.72 MB** |
-| Steady-state RSS | 1747.35 MB |
-| Generation TPS | **16.44 tok/s** |
-| First-token latency | 9026.84 ms |
-| CPU p99 | 93.4% |
+| Peak RSS | **1821.11 MB** |
+| Steady-state RSS | 1757.46 MB |
+| Generation TPS | **15.67 tok/s** |
+| First-token latency | 10548.82 ms |
+| CPU p99 | 98.5% |
 | Core temp peak | **100.0 °C** |
 | Throttled | **True** |
 | CPU | Intel(R) Core(TM) i7-8650U CPU @ 1.90GHz |

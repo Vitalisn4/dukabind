@@ -52,3 +52,9 @@ docs/PROGRESS.md
 docs/STAGE-*.md
 docs/COMPLIANCE_CHECKLIST.md
 TEMPLATE_README.md
+
+# Demo storyboard is local-only production planning (kept on disk, not published)
+demo/storyboard.md
+
+# Demo storyboard + transcript are local-only production notes (kept on disk, not published)
+demo/VIDEO.md

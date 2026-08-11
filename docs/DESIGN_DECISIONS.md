@@ -78,10 +78,10 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 | | |
 |---|---|
 | **Choice** | `language_scope: ["en"]` — cashier asks and binder messages in English |
-| **Evidence** | Builder has no native Swahili reviewer; contest African-language bonus is optional; Cameroon MSME use-case does not require Swahili |
+| **Evidence** | English-only product scope locked at Gate 1; Cameroon MSME use-case does not require another language |
 | **African claim** | `african_alpha_claim: true` is for **offline Cameroon/Douala MSME ledger use-case**, not an African-language claim |
-| **Deferred** | French localisation (Cameroon official language) and any Swahili track only after Gate 1 with a native reviewer |
-| **Reverse if** | Native Swahili reviewer available and held-out quality proven before freeze |
+| **Deferred** | French localisation (Cameroon official language) and any further languages after Gate 1 |
+| **Reverse if** | Held-out quality proven in an additional language before the freeze |
 
 ---
 
@@ -118,7 +118,7 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 | Date | Change |
 |---|---|
-| 2026-08-04 | D6b: English-only Path A; D3 drop Swahili Aya bake-off as Gate 1 plan |
+| 2026-08-04 | D6b: English-only scope; D3 drop Aya bake-off as Gate 1 plan |
 | 2026-08-04 | D8: seeded shop ledger (Marché Akwa Viviane) |
 | 2026-07-26 | Structured headers; Africa-wide product scope note; linked SECURITY / walkthrough |
 | 2026-07-25 | Initial decisions locked for Week 0–1 implementation |

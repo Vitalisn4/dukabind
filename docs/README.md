@@ -4,7 +4,7 @@ These files ship with the GitHub submission. Keep them current when behaviour or
 
 ## What DukaBind is (Gate 1)
 
-Offline **English** shop assistant: allowlisted SQLite ledger bind + optional local llama.cpp narration for African MSME counters (Cameroon-designed; Douala / XAF). Fail closed on missing money fields. Path A — no Swahili claim.
+Offline **English** shop assistant: allowlisted SQLite ledger bind + optional local llama.cpp narration for African MSME counters (Cameroon-designed; Douala / XAF). Fail closed on missing money fields.
 
 ## Docs map
 

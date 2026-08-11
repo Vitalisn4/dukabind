@@ -9,7 +9,7 @@ Staff ask about credit, payables, or stock in **English**. DukaBind runs **allow
 > Not another shop chatbot — a fail-closed ledger binder for African MSME counters.
 
 **Builder:** Vitalis Ngam · Solo · [Vitalisn4](https://github.com/Vitalisn4) · Africa (ledger fixture: Cameroon / XAF)  
-**Gate 1 path:** English only (Path A) · African claim = MSME offline use-case · Qwen2.5-1.5B Q4_K_M
+**Language:** English · **African claim** = MSME offline use-case · **Model:** Qwen2.5-1.5B Q4_K_M
 
 ## Start here
 
@@ -55,6 +55,25 @@ With local llama-server:
 bash scripts/start_llama_server.sh   # terminal A
 PYTHONPATH=. python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"  # terminal B
 ```
+
+## Demo
+
+**114-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (edit a row, the answer changes) → fail-closed refusal → offline proof → measured numbers. English; captions burned in.
+
+![Credit bind answer](demo/screenshots/01-credit-answer.png)
+*Credit ask answered from the ledger rows it read — arithmetic shown, no recall.*
+
+![Ledger flip](demo/screenshots/02-ledger-flip.png)
+*The bind: edit one `credit_limit` row, the same question gives a new answer.*
+
+![Fail-closed refusal](demo/screenshots/03-refuse-null-field.png)
+*Missing field → hard refusal that names the field. Never an invented balance.*
+
+![Offline proof](demo/screenshots/04-offline-proof.png)
+*`offline_check.sh` — answers track the ledger with no cloud dependency.*
+
+![Measured numbers](demo/screenshots/05-measured-numbers.png)
+*Measured: peak RSS 1821.11 MB (≪ 5.5 GB) · 15.67 tok/s · thermal record honest (see `BENCHMARKS.md`).*
 
 ## Contest links
 

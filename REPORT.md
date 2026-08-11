@@ -25,8 +25,8 @@ See [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) for selection rationa
 - **Integration (load-bearing):** Allowlisted SQL binder — not vector RAG. Protects S_eff under the 7 GB usable budget and prevents financial hallucination.
 - **Language:** English cashier asks and binder messages (`language_scope: ["en"]`). African use-case claim is Cameroon MSME offline ledger context, not an African-language claim.
 - **Runtime:** llama.cpp only (template + FAQ requirement).
-- **Model lock (M3):** Qwen2.5-1.5B Q4_K_M is frozen as primary on measured evidence — Peak RSS 1825.72 MB (≪ 5.5 GB limit), 16.44 tok/s (profiler `--full` run; llama-bench up to 17.94), TTFT ~9.0 s. **T15 quant lock:** Q4_K_M 1.5B stays frozen unless accuracy regresses with RSS margin; 3B Q4 only if T1–T3 stay green. Tiny Aya is explicitly **not** downloaded (no Swahili track under Path A) — no Aya benchmark is claimed.
-- **Alternatives rejected:** 7B-class (RSS DQ risk); embeddings/FAISS (RAM); LLM-generated SQL (injection + hallucination); shallow Swahili without a native reviewer.
+- **Model lock (M3):** Qwen2.5-1.5B Q4_K_M is frozen as primary on measured evidence — Peak RSS 1825.72 MB (≪ 5.5 GB limit), 16.44 tok/s (profiler `--full` run; llama-bench up to 17.94), TTFT ~9.0 s. **T15 quant lock:** Q4_K_M 1.5B stays frozen unless accuracy regresses with RSS margin; 3B Q4 only if T1–T3 stay green. Tiny Aya is explicitly **not** downloaded — no Aya benchmark is claimed.
+- **Alternatives rejected:** 7B-class (RSS DQ risk); embeddings/FAISS (RAM); LLM-generated SQL (injection + hallucination).
 
 Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
 
@@ -56,7 +56,7 @@ Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
 
 ## Benchmarks
 
-Participant smoke on build laptop (`bash scripts/run_profiler_smoke.sh --full`, definitive run 2026-08-06; earlier smoke 2026-08-04). The profiler's `accuracy` block is `[]` in participant mode by design — official accuracy comes from ADTC audit mode on the eval machine. Full tables: [`BENCHMARKS.md`](BENCHMARKS.md). Official Gate 1 scores come from the ADTC eval machine.
+Participant smoke on build laptop (`bash scripts/run_profiler_smoke.sh --full`, definitive run 2026-08-06; earlier smoke 2026-08-04; **M6 freeze re-run 2026-08-11** (`--skip-accuracy`): Peak RSS 1821.11 MB, TPS 15.67 tok/s, TTFT 10548.82 ms, core temp peak 100.0 °C / throttled — honest FAIL on this laptop, consistent with the 2026-08-10 soak re-run; snapshot committed as `benchmarks/submission.json`). The profiler's `accuracy` block is `[]` in participant mode by design — official accuracy comes from ADTC audit mode on the eval machine. Full tables: [`BENCHMARKS.md`](BENCHMARKS.md). Official Gate 1 scores come from the ADTC eval machine.
 
 | Metric | Measured (participant, definitive `--full` run) |
 |---|---|

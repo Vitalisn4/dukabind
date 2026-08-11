@@ -4,7 +4,7 @@
 **Last updated:** 2026-08-06  
 **Audience:** Contributors, Gate reviewers, and anyone reproducing DukaBind from a clean checkout
 
-**What we are building (Gate 1 Path A):** offline **English** shop assistant for African MSME counters — allowlisted SQL on Marché Akwa Viviane (Douala, XAF); hard refuse on missing money fields; optional local llama.cpp narration; binder `message` authoritative; **no Swahili claim**.
+**What we are building:** offline **English** shop assistant for African MSME counters — allowlisted SQL on Marché Akwa Viviane (Douala, XAF); hard refuse on missing money fields; optional local llama.cpp narration; binder `message` authoritative.
 
 Implementation schedule (local): [`ADTC-2026-Build-Kickoff.md`](./ADTC-2026-Build-Kickoff.md) · [`ADTC-2026-ROADMAP.md`](./ADTC-2026-ROADMAP.md) · [`PROGRESS.md`](./PROGRESS.md).
 
@@ -206,6 +206,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `scripts/ram_capped_proof.sh` | 8 GB-class proof: full stack under a cgroup `MemoryMax` cap (default 7.5 GB), reports `memory.peak` headroom. |
 | `scripts/thread_matrix.sh` | `llama-bench` thread bake-off (`-t 2,3,4,6,8`) + temp sampling → `benchmarks/raw/`. |
 | `scripts/thermal_soak.sh` | Sustained generation soak (default 10 min) sampling package temp every 5 s → CSV + PASS/FAIL. |
+| `scripts/render_demo_assets.py` | M6 packaging tool: renders `demo/screenshots/*.png` + `demo/demo.mp4` (≤2 min, captioned) from **real CLI / offline-check / profiler output** — nothing hand-typed. Requires Pillow + ffmpeg (dev-only). |
 | `scripts/static_analysis.sh` | One-pass gate: `ruff` + `bandit` (skip `B101` in tests) + `shellcheck`; exit 0 only when all clean. |
 | `download_model.sh` | Downloads pinned Qwen2.5-1.5B Q4_K_M GGUF + sha256 (**C7**). |
 
@@ -213,7 +214,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 
 | File | Covers |
 |---|---|
-| `test_binder.py` | Allowlist reject; Fotso over-limit 8410; Esther NULL limit; SOCA NULL balance; Bonaberi 42000; stock; SW ask unknown; substring safety; overlong ask; zero qty; rice price; ledger flip; qty-vs-amount parsing; SQL-injection battery; narration prompt-injection invariant |
+| `test_binder.py` | Allowlist reject; Fotso over-limit 8410; Esther NULL limit; SOCA NULL balance; Bonaberi 42000; stock; non-English ask unknown; substring safety; overlong ask; zero qty; rice price; ledger flip; qty-vs-amount parsing; SQL-injection battery; narration prompt-injection invariant |
 | `test_ask.py` | Refuse skips LLM; binder `message` authority; loopback reject; non-loopback `base_url` does not narrate |
 | `test_duka_b.py` | Second-shop generalization; NULL refusal; accent-insensitive asks; cross-shop non-leak; flip on `duka_b`; full held-out suite stays green |
 | `test_metadata.py` | Contest-claims guard: domain, `language_scope: ["en"]`, honest claims, exactly 2 ledger-grounded `test_prompts`, llama.cpp runtime |
