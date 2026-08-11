@@ -23,6 +23,7 @@ Staff ask about credit, payables, or stock in **English**. DukaBind runs **allow
 | [`evals/heldout/REPORT.md`](evals/heldout/REPORT.md) | Held-out evidence report (T11, flips, both fixtures) |
 | [`docs/README.md`](docs/README.md) | Public docs index |
 | [`REPORT.md`](REPORT.md) | Gate 1 technical writeup |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Reproduction runbook — fresh machine to working, verified binder |
 
 Official ADTC template: [adtc-2026-submission-template](https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template).
 
