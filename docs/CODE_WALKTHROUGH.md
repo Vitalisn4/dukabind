@@ -206,6 +206,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `scripts/ram_capped_proof.sh` | 8 GB-class proof: full stack under a cgroup `MemoryMax` cap (default 7.5 GB), reports `memory.peak` headroom. |
 | `scripts/thread_matrix.sh` | `llama-bench` thread bake-off (`-t 2,3,4,6,8`) + temp sampling → `benchmarks/raw/`. |
 | `scripts/thermal_soak.sh` | Sustained generation soak (default 10 min) sampling package temp every 5 s → CSV + PASS/FAIL. |
+| `scripts/render_demo_assets.py` | M6 packaging tool: renders `demo/screenshots/*.png` + `demo/demo.mp4` (≤2 min, captioned) from **real CLI / offline-check / profiler output** — nothing hand-typed. Requires Pillow + ffmpeg (dev-only). |
 | `scripts/static_analysis.sh` | One-pass gate: `ruff` + `bandit` (skip `B101` in tests) + `shellcheck`; exit 0 only when all clean. |
 | `download_model.sh` | Downloads pinned Qwen2.5-1.5B Q4_K_M GGUF + sha256 (**C7**). |
 

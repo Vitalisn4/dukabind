@@ -56,6 +56,25 @@ bash scripts/start_llama_server.sh   # terminal A
 PYTHONPATH=. python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"  # terminal B
 ```
 
+## Demo
+
+**114-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (edit a row, the answer changes) → fail-closed refusal → offline proof → measured numbers. English only (Path A); captions burned in. Storyboard: [`demo/storyboard.md`](demo/storyboard.md) · Transcript: [`demo/VIDEO.md`](demo/VIDEO.md).
+
+![Credit bind answer](demo/screenshots/01-credit-answer.png)
+*Credit ask answered from the ledger rows it read — arithmetic shown, no recall.*
+
+![Ledger flip](demo/screenshots/02-ledger-flip.png)
+*The bind: edit one `credit_limit` row, the same question gives a new answer.*
+
+![Fail-closed refusal](demo/screenshots/03-refuse-null-field.png)
+*Missing field → hard refusal that names the field. Never an invented balance.*
+
+![Offline proof](demo/screenshots/04-offline-proof.png)
+*`offline_check.sh` — answers track the ledger with no cloud dependency.*
+
+![Measured numbers](demo/screenshots/05-measured-numbers.png)
+*Measured: peak RSS 1825.61 MB (≪ 5.5 GB) · 15.9 tok/s · thermal record honest (see `BENCHMARKS.md`).*
+
 ## Contest links
 
 - [Devpost](https://adtc-2026.devpost.com/) · [Challenge site](https://africadeeptech.org/challenge-2026/)
