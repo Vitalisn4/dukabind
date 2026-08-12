@@ -74,9 +74,9 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 
 **108-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)). It walks through the credit bind answer, a ledger flip (a test harness edits one `credit_limit` row inside a temporary transaction and rolls it back, so the seed ledger is never modified; the answer changes with the row), a fail-closed refusal, **French and Swahili binder asks**, the offline proof, and the measured numbers. English captions are burned in, and every frame is rendered from real CLI output. The ask path stays read-only throughout.
 
-<video controls muted preload="metadata" width="100%" poster="https://raw.githubusercontent.com/Vitalisn4/dukabind/bb538bf/demo/demo-poster.png" src="https://raw.githubusercontent.com/Vitalisn4/dukabind/bb538bf/demo/demo.mp4"></video>
+<video controls muted preload="metadata" width="100%" poster="https://raw.githubusercontent.com/Vitalisn4/dukabind/d1f3638e750fa4d02305e1be009a0790e97892bb/demo/demo-poster.png" src="https://raw.githubusercontent.com/Vitalisn4/dukabind/d1f3638e750fa4d02305e1be009a0790e97892bb/demo/demo.mp4"></video>
 
-**Watch or download:** [`demo/demo.mp4`](demo/demo.mp4) (108 s, 1280×720, H.264, ~566 KB) · poster: [`demo/demo-poster.png`](demo/demo-poster.png)
+**Watch or download:** [`demo/demo.mp4`](demo/demo.mp4) (108 s, 1280×720, H.264 Main + AAC, ~650 KB) · poster: [`demo/demo-poster.png`](demo/demo-poster.png)
 
 | | |
 |---|---|

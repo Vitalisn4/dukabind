@@ -73,7 +73,7 @@ KNOWN_SKUS = [
     "Sac riz 25kg",
     "Bidon huile palme 5L",
     "soda",
-    "sodas",  # French plural used in cashier asks ("Combien de sodas…")
+    "sodas",
     "malt",
     "boisson",
     "rice",
