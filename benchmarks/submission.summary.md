@@ -1,7 +1,7 @@
 # Profiler participant smoke — summary
 
-**Run:** 2026-08-11T21:15:42Z UTC
-**Command:** `bash scripts/run_profiler_smoke.sh` --skip-accuracy
+**Run:** 2026-08-12T09:47:46Z UTC
+**Command:** `bash scripts/run_profiler_smoke.sh` --full
 
 > Auto-generated from the latest profiler run. The authoritative, curated benchmark story is [`BENCHMARKS.md`](../BENCHMARKS.md).
 **Raw JSON:** `benchmarks/raw/submission.json` (gitignored)
@@ -10,11 +10,11 @@
 
 | Field | Value |
 |---|---|
-| Peak RSS | **1821.11 MB** |
-| Steady-state RSS | 1757.46 MB |
-| Generation TPS | **15.67 tok/s** |
-| First-token latency | 10548.82 ms |
-| CPU p99 | 98.5% |
+| Peak RSS | **1825.86 MB** |
+| Steady-state RSS | 1745.84 MB |
+| Generation TPS | **15.57 tok/s** |
+| First-token latency | 9455.85 ms |
+| CPU p99 | 96.2% |
 | Core temp peak | **100.0 °C** |
 | Throttled | **True** |
 | CPU | Intel(R) Core(TM) i7-8650U CPU @ 1.90GHz |
@@ -22,6 +22,14 @@
 | OS | Ubuntu 22.04.5 LTS |
 | GPU | none |
 | Architecture | qwen2 |
+
+## Accuracy self-benchmark
+
+| Benchmark | Score | Metric | Samples |
+|---|---|---|---|
+| arc_easy | **74.0%** | acc_norm | 50 |
+
+> Participant-mode self-benchmark on a public task (e.g. `arc_easy`). The authoritative S_acc comes from the judges' audit-mode run on their hidden subset.
 
 ## Gate notes
 

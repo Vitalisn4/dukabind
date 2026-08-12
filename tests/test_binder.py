@@ -120,7 +120,14 @@ def test_pipeline_refuses_null_outstanding_row(tmp_path: Path) -> None:
     )
     conn.execute(
         "INSERT INTO skus VALUES (?, ?, ?, ?, ?, ?)",
-        ("sku_malt", "Caisse boisson malt 300ml", 720, 14, "XAF", "2026-01-01T00:00:00Z"),
+        (
+            "sku_malt",
+            "Caisse boisson malt 300ml",
+            720,
+            14,
+            "XAF",
+            "2026-01-01T00:00:00Z",
+        ),
     )
     conn.commit()
 
@@ -157,18 +164,21 @@ def test_stock_soda(db: sqlite3.Connection) -> None:
 
 
 def test_english_stock_stays_english(db: sqlite3.Connection) -> None:
-    """English ask stays English (Path A language scope)."""
+    """English ask stays English (language scope)."""
     r = handle_ask(db, "What stock of soda do we have on hand?")
     assert r.lang == "en"
     assert r.ok is True
 
 
-def test_non_english_ask_is_unknown_without_english_cues(db: sqlite3.Connection) -> None:
+def test_non_english_ask_is_unknown_without_english_cues(
+    db: sqlite3.Connection,
+) -> None:
     """English-only lexicon: a French credit ask does not route to credit."""
     r = handle_ask(db, "Puis-je accorder un crédit à ce client ?")
     assert r.lang == "en"
     assert r.ok is False
     assert r.refuse_reason == "unknown_intent"
+
 
 def test_sku_alias_not_substring_of_unrelated_word() -> None:
     """SKU aliases match whole words, never substrings of other words."""
@@ -319,7 +329,9 @@ def test_sql_injection_battery_fails_closed(db: sqlite3.Connection) -> None:
     assert n_skus == 3
 
     # A known-name decision inside an injection frame is still ledger-grounded.
-    r = handle_ask(db, "Can I give Fotso'; DROP TABLE customers;-- three crates on credit?")
+    r = handle_ask(
+        db, "Can I give Fotso'; DROP TABLE customers;-- three crates on credit?"
+    )
     assert "8410" in r.message
 
 
@@ -333,8 +345,10 @@ def test_narration_prompt_keeps_binder_and_citation_verbatim() -> None:
     """Prompt injection in the staff question cannot alter the binder facts."""
     from app.prompts.narrate import build_narration_prompt
 
-    binder = "No — 3 × 720 = 2160; 6250 + 2160 = 8410 exceeds limit 8000 by 410 XAF. " \
+    binder = (
+        "No — 3 × 720 = 2160; 6250 + 2160 = 8410 exceeds limit 8000 by 410 XAF. "
         "Max qty within limit: 2."
+    )
     citation = '{"ledger_rows":[{"credit_limit":8000,"outstanding":6250}]}'
     messages = build_narration_prompt(
         lang="en",

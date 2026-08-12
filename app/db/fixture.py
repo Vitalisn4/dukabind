@@ -20,10 +20,8 @@ SHOP_NAME_B = "Marché Nkolmébé"
 FIXTURE_ID_B = "duka_b"
 DEFAULT_DB_FILENAME_B = "duka_b.sqlite"
 
-# Default product when staff say "crates on credit" without naming an item.
 DEFAULT_CREDIT_SKU = "Caisse boisson malt 300ml"
 
-# Full display names plus short forms staff use at the counter.
 KNOWN_CUSTOMERS = [
     # Marché Akwa Viviane (Douala).
     "Marie-Claire Fotso",

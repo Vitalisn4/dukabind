@@ -93,7 +93,9 @@ def test_duka_b_stock(db_b: sqlite3.Connection) -> None:
     assert "on_hand=4" in r.message
 
 
-def test_cross_shop_duka_b_data_never_leaks_into_marche(db_a: sqlite3.Connection) -> None:
+def test_cross_shop_duka_b_data_never_leaks_into_marche(
+    db_a: sqlite3.Connection,
+) -> None:
     r = handle_ask(db_a, "How much do we owe Sanaga Épicerie?")
     assert r.ok is False
     assert r.refuse_reason == "not_found"
@@ -105,7 +107,9 @@ def test_cross_shop_duka_b_data_never_leaks_into_marche(db_a: sqlite3.Connection
     assert "36800" not in r.message
 
 
-def test_cross_shop_marche_data_never_leaks_into_duka_b(db_b: sqlite3.Connection) -> None:
+def test_cross_shop_marche_data_never_leaks_into_duka_b(
+    db_b: sqlite3.Connection,
+) -> None:
     r = handle_ask(db_b, "Can I give Marie-Claire two crates on credit?")
     assert r.ok is False
     assert r.refuse_reason == "not_found"
@@ -133,4 +137,4 @@ def test_heldout_suite_passes() -> None:
     n_prompts, prompt_fail, flip_fail, _ = run_heldout()
     assert prompt_fail == 0
     assert flip_fail == 0
-    assert n_prompts >= 20  # kickoff floor for the held-out set
+    assert n_prompts >= 20  # minimum size of the held-out set

@@ -39,7 +39,7 @@ jobs:
       - name: Held-out eval (T11 bind/refuse)
         run: PYTHONPATH=. python evals/run_heldout.py
 
-      - name: Held-out report freshness (M5 evidence)
+      - name: Held-out report freshness
         run: |
           PYTHONPATH=. python evals/run_heldout.py --write-report /tmp/report.generated.md
           # The Generated-date line legitimately changes daily; strip it from

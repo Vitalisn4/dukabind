@@ -1,7 +1,7 @@
 """Rule-based intent detection (English keywords).
 
 Routing is deterministic: the model never chooses the intent or the query.
-Product language for Gate 1 is English (Path A).
+Product language for Gate 1 is English.
 """
 
 from __future__ import annotations
@@ -45,10 +45,16 @@ _CREDIT = re.compile(
     r"\b(credit|on\s+credit|can\s+i\s+(give|sell)|allow\s+credit)\b",
     re.IGNORECASE,
 )
-_SUPPLIER = re.compile(r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.IGNORECASE)
-_STOCK = re.compile(r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.IGNORECASE)
+_SUPPLIER = re.compile(
+    r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.IGNORECASE
+)
+_STOCK = re.compile(
+    r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.IGNORECASE
+)
 
-_QTY = re.compile(r"\b(\d{1,3}(?:,\d{3})+|\d+)\s*(crates?|bags?|units?)?\b", re.IGNORECASE)
+_QTY = re.compile(
+    r"\b(\d{1,3}(?:,\d{3})+|\d+)\s*(crates?|bags?|units?)?\b", re.IGNORECASE
+)
 # Bare digits at or above this are ledger amounts (limits/prices/balances),
 # not crate counts — “his limit is 8000” must not become a quantity of 8000.
 MAX_BARE_QTY = 999
@@ -56,7 +62,9 @@ MAX_BARE_QTY = 999
 # as a small count by the word fallback. Sentinel is large enough that any
 # credit ask computes far over any plausible MSME limit.
 _SCALED_QTY_SENTINEL = 10**6
-_SCALED = re.compile(r"\b(hundreds?|thousands?|millions?|billions?|milliards?)\b", re.IGNORECASE)
+_SCALED = re.compile(
+    r"\b(hundreds?|thousands?|millions?|billions?|milliards?)\b", re.IGNORECASE
+)
 _WORD_QTY = {
     "one": 1,
     "two": 2,

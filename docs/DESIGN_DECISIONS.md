@@ -73,7 +73,7 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 ---
 
-## D6b — Product language: English only (Gate 1 Path A)
+## D6b — Product language: English only (Gate 1)
 
 | | |
 |---|---|

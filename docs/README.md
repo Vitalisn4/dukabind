@@ -10,21 +10,21 @@ Offline **English** shop assistant: allowlisted SQLite ledger bind + optional lo
 
 | Doc | Purpose | Update when |
 |---|---|---|
-| [SECURITY.md](./SECURITY.md) | Threat model and control IDs (C1–C10) | A control ships, defers, or changes |
-| [DESIGN_DECISIONS.md](./DESIGN_DECISIONS.md) | Research-backed product and runtime choices | A decision flips or evidence changes |
-| [CODE_WALKTHROUGH.md](./CODE_WALKTHROUGH.md) | Module map, shop ledger, commands, security map | Modules, seed rows, envs, or milestones change |
+| [`README.md`](../README.md) | Product pitch, quick start, demo, measured numbers | Behaviour, numbers, or screenshots change |
+| [`REPORT.md`](../REPORT.md) | Gate 1 technical writeup (template headings) | Benchmarks, constraints, or evidence change |
+| [`MODEL_CARD.md`](../MODEL_CARD.md) | Qwen2.5-1.5B Q4_K_M — intended use, limits, honesty | Model or quant evidence changes |
+| [`BENCHMARKS.md`](../BENCHMARKS.md) | Measured profiler / matrix / soak numbers (never invented) | Any measured run lands |
+| [`CONTRIBUTING.md`](../CONTRIBUTING.md) | Reproduction runbook — fresh machine to verified binder | Commands, paths, or test counts change |
+| [`CHANGELOG.md`](../CHANGELOG.md) | Keep-a-Changelog release history + freeze commit hash | A commit changes behaviour or packaging |
+| [`SECURITY.md`](./SECURITY.md) | Threat model and control IDs (C1–C10) | A control ships, defers, or changes |
+| [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) | Research-backed product and runtime choices | A decision flips or evidence changes |
+| [`CODE_WALKTHROUGH.md`](./CODE_WALKTHROUGH.md) | Module map, shop ledger, commands, security map | Modules, seed rows, envs, or milestones change |
+| [`FREEZE_CHECKLIST.md`](./FREEZE_CHECKLIST.md) | Gate-freeze checklist (T1–T3, T5, T8–T9, T11, T13) | Gate status changes |
 
-Root also ships [`BENCHMARKS.md`](../BENCHMARKS.md) (measured profiler / matrix / soak numbers), [`MODEL_CARD.md`](../MODEL_CARD.md) (Qwen2.5-1.5B Q4_K_M — intended use, limits, Path A honesty), `benchmarks/submission.summary.md`, and the held-out evaluation set + offline runner under `evals/` (28 EN prompts, two disjoint shop ledgers, committed evidence report at [`evals/heldout/REPORT.md`](../evals/heldout/REPORT.md) — see [`CODE_WALKTHROUGH.md`](./CODE_WALKTHROUGH.md) §5.7).
+Committed evidence under `benchmarks/` and `evals/`:
 
-## Local-only build guides (gitignored — open on disk)
-
-Use these for **implementation steps**, not for the public judge repo:
-
-| Doc | Role |
-|---|---|
-| `docs/ADTC-2026-Build-Kickoff.md` | Day-by-day checklist |
-| `docs/ADTC-2026-ROADMAP.md` | Milestone DoD M0–M7 + Path A status |
-| `docs/PROGRESS.md` | Lived status / what is open next |
-| `docs/COMPLIANCE_CHECKLIST.md` | Contest rules map |
-
-Strategy phase packs stay local (see `.gitignore`) so the public repo remains submission-focused.
+- [`benchmarks/submission.json`](../benchmarks/submission.json) — freeze snapshot of the measured participant output
+- [`benchmarks/submission.summary.md`](../benchmarks/submission.summary.md) — auto-regenerated summary of the latest profiler run
+- [`benchmarks/README.md`](../benchmarks/README.md) — how to re-run the profiler
+- [`evals/heldout/REPORT.md`](../evals/heldout/REPORT.md) — held-out evaluation report (T11 28/28 = 100 %, flips 3/3, 31/31 checks)
+- [`evals/run_heldout.py`](../evals/run_heldout.py) — offline held-out runner (28 EN prompts, two disjoint shop ledgers)

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "set": "Held-out EN prompts (Path A) — anti-memorization + fail-closed verification",
+    "set": "Held-out English prompts — anti-memorization + fail-closed verification",
     "language_scope": ["en"],
     "frozen": "2026-08-06",
     "purpose": "Run offline by evals/run_heldout.py against both disjoint shop ledgers. Answers must track ledger rows; NULL fields must refuse; jailbreaks must not change behavior. The 2 submission prompts in metadata.json are chosen from a pool disjoint from this set (T13)."

@@ -34,18 +34,18 @@ from PIL import Image, ImageDraw, ImageFont
 REPO = Path(__file__).resolve().parent.parent
 
 # ---------------------------------------------------------------- palette
-BG        = (26, 27, 38)      # #1a1b26
-FG        = (192, 202, 245)   # #c0caf5
-DIM       = (86, 95, 137)     # #565f89
-BLUE      = (122, 162, 247)   # #7aa2f7
-CYAN      = (125, 207, 255)   # #7dcfff
-GREEN     = (158, 206, 106)   # #9ece6a
-ORANGE    = (255, 158, 100)   # #ff9e64
-RED       = (247, 118, 142)   # #f7768e
-PURPLE    = (187, 154, 247)   # #bb9af7
-TITLEBAR  = (41, 44, 60)      # #292c3c
-BORDER    = (86, 95, 137)
-WHITE     = (255, 255, 255)
+BG = (26, 27, 38)  # #1a1b26
+FG = (192, 202, 245)  # #c0caf5
+DIM = (86, 95, 137)  # #565f89
+BLUE = (122, 162, 247)  # #7aa2f7
+CYAN = (125, 207, 255)  # #7dcfff
+GREEN = (158, 206, 106)  # #9ece6a
+ORANGE = (255, 158, 100)  # #ff9e64
+RED = (247, 118, 142)  # #f7768e
+PURPLE = (187, 154, 247)  # #bb9af7
+TITLEBAR = (41, 44, 60)  # #292c3c
+BORDER = (86, 95, 137)
+WHITE = (255, 255, 255)
 
 # ------------------------------------------------------------------ fonts
 FONT_DIR = Path("/usr/share/fonts/truetype/dejavu")
@@ -74,7 +74,11 @@ def cli_ask(question: str) -> dict:
     """Run the binder CLI and return its JSON result dict."""
     out = subprocess.run(
         [sys.executable, "-m", "app.cli", question],
-        capture_output=True, text=True, env=_env(), cwd=str(REPO), check=False,
+        capture_output=True,
+        text=True,
+        env=_env(),
+        cwd=str(REPO),
+        check=False,
     )
     if out.returncode != 0:
         raise RuntimeError(f"cli failed for {question!r}: {out.stderr}")
@@ -85,7 +89,9 @@ def seed_ledger() -> None:
     """Re-seed the shop ledger so demo answers match the committed seed."""
     subprocess.run(
         [sys.executable, "-m", "app.db.connection"],
-        check=True, env=_env(), cwd=str(REPO),
+        check=True,
+        env=_env(),
+        cwd=str(REPO),
     )
 
 
@@ -122,7 +128,9 @@ def flip_ask(question: str) -> tuple[dict, dict]:
 
 def run(cmd: list[str]) -> str:
     """Run a shell command and return its stdout, raising on failure."""
-    out = subprocess.run(cmd, capture_output=True, text=True, env=_env(), cwd=str(REPO), check=False)
+    out = subprocess.run(
+        cmd, capture_output=True, text=True, env=_env(), cwd=str(REPO), check=False
+    )
     if out.returncode != 0:
         raise RuntimeError(f"{cmd} failed: {out.stderr[:500]}")
     return out.stdout
@@ -277,7 +285,10 @@ def credit_lines() -> list[tuple[str, str]]:
     d = cli_ask("Can I give Marie-Claire three crates on credit?")
     msg = d["message"]
     rows = [
-        ("$ python -m app.cli \"Can I give Marie-Claire three crates on credit?\"", "prompt"),
+        (
+            '$ python -m app.cli "Can I give Marie-Claire three crates on credit?"',
+            "prompt",
+        ),
         ("", "plain"),
         ("{", "plain"),
         (f'  "ok" : {json.dumps(d["ok"])},', "json"),
@@ -307,17 +318,29 @@ def flip_lines() -> list[tuple[str, str]]:
         f'"message": {json.dumps(a)} }}'
     )
     return [
-        ("# flip one ledger row inside a single transaction (rolled back after):", "dim"),
+        (
+            "# flip one ledger row inside a single transaction (rolled back after):",
+            "dim",
+        ),
         ("UPDATE customers SET credit_limit = 20000", "cmd"),
         ("  WHERE display_name = 'Marie-Claire Fotso';", "cmd"),
         ("", "plain"),
-        ("$ python -m app.cli \"Can I give Fotso 3 crates on credit?\"   # before", "prompt"),
+        (
+            '$ python -m app.cli "Can I give Fotso 3 crates on credit?"   # before',
+            "prompt",
+        ),
         (before_json, "json"),
         ("", "plain"),
-        ("$ python -m app.cli \"Can I give Fotso 3 crates on credit?\"   # after the UPDATE", "prompt"),
+        (
+            '$ python -m app.cli "Can I give Fotso 3 crates on credit?"   # after the UPDATE',
+            "prompt",
+        ),
         (after_json, "json"),
         ("", "plain"),
-        ("→ same question, edited ledger row → answer changes. binding, not recall.", "dim"),
+        (
+            "→ same question, edited ledger row → answer changes. binding, not recall.",
+            "dim",
+        ),
     ]
 
 
@@ -328,12 +351,21 @@ def refuse_lines() -> list[tuple[str, str]]:
     esther = cli_ask("Can I give Esther credit for 1 crate?")
     e = esther["message"]
     return [
-        ("$ python -m app.cli \"How much do we owe SOCA Distribution Douala?\"", "prompt"),
-        (f'{{ "ok": {json.dumps(soca["ok"])}, "refuse_reason": {json.dumps(soca["refuse_reason"])},', "json"),
+        (
+            '$ python -m app.cli "How much do we owe SOCA Distribution Douala?"',
+            "prompt",
+        ),
+        (
+            f'{{ "ok": {json.dumps(soca["ok"])}, "refuse_reason": {json.dumps(soca["refuse_reason"])},',
+            "json",
+        ),
         ('  "message": ' + json.dumps(s) + " }", "json"),
         ("", "plain"),
-        ("$ python -m app.cli \"Can I give Esther credit for 1 crate?\"", "prompt"),
-        (f'{{ "ok": {json.dumps(esther["ok"])}, "refuse_reason": {json.dumps(esther["refuse_reason"])},', "json"),
+        ('$ python -m app.cli "Can I give Esther credit for 1 crate?"', "prompt"),
+        (
+            f'{{ "ok": {json.dumps(esther["ok"])}, "refuse_reason": {json.dumps(esther["refuse_reason"])},',
+            "json",
+        ),
         ('  "message": ' + json.dumps(e) + " }", "json"),
         ("", "plain"),
         ("→ missing field → hard refusal, named field, no invented figure.", "dim"),
@@ -343,8 +375,15 @@ def refuse_lines() -> list[tuple[str, str]]:
 def _offline_style(ln: str) -> str:
     """Map an offline_check output line to a display style."""
     if ln.startswith(
-        ("credit over-limit", "soca refuse", "bonaberi balance",
-         "stock soda", "esther null limit", "ledger flip", "PASS")
+        (
+            "credit over-limit",
+            "soca refuse",
+            "bonaberi balance",
+            "stock soda",
+            "esther null limit",
+            "ledger flip",
+            "PASS",
+        )
     ):
         return "ok"
     if ln.startswith("note:"):
@@ -358,7 +397,12 @@ def offline_lines() -> list[tuple[str, str]]:
     lines: list[tuple[str, str]] = [("$ bash scripts/offline_check.sh", "prompt")]
     for ln in out.splitlines():
         lines.append((ln, _offline_style(ln)))
-    lines.append(("→ unshare -n unavailable here → airplane-mode is manual Wi‑Fi off; binder still proven.", "dim"))
+    lines.append(
+        (
+            "→ unshare -n unavailable here → airplane-mode is manual Wi‑Fi off; binder still proven.",
+            "dim",
+        )
+    )
     return lines
 
 
@@ -407,7 +451,10 @@ def measured_lines() -> list[tuple[str, str]]:
     throttled = m.get("Throttled", "?")
     cpu = m.get("CPU", "?")
     lines = [
-        ("$ cat benchmarks/submission.summary.md   # adtc-profiler participant", "prompt"),
+        (
+            "$ cat benchmarks/submission.summary.md   # adtc-profiler participant",
+            "prompt",
+        ),
         ("", "plain"),
         ("| metric                    | value", "dim"),
         (f"| Peak RSS (full stack)      | {rss}", "json"),
@@ -422,11 +469,18 @@ def measured_lines() -> list[tuple[str, str]]:
     if rss_n is not None and rss_n < 5500:
         lines.append((f"→ peak RSS {rss} clears the 5.5 GB self-limit.", "ok"))
     else:
-        lines.append(("→ peak RSS check inconclusive — inspect benchmarks/submission.summary.md.", "warn"))
+        lines.append(
+            (
+                "→ peak RSS check inconclusive — inspect benchmarks/submission.summary.md.",
+                "warn",
+            )
+        )
     if tps_n is not None and tps_n >= 15:
         lines.append((f"→ generation TPS {tps} clears the 15 tok/s target.", "ok"))
     else:
-        lines.append(("→ generation TPS below the 15 tok/s target on this laptop.", "warn"))
+        lines.append(
+            ("→ generation TPS below the 15 tok/s target on this laptop.", "warn")
+        )
     if (temp_n is not None and temp_n >= 85) or str(throttled).lower() == "true":
         thermal_note = (
             f"→ core peak {temp}, throttled={throttled} on this laptop — soak record "
@@ -434,7 +488,12 @@ def measured_lines() -> list[tuple[str, str]]:
         )
         lines.append((thermal_note, "warn"))
     else:
-        lines.append((f"→ core peak {temp}, throttled={throttled} — thermal OK on this smoke.", "ok"))
+        lines.append(
+            (
+                f"→ core peak {temp}, throttled={throttled} — thermal OK on this smoke.",
+                "ok",
+            )
+        )
     return lines
 
 
@@ -442,9 +501,21 @@ def measured_lines() -> list[tuple[str, str]]:
 def screenshots() -> None:
     """Render the five numbered screenshots into demo/screenshots/."""
     shots = [
-        ("01-credit-answer", credit_lines, "dukabind — credit bind answer (real output)"),
-        ("02-ledger-flip", flip_lines, "dukabind — the bind: edit a row, answer changes"),
-        ("03-refuse-null-field", refuse_lines, "dukabind — fail-closed refusal (missing field)"),
+        (
+            "01-credit-answer",
+            credit_lines,
+            "dukabind — credit bind answer (real output)",
+        ),
+        (
+            "02-ledger-flip",
+            flip_lines,
+            "dukabind — the bind: edit a row, answer changes",
+        ),
+        (
+            "03-refuse-null-field",
+            refuse_lines,
+            "dukabind — fail-closed refusal (missing field)",
+        ),
         ("04-offline-proof", offline_lines, "dukabind — offline proof (no cloud)"),
         ("05-measured-numbers", measured_lines, "dukabind — measured (adtc-profiler)"),
     ]
@@ -529,9 +600,7 @@ def draw_caption(draw: ImageDraw.ImageDraw, text: str, w: int, h: int) -> None:
         ty += 28
 
 
-def render_video_frame(
-    scene: dict, progress: float, out_dir: Path, idx: int
-) -> None:
+def render_video_frame(scene: dict, progress: float, out_dir: Path, idx: int) -> None:
     """Render one video frame: title card, or a terminal scene at `progress`."""
     img = Image.new("RGB", (VIDEO_W, VIDEO_H), (14, 15, 24))
     draw = ImageDraw.Draw(img)
@@ -541,11 +610,26 @@ def render_video_frame(
         f_sub = font(SANS, 26)
         f_small = font(SANS, 18)
         title = scene.get("title", "DukaBind")
-        draw.text(((VIDEO_W - draw.textlength(title, font=f_big)) // 2, 220), title, font=f_big, fill=WHITE)
+        draw.text(
+            ((VIDEO_W - draw.textlength(title, font=f_big)) // 2, 220),
+            title,
+            font=f_big,
+            fill=WHITE,
+        )
         sub = "ADTC 2026 · Corporate / Enterprise · llama.cpp + GGUF · Qwen2.5-1.5B Q4_K_M"
-        draw.text(((VIDEO_W - draw.textlength(sub, font=f_sub)) // 2, 320), sub, font=f_sub, fill=BLUE)
+        draw.text(
+            ((VIDEO_W - draw.textlength(sub, font=f_sub)) // 2, 320),
+            sub,
+            font=f_sub,
+            fill=BLUE,
+        )
         tag = "no cloud · no invented balances · English"
-        draw.text(((VIDEO_W - draw.textlength(tag, font=f_small)) // 2, 380), tag, font=f_small, fill=DIM)
+        draw.text(
+            ((VIDEO_W - draw.textlength(tag, font=f_small)) // 2, 380),
+            tag,
+            font=f_small,
+            fill=DIM,
+        )
     else:
         caption = scene["caption"]
         if scene.get("lines") is measured_lines:
@@ -567,7 +651,13 @@ def render_video_frame(
         line_h = 27
         max_fit = (term_h - 34 - 26 - 22 - 20) // line_h
         visible = visible[:max_fit]
-        term = render_scene(visible, title="dukabind — demo", width=VIDEO_W - 120, height=term_h, font_size=17)
+        term = render_scene(
+            visible,
+            title="dukabind — demo",
+            width=VIDEO_W - 120,
+            height=term_h,
+            font_size=17,
+        )
         img.paste(term, (60, 40))
         draw = ImageDraw.Draw(img)
     draw_caption(draw, caption, VIDEO_W, VIDEO_H)
@@ -591,17 +681,39 @@ def _render_video(frames_dir: Path) -> None:
     mp4 = REPO / "demo" / "demo.mp4"
     mp4.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
-        "ffmpeg", "-y", "-framerate", str(FPS),
-        "-i", str(frames_dir / "frame_%05d.png"),
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        "ffmpeg",
+        "-y",
+        "-framerate",
+        str(FPS),
+        "-i",
+        str(frames_dir / "frame_%05d.png"),
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
         str(mp4),
     ]
     subprocess.run(cmd, check=True, capture_output=True)
     dur = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "default=nw=1:nk=1", str(mp4)],
-        capture_output=True, text=True, check=True,
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=nw=1:nk=1",
+            str(mp4),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
     ).stdout.strip()
     print(f"wrote {mp4} (duration {dur}s)")
 
@@ -620,7 +732,8 @@ def main() -> None:
     missing = [p for p in (MONO, SANS, SANS_B) if not Path(p).exists()]
     if missing:
         raise SystemExit(
-            "missing DejaVu font files: " + ", ".join(missing)
+            "missing DejaVu font files: "
+            + ", ".join(missing)
             + " (install fonts-dejavu-core, or adjust FONT_DIR)"
         )
     seed_ledger()
