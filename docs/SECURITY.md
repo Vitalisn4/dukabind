@@ -1,6 +1,6 @@
 # Security model: DukaBind
 
-**Authority:** Security-sensitive code paths cite a control ID (C1–C10) from this document.
+**Authority:** Security-sensitive code paths cite a control ID (C1-C10) from this document.
 
 This is the threat model for the ledger binder. The status column shows which controls are implemented, deferred, or partial as of Gate 1.
 
@@ -71,7 +71,7 @@ The language model is never trusted to choose SQL, invent balances, or execute w
 Architecture: the model only receives citation JSON from allowlisted SQL. Missing fields refuse before narration. Cashier-facing `message` stays the binder decision; optional polish is stored in `narration`. Tests cover NULL refuse and ledger flip.
 
 **Where is the policy encoded?**  
-Controls **C1–C5** and **C7–C9** in code under `app/binder/` and `app/llm/`. Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
+Controls **C1-C5** and **C7-C9** in code under `app/binder/` and `app/llm/`. Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 
 ---
 

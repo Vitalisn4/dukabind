@@ -295,6 +295,17 @@ def test_refuse_not_found_preserves_ledger_name(db: sqlite3.Connection) -> None:
     assert "fournisseur" not in r.message
 
 
+def test_french_sodas_plural_stock(db: sqlite3.Connection) -> None:
+    # README documents "Combien de sodas en stock ?" : the French plural must
+    # resolve to the malt crate SKU, not refuse with not_found.
+    r = handle_ask(db, "Combien de sodas en stock ?")
+    assert r.ok is True
+    assert r.lang == "fr"
+    assert r.intent.value == "stock_check"
+    assert "en stock=14" in r.message
+    assert "720" in r.message
+
+
 def test_english_still_default() -> None:
     p = parse_ask("How much do we owe SOCA?")
     assert p.lang == "en"

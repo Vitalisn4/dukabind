@@ -19,7 +19,7 @@ THREADS=3 CTX=2048 bash scripts/ram_capped_proof.sh   # 8 GB-class proof; envs p
 
 ## Participant smoke (2026-08-06, `--full`, definitive run)
 
-Source: the 2026-08-06 `--full` profiler run on the build laptop (values also recorded in [`REPORT.md`](REPORT.md); raw JSON gitignored under `benchmarks/raw/`). The committed freeze snapshot [`benchmarks/submission.json`](benchmarks/submission.json) is the **2026-08-11 `--skip-accuracy` re-run** (Peak RSS 1821.11 MB · 15.67 tok/s · TTFT 10548.82 ms, see `CHANGELOG.md` `[1.0.0-gate1]`) and is **not** the source of this table; the regenerated [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md) reflects the 2026-08-12 re-run.
+Source: the 2026-08-06 `--full` profiler run on the build laptop (values also recorded in [`REPORT.md`](REPORT.md); raw JSON gitignored under `benchmarks/raw/`). The committed freeze snapshot [`benchmarks/submission.json`](benchmarks/submission.json) is the **2026-08-11 `--skip-accuracy` re-run** (Peak RSS 1821.11 MB · 15.67 tok/s · TTFT 10548.82 ms, freeze tag `v1.0.0-gate1`) and is **not** the source of this table; the regenerated [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md) reflects the 2026-08-12 re-run.
 
 | Metric | Measured |
 |---|---|
@@ -92,7 +92,7 @@ Source: `benchmarks/raw/thermal_soak_20260806T071704Z.csv`, from `bash scripts/t
 | Samples ≥ 85 °C | 9 / 75 (12 %) |
 | Verdict | **FAIL**: peak ≥ 85 °C (P_thermal risk) |
 
-**Interpretation:** steady state is comfortable (mean 78 °C, last samples 70–81 °C, no runaway), but this 2018-era 8-thread laptop intermittently spikes ≥ 85 °C under sustained generation, the same burst pattern as the 100 °C profiler-smoke. Mitigations: (a) `THREADS=2` re-soak, **measured FAIL** at `ctx=2048` (see below); (b) `CTX=1024` re-soak, **measured PASS** (see below); (c) P_thermal is decided on the **official eval laptop** (i5 12th-gen / Ryzen 5 3000–5000), which cools differently from this host.
+**Interpretation:** steady state is comfortable (mean 78 °C, last samples 70-81 °C, no runaway), but this 2018-era 8-thread laptop intermittently spikes ≥ 85 °C under sustained generation, the same burst pattern as the 100 °C profiler-smoke. Mitigations: (a) `THREADS=2` re-soak, **measured FAIL** at `ctx=2048` (see below); (b) `CTX=1024` re-soak, **measured PASS** (see below); (c) P_thermal is decided on the **official eval laptop** (i5 12th-gen / Ryzen 5 3000-5000), which cools differently from this host.
 
 ## Thermal soak (2026-08-06, `THREADS=2` `ctx=2048`, single server)
 
@@ -165,7 +165,7 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 ## Model lock
 
 - **Primary (locked):** Qwen2.5-1.5B-Instruct Q4_K_M (`model/qwen2.5-1.5b-instruct-q4_k_m.gguf`, sha256-pinned in `download_model.sh`). Evidence above: Peak RSS 1825.72 MB, 16.44 tok/s (profiler `--full`; llama-bench up to 17.94), TTFT ~9.0 s, clearing the 5.5 GB self-limit with margin.
-- **T15 quant lock:** Q4_K_M 1.5B stays frozen unless T11 (answer accuracy) regresses against the held-out set with RSS margin; 3B Q4 only if T1–T3 stay green.
+- **T15 quant lock:** Q4_K_M 1.5B stays frozen unless T11 (answer accuracy) regresses against the held-out set with RSS margin; 3B Q4 only if T1-T3 stay green.
 - **Tiny Aya, skipped:** the Aya bake-off is out of scope for Gate 1. No Aya benchmark numbers are claimed or invented.
 
 ## Still to run

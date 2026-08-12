@@ -26,7 +26,7 @@ Verify it yourself in 30 seconds: edit one `credit_limit` row in the shop ledger
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 1. Binder tests: no model required (77 tests)
+# 1. Binder tests: no model required (78 tests)
 PYTHONPATH=. pytest tests/ -q
 
 # 2. Try the binder directly (no model; the ask path is read-only)
@@ -36,7 +36,7 @@ PYTHONPATH=. python -m app.cli "Can I give Marie-Claire three crates on credit?"
 # 3. Offline proof: answers track the ledger with no cloud dependency
 bash scripts/offline_check.sh
 
-# 4. Held-out evaluation: 28 prompts, two shop ledgers, flip proofs
+# 4. Held-out evaluation: EN/FR/SW prompts, two shop ledgers, flip proofs
 PYTHONPATH=. .venv/bin/python evals/run_heldout.py
 ```
 
@@ -97,8 +97,8 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 | Generation speed | **15.67 tok/s** | ≥ 15 tok/s |
 | Time to first token | 10548.82 ms | n/a |
 | Accuracy self-benchmark | **74.0 %** on `arc_easy` (50 samples, `acc_norm`); toolchain evidence, official S_acc = audit mode | n/a |
-| Held-out bind/refuse (T11) | **28/28 = 100.0 %** | ≥ 90 % |
-| Held-out checks | **31/31**, flip proofs 3/3 | n/a |
+| Held-out bind/refuse (T11) | **37/37 = 100.0 %** | ≥ 90 % |
+| Held-out checks | **40/40**, flip proofs 3/3 | n/a |
 | Thermal soak (10 min) | See [`BENCHMARKS.md`](BENCHMARKS.md): the 2026-08-06 PASS does not reproduce on the build laptop; the authoritative verdict is the official eval machine | < 85 °C |
 
 Numbers above cite the committed freeze snapshot (`benchmarks/submission.json` / `submission.summary.md`, 2026-08-11); `BENCHMARKS.md` also records the 2026-08-06 definitive run. Methodology and raw evidence: [`BENCHMARKS.md`](BENCHMARKS.md) · [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md) · [`MODEL_CARD.md`](MODEL_CARD.md) · held-out report [`evals/heldout/REPORT.md`](evals/heldout/REPORT.md). Every number above traces to a committed measurement. Nothing is invented.
@@ -109,7 +109,7 @@ Numbers above cite the committed freeze snapshot (`benchmarks/submission.json` /
 
 | Doc | Purpose |
 |---|---|
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Threat model and binder security rules (C1–C10) |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Threat model and binder security rules (C1-C10) |
 | [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) | Research-backed design choices and rejected alternatives |
 | [`docs/README.md`](docs/README.md) | Public docs index |
 | [`REPORT.md`](REPORT.md) | Gate 1 technical writeup |
