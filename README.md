@@ -2,9 +2,9 @@
 
 **An offline shop assistant that cannot invent your money.**
 
-DukaBind is a fail-closed ledger binder for African MSME counters. Staff ask about **credit**, **supplier payables**, or **stock** in English; the app answers from a local SQLite ledger through a small set of allowlisted queries, and a local GGUF model may narrate *only* the rows those queries returned. Missing data produces a hard refusal — never an invented figure. Change a ledger row, and the answer must change.
+DukaBind is a fail-closed ledger binder for African MSME counters. Staff ask about **credit**, **supplier payables**, or **stock** in **English, French, or Swahili**; the app answers from a local SQLite ledger through a small set of allowlisted queries, and a local GGUF model may narrate *only* the rows those queries returned. Missing data produces a hard refusal — never an invented figure. Change a ledger row, and the answer must change.
 
-> Domain: **Corporate / Enterprise** · Runtime: **llama.cpp + GGUF** · 100 % offline at inference · English
+> Domain: **Corporate / Enterprise** · Runtime: **llama.cpp + GGUF** · 100 % offline at inference · English, French, Swahili (`language_scope: ["en", "fr", "sw"]`)
 
 ---
 
@@ -55,12 +55,14 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 
 ## What it answers
 
-| Intent | Example ask | Behaviour |
+| Intent | Example ask (EN / FR / SW) | Behaviour |
 |---|---|---|
-| Credit check | "Can I give Marie-Claire three crates on credit?" | Arithmetic vs. the ledger limit; grounded Yes / No with the math shown |
-| Supplier balance | "How much do we owe SOCA?" | Reads `balance_owed` from the ledger row |
-| Stock on hand | "How many soda crates on hand?" | Reads `on_hand` from the ledger row |
-| Anything else | "Who owns this shop?", jailbreaks | Hard refusal — `unknown_intent` or `not_found` |
+| Credit check | "Can I give Marie-Claire three crates on credit?" / "Puis-je donner trois caisses de crédit à Marie-Claire ?" / "Ninaweza kumpa Marie-Claire kreti ya makreti matatu?" | Arithmetic vs. the ledger limit; grounded Yes / No with the math shown, in the ask language |
+| Supplier balance | "How much do we owe SOCA?" / "Combien devons-nous à SOCA ?" / "Tunadaiwa kiasi gani na SOCA?" | Reads `balance_owed` from the ledger row, localized |
+| Stock on hand | "How many soda crates on hand?" / "Combien de sodas en stock ?" / "Tuna hifadhi ngapi ya soda?" | Reads `on_hand` from the ledger row, localized |
+| Anything else | "Who owns this shop?", jailbreaks (any language) | Hard refusal — `unknown_intent` or `not_found`, in the ask language |
+
+**Narration:** English and French answers may be narrated by the local model (verified on Qwen2.5-1.5B Q4_K_M). Swahili answers are **binder-only** by design: the deterministic message is authoritative, and the 1.5B model does not reliably narrate Swahili without mangling figures — so narration is deliberately skipped to protect money numbers.
 
 **Fail-closed rule:** a required money field that is `NULL` ("not on file") produces a refusal that names the field — no balance, no limit, no amount is invented. This applies to `credit_limit`, `outstanding`, and `balance_owed`, enforced by tests including an injection battery.
 

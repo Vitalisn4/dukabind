@@ -170,14 +170,17 @@ def test_english_stock_stays_english(db: sqlite3.Connection) -> None:
     assert r.ok is True
 
 
-def test_non_english_ask_is_unknown_without_english_cues(
+def test_non_english_ask_still_fails_closed(
     db: sqlite3.Connection,
 ) -> None:
-    """English-only lexicon: a French credit ask does not route to credit."""
+    """A non-English ask with no known entity still refuses, never guesses."""
+    # French asks route to the French track; without a known customer the
+    # binder refuses (not_found) instead of inventing a customer or amount.
     r = handle_ask(db, "Puis-je accorder un crédit à ce client ?")
-    assert r.lang == "en"
+    assert r.lang == "fr"
     assert r.ok is False
-    assert r.refuse_reason == "unknown_intent"
+    assert r.refuse_reason == "not_found"
+    assert "propriétaire" in r.message
 
 
 def test_sku_alias_not_substring_of_unrelated_word() -> None:

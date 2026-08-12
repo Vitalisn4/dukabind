@@ -1,7 +1,7 @@
 {
   "team_id": "vitalisn4",
   "domain": "corporate_enterprise",
-  "language_scope": ["en"],
+  "language_scope": ["en", "fr", "sw"],
   "african_alpha_claim": true,
   "budget_laptop_claim": true,
   "submitter": {

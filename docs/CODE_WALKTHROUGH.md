@@ -4,7 +4,7 @@
 **Last updated:** 2026-08-12  
 **Audience:** Contributors, Gate reviewers, and anyone reproducing DukaBind from a clean checkout
 
-**What we are building:** offline **English** shop assistant for African MSME counters — allowlisted SQL on Marché Akwa Viviane (Douala, XAF); hard refuse on missing money fields; optional local llama.cpp narration; binder `message` authoritative.
+**What we are building:** offline shop assistant for African MSME counters in **English, French, and Swahili** — allowlisted SQL on Marché Akwa Viviane (Douala, XAF); hard refuse on missing money fields; optional local llama.cpp narration (en/fr; Swahili is binder-only by design); binder `message` authoritative.
 
 This guide maps the shipped product: what each file does, how a staff question becomes an answer, which commands to run, and how the Marché Akwa Viviane ledger is structured.
 
@@ -20,7 +20,7 @@ DukaBind is an **offline shop assistant** for commodity 8 GB laptops. Counter st
 
 The system does **not** answer from the language model’s memory. It:
 
-1. Detects intent with English keyword rules.  
+1. Detects intent with keyword rules (English / French / Swahili).  
 2. Runs **one or more allowlisted SQL queries** with bound parameters (credit uses `customer_credit` then `sku_stock`).  
 3. Computes credit math in Python (or **refuses** if a required money field is missing).  
 4. Optionally asks a **local** `llama-server` to polish wording — the binder `message` stays authoritative.
@@ -62,7 +62,7 @@ Staff question (English)
 | `ok` | `true` when the binder returned a grounded answer (including credit Yes/No); `false` on refuse |
 | `approved` | Credit only: `true` within limit, `false` over limit; `null` for non-credit / refuse |
 | `intent` | `credit_check` · `supplier_balance` · `stock_check` · `unknown` |
-| `lang` | `en` (English only) |
+| `lang` | `en` / `fr` / `sw` (ask language; binder message localized deterministically) |
 | `message` | **Authoritative** cashier string from the binder |
 | `refuse_reason` | e.g. `balance_owed_null`, `credit_limit_null`, `not_found` |
 | `citation_json` | Compact JSON of ledger rows |
@@ -169,7 +169,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 
 | Path | What it does |
 |---|---|
-| `intents.py` | Rule-based English detection; extracts slots; caps ask length at 500 chars; word-boundary name match (so `rice` does not match inside `price`). |
+| `intents.py` | Rule-based EN/FR/SW detection (marker scoring); extracts slots; caps ask length at 500 chars; word-boundary name match (so `rice` does not match inside `price`). |
 | `allowlist.py` | Finite map of named SQL; unknown name or missing params → `ValueError`; never concatenates user text into SQL (**C1/C2**). |
 | `refuse.py` | Refuse strings + `credit_decision` arithmetic in Python (**C4**). |
 | `citations.py` | Rows → compact JSON for narration prompts. |
@@ -215,7 +215,7 @@ Contact email lives in `metadata.json` / Devpost only — not in this walkthroug
 | `test_binder.py` | Allowlist reject; Fotso over-limit 8410; Esther NULL limit; SOCA NULL balance; Bonaberi 42000; stock; non-English ask unknown; substring safety; overlong ask; zero qty; rice price; ledger flip; qty-vs-amount parsing; SQL-injection battery; narration prompt-injection invariant |
 | `test_ask.py` | Refuse skips LLM; binder `message` authority; loopback reject; non-loopback `base_url` does not narrate |
 | `test_duka_b.py` | Second-shop generalization; NULL refusal; accent-insensitive asks; cross-shop non-leak; flip on `duka_b`; full held-out suite stays green |
-| `test_metadata.py` | Contest-claims guard: domain, `language_scope: ["en"]`, honest claims, exactly 2 ledger-grounded `test_prompts`, llama.cpp runtime |
+| `test_metadata.py` | Contest-claims guard: domain, `language_scope: ["en","fr","sw"]`, honest claims, exactly 2 ledger-grounded `test_prompts`, llama.cpp runtime |
 
 Run: `PYTHONPATH=. pytest tests/ -q` (expect **46 passed**).
 

@@ -96,9 +96,22 @@ PYTHONPATH=. .venv/bin/python evals/run_heldout.py
 # expect: 31/31 checks, 0 failures (T11 28/28 = 100.0%, ledger-flip proofs 3/3)
 ```
 
-28 EN prompts against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`) — credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak.
+28 EN prompts against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`) — credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak. Multilingual asks (French, Swahili) are covered by `tests/test_languages.py`.
 
-### 2.8 (Optional) Profiler — `benchmarks/` regeneration
+### 2.8 (Optional) Multilingual + Ollama/LM Studio compatibility
+
+The binder answers English, French, and Swahili asks with localized deterministic messages (`tests/test_languages.py`):
+
+```bash
+PYTHONPATH=. python -m app.cli "Puis-je donner trois caisses de crédit à Marie-Claire ?"
+PYTHONPATH=. python -m app.cli "Tunadaiwa kiasi gani na SOCA?"
+```
+
+English and French answers may be narrated by the local model; Swahili is binder-only by design (the 1.5B model does not narrate Swahili reliably — see `MODEL_CARD.md`).
+
+**Judge-compatibility smoke:** judges may bare-load the GGUF in LM Studio or Ollama rather than our repo scripts. The weights are a standard Qwen2.5 GGUF, so any GGUF loader works; the binder-only `python -m app.cli` path never needs the model at all. This is a documented compatibility note, not a shipped dependency (llama.cpp remains the only runtime the repo builds).
+
+### 2.9 (Optional) Profiler — `benchmarks/` regeneration
 
 The committed `benchmarks/submission.json` is the freeze snapshot; only regenerate it if you are re-measuring on a new host. Requirements are documented in the script header: a Python ≥ 3.11 venv with `adtc-profiler` installed (the repo convention is `.venv311`, created with `uv` or `python3.11 -m venv`), the GGUF from §2.4, and `llama-bench` from the §2.5 build on `PATH`:
 

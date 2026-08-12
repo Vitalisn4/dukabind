@@ -15,19 +15,19 @@
 ## Intended use
 
 - **Narrate cited ledger rows only.** DukaBind's deterministic binder (`app/binder/`) runs allowlisted SQL on a local SQLite shop ledger and produces an authoritative `message` plus `citation_json`. The model may **polish wording** of those rows — it never chooses SQL, never computes balances, and never sees or outputs amounts that are not already in the citation JSON.
-- **Offline English counter-staff Q&A** about credit, supplier payables, and stock on hand, on commodity 8 GB laptops with no connectivity.
-- **Language scope (locked):** `language_scope=["en"]`. The African use-case claim is the **Cameroon MSME offline ledger use-case** (`african_alpha_claim: true`).
+- **Offline counter-staff Q&A** about credit, supplier payables, and stock on hand, on commodity 8 GB laptops with no connectivity.
+- **Language scope:** `language_scope=["en","fr","sw"]`. Binder answers are localized deterministically (no LLM) in English, French (Cameroon official language), and Swahili (pan-African). The African use-case claim is the **Cameroon MSME offline ledger use-case** (`african_alpha_claim: true`).
 
 ## Out of scope (do not rely on it for)
 
 - Inventing balances, limits, or stock figures that are not in the citation rows — the binder **refuses** (fail closed) when a required money field is `NULL`; refusals never call the model.
 - Choosing or generating SQL, or any write path (owner-gated writes C6 are deferred past Gate 1).
-- Languages beyond English — not claimed at Gate 1. Product language: English (`language_scope: ["en"]`).
+- Narration languages: English and French (verified on the frozen Qwen2.5-1.5B). **Swahili is binder-only** — the 1.5B model does not narrate Swahili reliably (it can invent figures), so Swahili answers ship the authoritative deterministic binder message without model narration.
 - Anything requiring a cloud API, telemetry, or network at inference time.
 
 ## Known limits
 
-- **English only.** Additional-language localisation is planned post–Gate 1.
+- **Multilingual binder track (en/fr/sw) shipped; narration is en/fr.** Additional languages remain a post–Gate 1 extension on the same binder.
 - **Thermal on hot laptops:** on the build laptop (Intel i7-8650U) a 10-minute soak passed **&lt; 85 °C at `THREADS=2`/`ctx=1024`** on 2026-08-06 (peak 84.0 °C, 0/68 samples ≥ 85 °C), but that **PASS no longer reproduces**: the identical config re-run on 2026-08-10 from a cooler 60 °C idle **FAILED** (mean 78.6 °C, peak **89.0 °C**, several samples ≥ 85 °C). `THREADS=3`/`ctx=2048` and `THREADS=2`/`ctx=2048` also fail on that host (peaks 97 °C / 93 °C). Treat P_thermal on the build laptop as **unverified (FAIL on 2026-08-10 re-run)**; the authoritative P_thermal call is the official ADTC eval machine. Shipped default: `THREADS=2`/`ctx=1024` (documented in [`BENCHMARKS.md`](BENCHMARKS.md)).
 - **Allowlist coverage:** the binder answers three intents (credit, supplier balance, stock) against the seeded ledgers. Unknown intents/entities refuse with `not_found` — by design, not a completeness claim.
 - **Accuracy measurement:** official S_acc comes from ADTC audit mode on the eval machine. The profiler's participant mode can now emit a real self-benchmark (`arc_easy` 50-sample **74.0%** on 2026-08-12 — toolchain evidence, not a S_acc claim). Held-out bind/refuse (T11) is measured separately by `evals/run_heldout.py` — see the [held-out report](evals/heldout/REPORT.md).

@@ -1,7 +1,8 @@
 """Fail-closed refuse rules (control C4).
 
 If a required field is NULL/missing, we refuse — the LLM must not invent amounts.
-Cashier messages are English (Gate 1).
+Cashier messages are localized (English / French / Swahili); the deterministic
+message is authoritative in every language.
 """
 
 from __future__ import annotations
@@ -30,6 +31,11 @@ class BinderResult:
     approved: bool | None = None
 
 
+def _t(lang: str, en: str, fr: str, sw: str) -> str:
+    """Pick the localized template; English is the fallback for unknown langs."""
+    return {"en": en, "fr": fr, "sw": sw}.get(lang, en)
+
+
 def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
     """Refuse when credit_limit is NULL — never invent a limit."""
     return BinderResult(
@@ -38,7 +44,12 @@ def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="credit_limit_null",
-        message=f"No credit limit on file for {name} — ask the owner.",
+        message=_t(
+            lang,
+            f"No credit limit on file for {name} — ask the owner.",
+            f"Pas de limite de crédit enregistrée pour {name} — demandez au propriétaire.",
+            f"Hakuna kikomo cha kreti kwa {name} — uliza mmiliki.",
+        ),
     )
 
 
@@ -50,7 +61,12 @@ def refuse_credit_missing_outstanding(lang: str, name: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="outstanding_null",
-        message=f"No outstanding balance on file for {name} — ask the owner.",
+        message=_t(
+            lang,
+            f"No outstanding balance on file for {name} — ask the owner.",
+            f"Pas de solde impayé enregistré pour {name} — demandez au propriétaire.",
+            f"Hakuna salio linalodaiwa kwa {name} — uliza mmiliki.",
+        ),
     )
 
 
@@ -62,7 +78,12 @@ def refuse_supplier_missing_balance(lang: str, name: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="balance_owed_null",
-        message=f"Amount owed to {name} is not on file — ask the owner.",
+        message=_t(
+            lang,
+            f"Amount owed to {name} is not on file — ask the owner.",
+            f"Le montant dû à {name} n'est pas enregistré — demandez au propriétaire.",
+            f"Kiasi kinachodaiwa na {name} hakipo kwenye kumbukumbu — uliza mmiliki.",
+        ),
     )
 
 
@@ -74,7 +95,12 @@ def refuse_not_found(lang: str, what: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="not_found",
-        message=f"No ledger row found for {what} — ask the owner.",
+        message=_t(
+            lang,
+            f"No ledger row found for {what} — ask the owner.",
+            f"Aucune ligne de registre trouvée pour {what} — demandez au propriétaire.",
+            f"Hakuna rekodi ya {what} — uliza mmiliki.",
+        ),
     )
 
 
@@ -86,8 +112,13 @@ def refuse_unknown(lang: str) -> BinderResult:
         lang=lang,
         citation_rows=[],
         refuse_reason="unknown_intent",
-        message=(
-            "I can only answer credit, supplier balances, or stock from this shop ledger."
+        message=_t(
+            lang,
+            "I can only answer credit, supplier balances, or stock from this shop ledger.",
+            "Je ne peux répondre qu'aux questions de crédit, de soldes fournisseurs "
+            "ou de stock de ce registre de la boutique.",
+            "Naweza kujibu tu maswali ya kreti, salio la wasambazaji, au hifadhi "
+            "kutoka kwenye rekodi za duka.",
         ),
     )
 
@@ -135,11 +166,26 @@ def credit_decision(
             lang=lang,
             citation_rows=citation,
             approved=False,
-            message=(
-                f"No — {qty} × {unit_price} = {add}; "
-                f"{outstanding} + {add} = {projected} exceeds limit {limit_i} "
-                f"by {over} {currency}. "
-                f"Max qty within limit: {max_qty}."
+            message=_t(
+                lang,
+                (
+                    f"No — {qty} × {unit_price} = {add}; "
+                    f"{outstanding} + {add} = {projected} exceeds limit {limit_i} "
+                    f"by {over} {currency}. "
+                    f"Max qty within limit: {max_qty}."
+                ),
+                (
+                    f"Non — {qty} × {unit_price} = {add} ; "
+                    f"{outstanding} + {add} = {projected} dépasse la limite "
+                    f"{limit_i} de {over} {currency}. "
+                    f"Quantité maximale dans la limite : {max_qty}."
+                ),
+                (
+                    f"Hapana — {qty} × {unit_price} = {add}; "
+                    f"{outstanding} + {add} = {projected} inazidi kikomo {limit_i} "
+                    f"kwa {over} {currency}. "
+                    f"Idadi ya juu ndani ya kikomo: {max_qty}."
+                ),
             ),
         )
 
@@ -149,8 +195,19 @@ def credit_decision(
         lang=lang,
         citation_rows=citation,
         approved=True,
-        message=(
-            f"Yes — {qty} × {unit_price} = {add}; "
-            f"projected outstanding {projected} ≤ limit {limit_i} {currency}."
+        message=_t(
+            lang,
+            (
+                f"Yes — {qty} × {unit_price} = {add}; "
+                f"projected outstanding {projected} ≤ limit {limit_i} {currency}."
+            ),
+            (
+                f"Oui — {qty} × {unit_price} = {add} ; "
+                f"solde prévisionnel {projected} ≤ limite {limit_i} {currency}."
+            ),
+            (
+                f"Ndiyo — {qty} × {unit_price} = {add}; "
+                f"salio linalotarajiwa {projected} ≤ kikomo {limit_i} {currency}."
+            ),
         ),
     )

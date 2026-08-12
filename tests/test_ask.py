@@ -60,3 +60,20 @@ def test_ask_rejects_non_loopback_base_url(db: sqlite3.Connection) -> None:
     assert out["message"]
     assert "llm_note" in out
     assert "127.0.0.1" in out["llm_note"]
+
+
+def test_ask_swahili_skips_narration_by_design(db: sqlite3.Connection) -> None:
+    """Swahili is binder-only: the frozen model cannot narrate Swahili
+    reliably, so the authoritative binder message ships without narration."""
+    out = ask(
+        db,
+        "Je, ninaweza kumpa Marie-Claire kreti ya makreti matatu?",
+        use_llm=True,
+    )
+    assert out["ok"] is True
+    assert out["lang"] == "sw"
+    assert out["narrated"] is False
+    assert out["narration"] is None
+    assert out["source"] == "binder"
+    assert "binder message is authoritative" in out["llm_note"]
+    assert "8410" in out["message"]

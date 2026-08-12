@@ -24,9 +24,10 @@ def test_domain_locked(meta: dict) -> None:
     assert meta["domain"] == "corporate_enterprise"
 
 
-def test_language_scope_is_english_only(meta: dict) -> None:
-    # English-only at Gate 1; additional languages are a post-Gate-1 plan.
-    assert meta["language_scope"] == ["en"]
+def test_language_scope_matches_shipped_tracks(meta: dict) -> None:
+    # English is the primary language; French (Cameroon official language) and
+    # Swahili (pan-African) binder tracks are shipped and tested.
+    assert meta["language_scope"] == ["en", "fr", "sw"]
 
 
 def test_claims_match_what_is_proven(meta: dict) -> None:

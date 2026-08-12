@@ -21,11 +21,23 @@ Docs, CI, and benchmark tooling only — no product features added after the 1.0
   participant score — `arc_easy` 50-sample **74.0 %** (`acc_norm`, 2026-08-12),
   recorded in `BENCHMARKS.md` as toolchain evidence only (official S_acc = audit mode).
 
+### Added
+
+- French + Swahili binder tracks (`language_scope: ["en","fr","sw"]`):
+  language detection (marker-scored), localized deterministic binder messages
+  (credit / supplier / stock / all refusals), localized narration prompts, and
+  20 new tests (`tests/test_languages.py`). Narration ships for English and
+  French (verified on the frozen Qwen2.5-1.5B); Swahili is **binder-only** by
+  design — the 1.5B model does not narrate Swahili reliably, so the
+  authoritative deterministic message is never overridden with a mangled
+  figure.
+
 ### Changed
 
 - `README.md` — professional judge-facing rewrite: pitch, “why not a chatbot”
-  (binding not recall), quick start, intents table, demo screenshot grid, measured
-  performance table (incl. the accuracy self-benchmark), docs index.
+  (binding not recall), quick start, intents table (EN/FR/SW examples), demo
+  screenshot grid, measured performance table (incl. the accuracy
+  self-benchmark), docs index.
 - `scripts/run_profiler_smoke.sh` — `--full` runs now emit an “Accuracy self-benchmark”
   section in `benchmarks/submission.summary.md`.
 - Docs honesty: `BENCHMARKS.md` / `REPORT.md` / `MODEL_CARD.md` corrected the

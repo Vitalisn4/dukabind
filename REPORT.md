@@ -23,7 +23,7 @@ See [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) for selection rationa
 - **Base model:** Qwen2.5-1.5B-Instruct (Apache-2.0 upstream).
 - **Quantization:** GGUF Q4_K_M — quality/size trade per Devpost quant guidance; official Qwen GGUF file ~1.12 GB.
 - **Integration (load-bearing):** Allowlisted SQL binder — not vector RAG. Protects S_eff under the 7 GB usable budget and prevents financial hallucination.
-- **Language:** English cashier asks and binder messages (`language_scope: ["en"]`). African use-case claim is Cameroon MSME offline ledger context, not an African-language claim.
+- **Language:** English, French (Cameroon official language), and Swahili cashier asks and binder messages (`language_scope: ["en","fr","sw"]`). Binder answers are deterministic and localized in all three; narration (optional model polish) ships for English and French — Swahili is binder-only because the 1.5B model does not narrate Swahili reliably. African use-case claim is Cameroon MSME offline ledger context.
 - **Runtime:** llama.cpp only (template + FAQ requirement).
 - **Model lock (M3):** Qwen2.5-1.5B Q4_K_M is frozen as primary on measured evidence — Peak RSS 1825.72 MB (≪ 5.5 GB limit), 16.44 tok/s (profiler `--full` run; llama-bench up to 17.94), TTFT ~9.0 s. **T15 quant lock:** Q4_K_M 1.5B stays frozen unless accuracy regresses with RSS margin; 3B Q4 only if T1–T3 stay green. Tiny Aya is explicitly **not** downloaded — no Aya benchmark is claimed.
 - **Alternatives rejected:** 7B-class (RSS DQ risk); embeddings/FAISS (RAM); LLM-generated SQL (injection + hallucination).
@@ -84,4 +84,4 @@ Full measured tables and methodology: [`BENCHMARKS.md`](BENCHMARKS.md). Model fa
 
 ## African use case claim
 
-`african_alpha_claim: true` — African **use-case** claim: offline MSME shop ledger assistant for commodity laptops, designed from Cameroon (Douala / XAF) reality. Product language is **English only** (`language_scope: ["en"]`); no African-language bonus is claimed without a native reviewer.
+`african_alpha_claim: true` — African **use-case** claim: offline MSME shop ledger assistant for commodity laptops, designed from Cameroon (Douala / XAF) reality. Product languages: English, French, and Swahili binder tracks (`language_scope: ["en","fr","sw"]`); French and Swahili asks/answers were authored and reviewed with native-language care, and narration is limited to the languages the frozen model handles reliably (en/fr).

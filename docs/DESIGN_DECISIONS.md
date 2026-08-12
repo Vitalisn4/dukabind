@@ -73,15 +73,15 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 ---
 
-## D6b — Product language: English only (Gate 1)
+## D6b — Product language: English, French, Swahili binder tracks (Gate 1)
 
 | | |
 |---|---|
-| **Choice** | `language_scope: ["en"]` — cashier asks and binder messages in English |
-| **Evidence** | English-only product scope locked at Gate 1; Cameroon MSME use-case does not require another language |
-| **African claim** | `african_alpha_claim: true` is for **offline Cameroon/Douala MSME ledger use-case**, not an African-language claim |
-| **Deferred** | French localisation (Cameroon official language) and any further languages after Gate 1 |
-| **Reverse if** | Held-out quality proven in an additional language before the freeze |
+| **Choice** | `language_scope: ["en","fr","sw"]` — cashier asks and binder messages localized deterministically in English, French (Cameroon official language), and Swahili (pan-African) |
+| **Evidence** | Language detection is keyword-based and deterministic; binder messages are templated per language with tests; narration was verified empirically on the frozen Qwen2.5-1.5B — English and French narrate reliably, **Swahili does not, so Swahili is binder-only** (narration skipped so money figures are never mis-stated) |
+| **African claim** | `african_alpha_claim: true` covers the **offline Cameroon/Douala MSME ledger use-case** plus French/Swahili binder tracks |
+| **Deferred** | Additional languages after Gate 1 |
+| **Reverse if** | Held-out quality regresses in English, or a bigger model narrates Swahili reliably within the 8 GB envelope |
 
 ---
 

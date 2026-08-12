@@ -89,6 +89,12 @@ KNOWN_SKUS = [
     "Farine 50kg",
     "flour",
     "farine",
+    # Swahili product words — stock asks in Swahili bind to the same SKUs.
+    "sukari",  # sugar
+    "unga",  # flour
+    "mchele",  # rice
+    "mafuta",  # oil
+    "sabuni",  # soap
 ]
 
 _CUSTOMER_ALIASES = {
@@ -151,6 +157,12 @@ _SKU_ALIASES = {
     "farine 50kg": "Farine 50kg",
     "flour": "Farine 50kg",
     "farine": "Farine 50kg",
+    # Swahili product words.
+    "sukari": "Sucre 25kg",
+    "unga": "Farine 50kg",
+    "mchele": "Sac riz 25kg",
+    "mafuta": "Bidon huile palme 5L",
+    "sabuni": "Savon carton 24",
 }
 
 
