@@ -735,8 +735,6 @@ def _render_video(frames_dir: Path) -> None:
         str(FPS),
         "-i",
         str(frames_dir / "frame_%05d.png"),
-        # Silent AAC track: GitHub's blob player often shows a blank page for
-        # video-only H.264 (High, no audio). Main + AAC is the reliable combo.
         "-f",
         "lavfi",
         "-i",
