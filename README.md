@@ -14,7 +14,7 @@ Most offline LLM demos answer from the model's memory — and a model asked to s
 
 1. The model never sees the database. It sees a **JSON citation block** containing exactly the rows an allowlisted query returned, plus a system rule that forbids amounts absent from that block.
 2. The binder's deterministic `message` is **authoritative**. The model may polish wording; it never chooses SQL, computes balances, or adds figures.
-3. Every ask path is **read-only** and **loopback-only** — no cloud, no telemetry, no write access.
+3. Every ask path is **read-only** — no cloud, no telemetry, no write access. Binder-only asks make **no network call**; optional narration talks only to the local model over **loopback** (127.0.0.1).
 
 Verify it yourself in 30 seconds: edit one `credit_limit` row in the shop ledger and re-ask the same question. That is the whole product — **binding, not recall.**
 

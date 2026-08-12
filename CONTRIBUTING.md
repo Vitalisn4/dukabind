@@ -27,7 +27,7 @@ No GPU required — `--n-gpu-layers 0` is the frozen flag.
 
 ## 2. Fresh-machine reproduction (from zero)
 
-Everything below is run from a fresh clone. Network is needed **once** (clone + model download); after that the whole stack runs offline.
+Everything below is run from a fresh clone. Network is needed for the repository clone, Python dependency installation, the llama.cpp source clone, and the model download; after these setup steps, the whole stack runs offline.
 
 ### 2.1 Clone + Python environment
 
@@ -142,5 +142,5 @@ Any change to these flags after the freeze is a re-freeze and must be recorded i
 | `model missing at model/qwen2.5-…gguf` | Run `./download_model.sh` first (§2.4) |
 | sha256 mismatch on download | Network-corrupted download; delete `model/qwen2.5-1.5b-instruct-q4_k_m.gguf` and re-run (idempotent) |
 | `pytest` fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing — see §2.1–2.2 |
-| Held-out eval fails on a fresh clone | Ledger not seeded — `python -m app.db.connection` before `evals/run_heldout.py` |
+| Held-out eval fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing (see §2.1–2.2). No seeding is needed — `evals/run_heldout.py` creates and seeds its temporary SQLite fixtures automatically. |
 | Thermal on a hot laptop | This is the documented, honest risk: see `BENCHMARKS.md`. The authoritative P_thermal verdict is the official ADTC eval machine. |
