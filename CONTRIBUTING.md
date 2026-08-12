@@ -14,7 +14,7 @@ This document is written for an **auditor or judge**, not for feature contributo
 | Domain / runtime | `corporate_enterprise` · llama.cpp + GGUF only |
 | Model | Qwen2.5-1.5B-Instruct Q4_K_M (pinned GGUF + sha256 in `download_model.sh`) |
 | Ship default | `THREADS=2` / `CTX=1024` (thermal-safety freeze) |
-| Reference commit | `f235c9a9bb722420974597cbd07de2ad671e9971` (this runbook); product freeze tag `v1.0.0-gate1` (`fe5b506`) |
+| Reference commit | `29d1eba5131b72cd5fe29705905cc5c5b31a6c38` (this runbook); product freeze tag `v1.0.0-gate1` (`fe5b506`) |
 
 ---
 
@@ -36,7 +36,7 @@ Everything below is run from a fresh clone. Network is needed for the repository
 ```bash
 git clone https://github.com/Vitalisn4/dukabind.git
 cd dukabind
-git checkout --detach f235c9a9bb722420974597cbd07de2ad671e9971   # pin to the runbook reference commit (Quick facts)
+git checkout --detach 29d1eba5131b72cd5fe29705905cc5c5b31a6c38   # pin to the runbook reference commit (Quick facts)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
