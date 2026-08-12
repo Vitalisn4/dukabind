@@ -5,6 +5,33 @@ All notable changes to DukaBind are documented here, in
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 up to the Gate 1 freeze; pre-1.0 versions are milestone snapshots.
 
+## [Unreleased] - post-freeze (M7, submission readiness)
+
+Docs, CI, and benchmark tooling only — no product features added after the 1.0.0-gate1 freeze.
+
+### Added
+
+- `CONTRIBUTING.md` — fresh-machine reproduction runbook written for an auditor/judge.
+- `.github/workflows/link-health.yml` — weekly + manual GGUF URL-rot guard (HEAD probe
+  + content-length ≥ 1 GB; fails loudly on a dead or non-200 final response). Hardened
+  after review: exact `MODEL_URL=` extraction (awk, count == 1), URL passed via step
+  `env` (no shell interpolation), and `^[0-9]+$` content-length validation.
+- Accuracy self-benchmark evidence: with the current `adtc-profiler` (in-process
+  llama-cpp-python path), `bash scripts/run_profiler_smoke.sh --full` emits a real
+  participant score — `arc_easy` 50-sample **74.0 %** (`acc_norm`, 2026-08-12),
+  recorded in `BENCHMARKS.md` as toolchain evidence only (official S_acc = audit mode).
+
+### Changed
+
+- `README.md` — professional judge-facing rewrite: pitch, “why not a chatbot”
+  (binding not recall), quick start, intents table, demo screenshot grid, measured
+  performance table (incl. the accuracy self-benchmark), docs index.
+- `scripts/run_profiler_smoke.sh` — `--full` runs now emit an “Accuracy self-benchmark”
+  section in `benchmarks/submission.summary.md`.
+- Docs honesty: `BENCHMARKS.md` / `REPORT.md` / `MODEL_CARD.md` corrected the
+  now-false claim that participant-mode accuracy is impossible; the 74.0 %
+  self-benchmark is recorded with the audit-mode caveat.
+
 ## [1.0.0-gate1] - 2026-08-11
 
 **Freeze commit:** `fe5b506`, tagged `v1.0.0-gate1` (branch `feature/dukabind-m6-freeze`, 2026-08-11)

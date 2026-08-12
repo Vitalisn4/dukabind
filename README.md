@@ -90,11 +90,12 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 | Peak RSS (full stack) | **1821.11 MB** | < 5.5 GB self-limit |
 | Generation speed | **15.67 tok/s** | ≥ 15 tok/s |
 | Time to first token | 10548.82 ms | — |
+| Accuracy self-benchmark | **74.0 %** on `arc_easy` (50 samples, `acc_norm`) — toolchain evidence; official S_acc = audit mode | — |
 | Held-out bind/refuse (T11) | **28/28 = 100.0 %** | ≥ 90 % |
 | Held-out checks | **31/31**, flip proofs 3/3 | — |
 | Thermal soak (10 min) | See [`BENCHMARKS.md`](BENCHMARKS.md) — 2026-08-06 PASS does not reproduce on the build laptop; authoritative verdict = official eval machine | < 85 °C |
 
-Methodology and raw evidence: [`BENCHMARKS.md`](BENCHMARKS.md) · [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md).
+Numbers above cite the committed freeze snapshot (`benchmarks/submission.json` / `submission.summary.md`, 2026-08-11); `BENCHMARKS.md` also records the 2026-08-06 definitive run. Methodology and raw evidence: [`BENCHMARKS.md`](BENCHMARKS.md) · [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md) · [`MODEL_CARD.md`](MODEL_CARD.md) · held-out report [`evals/heldout/REPORT.md`](evals/heldout/REPORT.md). Every number above traces to a committed measurement — nothing is invented.
 
 ---
 

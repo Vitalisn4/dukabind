@@ -1,7 +1,7 @@
 # Code walkthrough
 
 **Status:** Living document — update when modules, commands, or Gate milestones change  
-**Last updated:** 2026-08-06  
+**Last updated:** 2026-08-12  
 **Audience:** Contributors, Gate reviewers, and anyone reproducing DukaBind from a clean checkout
 
 **What we are building:** offline **English** shop assistant for African MSME counters — allowlisted SQL on Marché Akwa Viviane (Douala, XAF); hard refuse on missing money fields; optional local llama.cpp narration; binder `message` authoritative.
@@ -331,7 +331,7 @@ Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 |---|---|
 | Fail-closed binder + 3 intents | FastAPI / HTMX staff UI |
 | Marché Akwa Viviane + Marché Nkolmébé (`duka_b`) ledgers + tests | Owner-gated writes (C6) |
-| Optional local narration | Full profiler accuracy pass |
+| Optional local narration + profiler accuracy self-benchmark (74.0 % `arc_easy`, 2026-08-12) | |
 | Loopback + readonly ask path | |
 | `scripts/offline_check.sh` binder proof | Thermal soak green &lt;85 °C on **official eval machine** — build laptop: shipped default `THREADS=2`/`CTX=1024` **PASS 2026-08-06** (peak 84.0 °C, temperature-only) but **FAIL on 2026-08-10 re-run** (peak 89.0 °C — no longer reproducible); `THREADS=3`/`ctx=2048` (97 °C) and `THREADS=2`/`ctx=2048` (93 °C) documented FAIL |
 | Profiler smoke Peak RSS ~1.8 GB | |
@@ -368,7 +368,8 @@ When you change behaviour, update this file in the **same** change set:
 |---|---|
 | 2026-08-10 | Thermal re-validation: shipped default `THREADS=2`/`CTX=1024` 10-min soak **FAIL** on build laptop (cold-start peak 89.0 °C, hot-start 98.0 °C) — the 2026-08-06 PASS no longer reproduces; authoritative P_thermal stays on the official eval machine |
 | 2026-08-07 | M5 evidence pack: `MODEL_CARD.md`; committed held-out report (`evals/heldout/REPORT.md` via `--write-report`); T13-disjoint `tp_001`/`tp_002` in metadata.json; ship default frozen `THREADS=2`/`CTX=1024` in `start_llama_server.sh` (+ soak/proof scripts); REPORT/BENCHMARKS aligned to measured reality |
-| 2026-08-06 | 8 GB-class proof: `scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap, headroom 6.73 GiB); definitive `--full` profiler run (Peak RSS 1825.72 MB, 16.44 tok/s, TTFT 9026.84 ms, `accuracy: []` by participant-mode design) |
+| 2026-08-12 | Accuracy self-benchmark: `--full` profiler run with the current in-process llama-cpp-python accuracy path → `arc_easy` 50-sample **74.0 %** (`acc_norm`) recorded in `BENCHMARKS.md` (toolchain evidence; official S_acc = audit mode); `run_profiler_smoke.sh` now emits the score in `benchmarks/submission.summary.md` |
+| 2026-08-06 | 8 GB-class proof: `scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap, headroom 6.73 GiB); definitive `--full` profiler run (Peak RSS 1825.72 MB, 16.44 tok/s, TTFT 9026.84 ms; the then-default toolchain emitted `accuracy: []` in participant mode) |
 | 2026-08-06 | Thermal: `THREADS=2`/`ctx=1024` 10-min soak **PASS** on build laptop (mean 75.7 °C / peak 84.0 °C / 0 ≥ 85 °C); `THREADS=3` and `THREADS=2`@`ctx=2048` documented FAIL; eval laptop still decides P_thermal |
 | 2026-08-06 | CI: `.github/workflows/ci.yml` — pytest + ruff + static-analysis gate + held-out eval + offline binder proof + metadata validation on every push/PR |
 | 2026-08-06 | Security hardening: qty-vs-amount parsing, accent-insensitive aliases, injection-battery tests; `scripts/static_analysis.sh` gate (ruff + bandit + shellcheck) |
