@@ -72,15 +72,15 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 
 ## Demo
 
-**108-second demo video** ([play / download](https://github.com/Vitalisn4/dukabind/releases/download/demo-video/demo.mp4) · [release](https://github.com/Vitalisn4/dukabind/releases/tag/demo-video)). It walks through the credit bind answer, a ledger flip (a test harness edits one `credit_limit` row inside a temporary transaction and rolls it back, so the seed ledger is never modified; the answer changes with the row), a fail-closed refusal, **French and Swahili binder asks**, the offline proof, and the measured numbers. English captions are burned in, and every frame is rendered from real CLI output by [`scripts/render_demo_assets.py`](scripts/render_demo_assets.py) (Pillow terminal chrome, not a staff UI). The ask path stays read-only throughout.
+**108-second demo video** ([watch on GitHub Pages](https://vitalisn4.github.io/dukabind/demo/) · [`demo/demo.mp4`](demo/demo.mp4)). It walks through the credit bind answer, a ledger flip (a test harness edits one `credit_limit` row inside a temporary transaction and rolls it back, so the seed ledger is never modified; the answer changes with the row), a fail-closed refusal, **French and Swahili binder asks**, the offline proof, and the measured numbers. English captions are burned in, and every frame is rendered from real CLI output by [`scripts/render_demo_assets.py`](scripts/render_demo_assets.py) (Pillow terminal chrome, not a staff UI). The ask path stays read-only throughout.
 
-[![DukaBind demo poster](demo/demo-poster.png)](https://github.com/Vitalisn4/dukabind/releases/download/demo-video/demo.mp4)
+[![DukaBind demo poster](demo/demo-poster.png)](https://vitalisn4.github.io/dukabind/demo/)
 
-<video controls muted preload="metadata" width="100%" poster="https://github.com/Vitalisn4/dukabind/releases/download/demo-video/demo-poster.png" src="https://github.com/Vitalisn4/dukabind/releases/download/demo-video/demo.mp4"></video>
+<video controls muted preload="metadata" width="100%" poster="https://vitalisn4.github.io/dukabind/demo/demo-poster.png" src="https://vitalisn4.github.io/dukabind/demo/demo.mp4"></video>
 
-**Watch or download:** [demo.mp4 on the `demo-video` release](https://github.com/Vitalisn4/dukabind/releases/download/demo-video/demo.mp4) (108 s, 1280×720, H.264 Baseline + AAC, ~4.2 MB). Copy in-repo: [`demo/demo.mp4`](demo/demo.mp4). Poster (title card, not a product UI): [`demo/demo-poster.png`](demo/demo-poster.png).
+**Watch or download:** [GitHub Pages player](https://vitalisn4.github.io/dukabind/demo/) · in-repo file [`demo/demo.mp4`](demo/demo.mp4) (108 s, 1280×720, H.264 Baseline + AAC, ~4.2 MB) · poster title card [`demo/demo-poster.png`](demo/demo-poster.png).
 
-> GitHub’s file browser for repo MP4s often shows a blank page with only **View raw** (download). That is a GitHub limitation, not a broken file. Use the release download / `<video>` embed above to play in the browser.
+> Opening `demo/demo.mp4` in GitHub’s file browser often shows a blank page (View raw only). That is a GitHub limitation. Use the Pages player or the embed above to watch in the browser.
 
 | | |
 |---|---|

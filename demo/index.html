@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DukaBind demo</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #0e0f18;
+      color: #e8eaf2;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
+    main { width: min(960px, 94vw); }
+    h1 { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.75rem; }
+    p { margin: 0.5rem 0 0; color: #9aa3b5; font-size: 0.95rem; }
+    video {
+      width: 100%;
+      border-radius: 12px;
+      background: #000;
+      aspect-ratio: 16 / 9;
+    }
+    a { color: #7eb6ff; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>DukaBind · 108 s demo</h1>
+    <video controls playsinline preload="metadata" poster="demo-poster.png" src="demo.mp4">
+      Your browser cannot play this MP4.
+      <a href="demo.mp4">Download demo.mp4</a>
+    </video>
+    <p>
+      Rendered CLI frames (not a staff UI).
+      Repo: <a href="https://github.com/Vitalisn4/dukabind">Vitalisn4/dukabind</a>
+    </p>
+  </main>
+</body>
+</html>
