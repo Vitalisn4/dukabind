@@ -25,13 +25,21 @@ the ADTC African-language bonus before submission).
 - French + Swahili binder tracks (`language_scope: ["en","fr","sw"]`):
   language detection (marker-scored, word-boundary safe, ties fall back to
   English), localized deterministic binder messages (credit / supplier / stock /
-  all refusals — internal identifiers localized too), localized narration
-  prompts, Swahili product aliases (`sukari`, `unga`, …), and 31 tests
+  all refusals, with internal identifiers localized too), localized narration
+  prompts, Swahili product aliases (`sukari`, `unga`, and others), and 31 tests
   (30 in `tests/test_languages.py` plus the narration-gate test in
-  `tests/test_ask.py`). Narration ships for English and French (verified
-  on the frozen Qwen2.5-1.5B); Swahili is **binder-only** by design — the 1.5B
+  `tests/test_ask.py`). Narration ships for English and French (verified on the
+  frozen Qwen2.5-1.5B); Swahili is **binder-only** by design because the 1.5B
   model does not narrate Swahili reliably, so the authoritative deterministic
   message is never overridden with a mangled figure.
+- Fresh-machine reproduction evidence (M7 Day 1, 2026-08-12): the full
+  `CONTRIBUTING.md` runbook was executed from a clean clone of `main`
+  (`e092c7c`). Every step passed as documented: venv and `pip install`,
+  pytest (46 passed at the time), `offline_check.sh` PASS (including the ledger
+  flip and rollback), `download_model.sh` sha256-verified and idempotent,
+  llama.cpp Release build OK, server healthy at the ship default
+  (`THREADS=2`/`CTX=1024`), and the narrated asks correct (credit No because
+  8410 exceeds 8000, and the NULL-balance refusal).
 
 ### Changed
 
