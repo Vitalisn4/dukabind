@@ -33,14 +33,14 @@ def ask(
     payload["narration"] = None
     payload["source"] = "binder"
 
-    # Never hand a refusal to the model — it would be tempted to fill in a number.
+    # Never hand a refusal to the model; it would be tempted to fill in a number.
     if not result.ok and result.refuse_reason:
         return payload
 
     # Swahili answers are binder-only: the frozen Qwen2.5-1.5B model invents
     # or mangles figures when narrating in Swahili (verified empirically). The
-    # deterministic binder message is authoritative — narration is deliberately
-    # skipped so a money figure is never mis-stated.
+    # deterministic binder message is authoritative, so narration is
+    # deliberately skipped and a money figure is never mis-stated.
     if result.lang == "sw":
         payload["llm_note"] = (
             "Swahili narration skipped by design: the binder message is "

@@ -1,10 +1,10 @@
-# DukaBind — Reproduction runbook
+# DukaBind: Reproduction runbook
 
-**Goal:** from a clean, offline-capable Ubuntu machine to a working, verified DukaBind in ~15 minutes of machine time **plus model download** (~1.1 GB — network-dependent), with every number traceable to a committed artifact.
+**Goal:** from a clean, offline-capable Ubuntu machine to a working, verified DukaBind in ~15 minutes of machine time **plus model download** (~1.1 GB, network-dependent), with every number traceable to a committed artifact.
 
-> ✅ **Verified end-to-end 2026-08-12** from a clean clone of `main` (`e092c7c`): every step below (§2.1–§2.7) executed as written and passed — pytest 46/46, offline proof PASS, model sha256-verified + idempotent, llama.cpp build OK, server healthy, narrated asks correct. See [`CHANGELOG.md`](CHANGELOG.md) `[Unreleased]`.
+> **Verified end-to-end 2026-08-12** from a clean clone of `main` (`e092c7c`): every step below (§2.1–§2.7) executed as written and passed. pytest 46/46 at the pinned commit (current `main` has 77 tests), offline proof PASS, model sha256-verified + idempotent, llama.cpp build OK, server healthy, narrated asks correct. See [`CHANGELOG.md`](CHANGELOG.md) `[Unreleased]`.
 
-This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen — see [`CHANGELOG.md`](CHANGELOG.md) for the freeze commit. If you want to verify DukaBind end to end, follow this runbook top to bottom.
+This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen. See [`CHANGELOG.md`](CHANGELOG.md) for the freeze commit. If you want to verify DukaBind end to end, follow this runbook top to bottom.
 
 **Quick facts**
 
@@ -14,18 +14,18 @@ This document is written for an **auditor or judge**, not for feature contributo
 | Domain / runtime | `corporate_enterprise` · llama.cpp + GGUF only |
 | Model | Qwen2.5-1.5B-Instruct Q4_K_M (pinned GGUF + sha256 in `download_model.sh`) |
 | Ship default | `THREADS=2` / `CTX=1024` (thermal-safety freeze) |
-| Reference commit | [`CHANGELOG.md`](CHANGELOG.md) — `[1.0.0-gate1]`, tag `v1.0.0-gate1` |
+| Reference commit | [`CHANGELOG.md`](CHANGELOG.md), `[1.0.0-gate1]`, tag `v1.0.0-gate1` |
 
 ---
 
 ## 1. Hardware assumptions
 
-- Ubuntu 22.04 LTS (or close), x86-64 CPU (Intel i5 class / Ryzen 5 class — an i7-8650U participant laptop is sufficient)
+- Ubuntu 22.04 LTS (or close), x86-64 CPU (Intel i5 class / Ryzen 5 class, an i7-8650U participant laptop is sufficient)
 - **≥ 8 GB RAM** (the contest target; measured full-stack peak RSS ~1.8 GB, see `BENCHMARKS.md`)
 - ~20 GB free disk (llama.cpp build + 1.1 GB GGUF)
 - Python 3.10+ and `cmake` + a C compiler (for the llama.cpp build)
 
-No GPU required — `--n-gpu-layers 0` is the frozen flag.
+No GPU required. `--n-gpu-layers 0` is the frozen flag.
 
 ## 2. Fresh-machine reproduction (from zero)
 
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 Detached-HEAD checkout pins the run to the verified commit so a later push to `main` cannot silently change what this runbook executes. The verification status in this document refers to that commit.
 
-### 2.2 Binder tests — no model required (2 min)
+### 2.2 Binder tests: no model required (2 min)
 
 ```bash
 PYTHONPATH=. pytest tests/ -q        # expect 77 passed
@@ -52,15 +52,15 @@ PYTHONPATH=. pytest tests/ -q        # expect 77 passed
 
 This exercises the binder (credit check, supplier balance, stock), the fail-closed refusal rules (NULL limit / NULL outstanding / NULL balance), injection battery, the second ledger fixture `duka_b`, the French + Swahili tracks, and the T13 metadata guard.
 
-### 2.3 Offline proof — no model required (30 s)
+### 2.3 Offline proof: no model required (30 s)
 
 ```bash
-bash scripts/offline_check.sh        # expect: PASS — binder answers track the ledger
+bash scripts/offline_check.sh        # expect: PASS, binder answers track the ledger
 ```
 
-Proves the binder answers from the SQLite ledger with no cloud dependency: credit over-limit refusal, supplier NULL-balance refusal, stock answer, and the **ledger-flip** (edit a `credit_limit` row → same question, new answer → rollback → original answer).
+Proves the binder answers from the SQLite ledger with no cloud dependency: credit over-limit refusal, supplier NULL-balance refusal, stock answer, and the **ledger-flip** (edit a `credit_limit` row, same question, new answer, rollback, original answer).
 
-### 2.4 Model download — network once, sha256-verified, idempotent
+### 2.4 Model download: network once, sha256-verified, idempotent
 
 ```bash
 ./download_model.sh                  # ~1.1 GB from HF; pinned sha256 checked
@@ -80,7 +80,7 @@ Requires `cmake`, a C compiler, and `nproc` cores.
 ### 2.6 Start the server + narrated asks
 
 ```bash
-bash scripts/start_llama_server.sh   # terminal A — llama-server on 127.0.0.1:8080 (ship default THREADS=2/CTX=1024)
+bash scripts/start_llama_server.sh   # terminal A, llama-server on 127.0.0.1:8080 (ship default THREADS=2/CTX=1024)
 ```
 
 Then, in a second terminal:
@@ -88,8 +88,8 @@ Then, in a second terminal:
 ```bash
 source .venv/bin/activate
 export PYTHONPATH=.
-python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"   # over-limit → No, arithmetic shown
-python -m app.narrate_cli "How much do we owe SOCA?"                         # NULL balance → refusal naming the field
+python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"   # over-limit, No, arithmetic shown
+python -m app.narrate_cli "How much do we owe SOCA?"                         # NULL balance, refusal naming the field
 ```
 
 The binder `message` is authoritative; the local model only narrates the cited rows (see `docs/CODE_WALKTHROUGH.md`).
@@ -101,7 +101,7 @@ PYTHONPATH=. .venv/bin/python evals/run_heldout.py
 # expect: 31/31 checks, 0 failures (T11 28/28 = 100.0%, ledger-flip proofs 3/3)
 ```
 
-28 EN prompts against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`) — credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak. Multilingual asks (French, Swahili) are covered by `tests/test_languages.py`.
+28 EN prompts against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`): credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak. Multilingual asks (French, Swahili) are covered by `tests/test_languages.py`.
 
 ### 2.8 (Optional) Multilingual + Ollama/LM Studio compatibility
 
@@ -112,11 +112,11 @@ PYTHONPATH=. python -m app.cli "Puis-je donner trois caisses de crédit à Marie
 PYTHONPATH=. python -m app.cli "Tunadaiwa kiasi gani na SOCA?"
 ```
 
-English and French answers may be narrated by the local model; Swahili is binder-only by design (the 1.5B model does not narrate Swahili reliably — see `MODEL_CARD.md`).
+English and French answers may be narrated by the local model; Swahili is binder-only by design (the 1.5B model does not narrate Swahili reliably; see `MODEL_CARD.md`).
 
 **Judge-compatibility smoke:** judges may bare-load the GGUF in LM Studio or Ollama rather than our repo scripts. The weights are a standard Qwen2.5 GGUF, so any GGUF loader works; the binder-only `python -m app.cli` path never needs the model at all. This is a documented compatibility note, not a shipped dependency (llama.cpp remains the only runtime the repo builds).
 
-### 2.9 (Optional) Profiler — `benchmarks/` regeneration
+### 2.9 (Optional) Profiler: `benchmarks/` regeneration
 
 The committed `benchmarks/submission.json` is the freeze snapshot; only regenerate it if you are re-measuring on a new host. Requirements are documented in the script header: a Python ≥ 3.11 venv with `adtc-profiler` installed (the repo convention is `.venv311`, created with `uv` or `python3.11 -m venv`), the GGUF from §2.4, and `llama-bench` from the §2.5 build on `PATH`:
 
@@ -159,6 +159,6 @@ Any change to these flags after the freeze is a re-freeze and must be recorded i
 | `llama-server binary not found` | Skip §2.5 or rebuild: `bash scripts/setup_llama.sh` |
 | `model missing at model/qwen2.5-…gguf` | Run `./download_model.sh` first (§2.4) |
 | sha256 mismatch on download | Network-corrupted download; delete `model/qwen2.5-1.5b-instruct-q4_k_m.gguf` and re-run (idempotent) |
-| `pytest` fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing — see §2.1–2.2 |
-| Held-out eval fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing (see §2.1–2.2). No seeding is needed — `evals/run_heldout.py` creates and seeds its temporary SQLite fixtures automatically. |
+| `pytest` fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing. See §2.1–2.2 |
+| Held-out eval fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing (see §2.1–2.2). No seeding is needed. `evals/run_heldout.py` creates and seeds its temporary SQLite fixtures automatically. |
 | Thermal on a hot laptop | This is the documented, honest risk: see `BENCHMARKS.md`. The authoritative P_thermal verdict is the official ADTC eval machine. |

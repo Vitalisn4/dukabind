@@ -16,14 +16,14 @@ EXPECTED_SHA256="${EXPECTED_SHA256:-6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7
 mkdir -p "$MODEL_DIR"
 
 if [[ -f "$MODEL_FILE" ]]; then
-  echo "model already present at $MODEL_FILE — skipping download"
+  echo "model already present at $MODEL_FILE. Skipping download"
   if [[ -n "$EXPECTED_SHA256" ]]; then
     echo "$EXPECTED_SHA256  $MODEL_FILE" | sha256sum -c -
   fi
   exit 0
 fi
 
-echo "downloading $MODEL_URL → $MODEL_FILE (~1.1 GB)…"
+echo "downloading $MODEL_URL to $MODEL_FILE (~1.1 GB)..."
 
 if command -v curl > /dev/null 2>&1; then
   curl -L --fail --progress-bar -o "$MODEL_FILE.partial" "$MODEL_URL"

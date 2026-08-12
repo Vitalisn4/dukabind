@@ -1,7 +1,7 @@
 -- Marché Akwa Viviane (Akwa, Douala · XAF).
 -- Keep names in sync with app/db/fixture.py.
--- Esther Tchamba: NULL credit_limit → refuse credit asks.
--- SOCA Distribution Douala: NULL balance_owed → refuse payable asks.
+-- Esther Tchamba: NULL credit_limit forces a credit refusal.
+-- SOCA Distribution Douala: NULL balance_owed forces a payable refusal.
 
 INSERT OR REPLACE INTO shop_meta(key, value) VALUES
   ('shop_name', 'Marché Akwa Viviane'),

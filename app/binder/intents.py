@@ -48,11 +48,11 @@ class ParsedAsk:
 
 
 # Language markers for detection, matched on word boundaries only (a marker
-# must not fire inside an English word — e.g. "deni" must not match
-# "denizen"). Shared words (e.g. "stock", "credit") are deliberately excluded
-# from FR/SW marker lists so an English ask is never misrouted; accented
-# "crédit"/"à crédit"/"dû" and unaccented French verbs are unambiguous, and
-# "kreti"/"mkopo"/"tunadaiwa" are unambiguously Swahili.
+# must not fire inside an English word; for example "deni" must not match
+# "denizen"). Shared words such as "stock" or "credit" are deliberately
+# excluded from the FR/SW marker lists so an English ask is never misrouted.
+# Accented "crédit"/"à crédit"/"dû" and unaccented French verbs are
+# unambiguous, and "kreti"/"mkopo"/"tunadaiwa" are unambiguously Swahili.
 _LANG_MARKERS: dict[str, tuple[str, ...]] = {
     "fr": (
         "crédit",
@@ -142,7 +142,7 @@ _QTY = re.compile(
     re.IGNORECASE,
 )
 # Bare digits at or above this are ledger amounts (limits/prices/balances),
-# not crate counts — “his limit is 8000” must not become a quantity of 8000.
+# not crate counts. “His limit is 8000” must not become a quantity of 8000.
 MAX_BARE_QTY = 999
 # Scaled word quantities (“eight thousand crates”) must refuse, never be read
 # as a small count by the word fallback. Sentinel is large enough that any
@@ -222,19 +222,19 @@ def detect_lang(text: str) -> str:
 
 
 def _extract_qty(text: str, lang: str) -> int | None:
-    """Parse a digit or word quantity (one…ten) from the utterance.
+    """Parse a digit or word quantity (one to ten) from the utterance.
 
     A digit is a quantity only when it carries a unit word (``3 crates``,
     ``1 bag``, ``trois caisses``, ``makreti matatu``, or noun-before-digit
-    ``kreti 2,000`` → 2000), is a small bare count (< ``MAX_BARE_QTY``), or
+    ``kreti 2,000`` reads as 2000), is a small bare count (< ``MAX_BARE_QTY``), or
     is a comma-grouped magnitude parsed at its full value (``2,000 crates``
-    → 2000). Ledger amounts like limits, prices, or balances in the question
-    are never quantities — but an amount mentioned before the real quantity
+    reads as 2000). Ledger amounts like limits, prices, or balances in the question
+    are never quantities, but an amount mentioned before the real quantity
     must not swallow it (``his balance is 6250, can I give Fotso 2 crates?``
-    → 2).
+    reads as 2).
 
-    Known limitations (all fail closed — toward refuse, never a wrong
-    approval): word-written amounts (``eight thousand crates``) refuse via a
+    Known limitations (all fail closed, meaning they move toward refuse and
+    never toward a wrong approval): word-written amounts (``eight thousand crates``) refuse via a
     scaled-quantity sentinel instead of being read as small counts; a
     sub-threshold price mention (``the price is 720 per crate``) or a false
     unit word (``2000 units of credit``) is read as a large quantity. Each

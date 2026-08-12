@@ -1,4 +1,4 @@
-"""Binder pipeline: utterance → intent → allowlisted SQL → decision or refuse.
+"""Binder pipeline: utterance, intent, allowlisted SQL, decision or refuse.
 
 Produces the authoritative answer without any model call.
 """

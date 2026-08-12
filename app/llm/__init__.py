@@ -1,1 +1,1 @@
-"""LLM package — local llama-server client only (no cloud)."""
+"""LLM package. Local llama-server client only (no cloud)."""

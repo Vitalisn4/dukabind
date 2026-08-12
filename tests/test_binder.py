@@ -1,4 +1,4 @@
-"""Binder security and correctness tests — no network, no GGUF required."""
+"""Binder security and correctness tests. No network, no GGUF required."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def db(tmp_path: Path) -> sqlite3.Connection:
 
 
 def test_allowlist_rejects_unknown_query(db: sqlite3.Connection) -> None:
-    """Unknown query names raise — never run unallowlisted SQL."""
+    """Unknown query names raise. Never run unallowlisted SQL."""
     with pytest.raises(ValueError, match="not allowlisted"):
         run_query(db, "drop_customers", {"name": "x"})
 
@@ -52,7 +52,7 @@ def test_credit_fotso_three_crates_refuses_over_limit(db: sqlite3.Connection) ->
 
 
 def test_credit_tchamba_missing_limit_refuses(db: sqlite3.Connection) -> None:
-    """NULL credit_limit must refuse — never invent a limit."""
+    """NULL credit_limit must refuse. Never invent a limit."""
     r = handle_ask(db, "Can I give Esther Tchamba credit for 1 crate?")
     assert r.ok is False
     assert r.approved is None
@@ -61,7 +61,7 @@ def test_credit_tchamba_missing_limit_refuses(db: sqlite3.Connection) -> None:
 
 
 def test_credit_missing_outstanding_refuses() -> None:
-    """NULL outstanding must refuse (fail closed) — never crash or invent."""
+    """NULL outstanding must refuse (fail closed). Never crash or invent."""
     from app.binder.refuse import credit_decision
 
     r = credit_decision(
@@ -200,7 +200,7 @@ def test_overlong_ask_refuses(db: sqlite3.Connection) -> None:
 
 
 def test_zero_qty_credit_refuses(db: sqlite3.Connection) -> None:
-    """Zero quantity refuses — never approves a zero-crate ask."""
+    """Zero quantity refuses. Never approve a zero-crate ask."""
     r = handle_ask(db, "Can I give Fotso 0 crates on credit?")
     assert r.ok is False
     assert r.refuse_reason == "not_found"
@@ -243,7 +243,7 @@ def test_qty_after_amount_mention_still_parsed(db: sqlite3.Connection) -> None:
     """An amount before the real quantity must not swallow the quantity."""
     # 6250 skipped as an amount; 2 crates (1440) wins: 6250 + 1440 = 7690.
     r = handle_ask(
-        db, "Fotso's outstanding is 6250 — can I give Fotso 2 crates on credit?"
+        db, "Fotso's outstanding is 6250. Can I give Fotso 2 crates on credit?"
     )
     assert r.ok is True
     assert r.approved is True
@@ -254,7 +254,7 @@ def test_qty_ignores_ledger_amounts(db: sqlite3.Connection) -> None:
     """Bare amounts (limits/prices) in a question are not crate counts."""
     # 6250 is Fotso's outstanding, not a quantity of 6250 crates.
     r = handle_ask(
-        db, "Fotso's outstanding is 6250 — can I give Fotso a crate on credit?"
+        db, "Fotso's outstanding is 6250. Can I give Fotso a crate on credit?"
     )
     assert r.ok is True
     assert r.approved is True  # 6250 + 720 = 6970 <= 8000
@@ -268,7 +268,7 @@ def test_qty_ignores_ledger_amounts(db: sqlite3.Connection) -> None:
 
 def test_scaled_word_and_comma_quantities_fail_closed(db: sqlite3.Connection) -> None:
     """Scaled or comma-grouped quantities never become a small approved count."""
-    # Ibrahim fits 8 crates (2000 + 5760 = 7760 <= 15000) but not 8000 — so
+    # Ibrahim fits 8 crates (2000 + 5760 = 7760 <= 15000) but not 8000, so
     # reading "eight thousand" as 8 would be a wrong Yes. It must refuse.
     r = handle_ask(db, "Can I give Ibrahim Njoya eight thousand crates on credit?")
     assert r.ok is True
@@ -349,7 +349,7 @@ def test_narration_prompt_keeps_binder_and_citation_verbatim() -> None:
     from app.prompts.narrate import build_narration_prompt
 
     binder = (
-        "No — 3 × 720 = 2160; 6250 + 2160 = 8410 exceeds limit 8000 by 410 XAF. "
+        "No, 3 × 720 = 2160; 6250 + 2160 = 8410 exceeds limit 8000 by 410 XAF. "
         "Max qty within limit: 2."
     )
     citation = '{"ledger_rows":[{"credit_limit":8000,"outstanding":6250}]}'

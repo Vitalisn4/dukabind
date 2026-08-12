@@ -3,7 +3,7 @@
 
 Every line of text in the generated screenshots and the demo video comes from
 actually running the binder, the offline proof, or the profiler summary on this
-machine — nothing is fabricated.
+machine. Nothing is fabricated.
 
 Outputs:
   demo/screenshots/01-credit-answer.png    credit bind answer (with citation rows)
@@ -301,7 +301,7 @@ def credit_lines() -> list[tuple[str, str]]:
     ]
     rows += [(l, "json") for l in pretty_citation(d["citation_json"])]
     rows += [("}", "plain")]
-    rows += [("", "plain"), ("→ answer is a function of the rows it read.", "dim")]
+    rows += [("", "plain"), ("# the answer is a function of the rows it read.", "dim")]
     return rows
 
 
@@ -339,7 +339,7 @@ def flip_lines() -> list[tuple[str, str]]:
         (after_json, "json"),
         ("", "plain"),
         (
-            "→ same question, edited ledger row → answer changes. binding, not recall.",
+            "# same question, edited ledger row, new answer. binding, not recall.",
             "dim",
         ),
     ]
@@ -369,7 +369,7 @@ def refuse_lines() -> list[tuple[str, str]]:
         ),
         ('  "message": ' + json.dumps(e, ensure_ascii=False) + " }", "json"),
         ("", "plain"),
-        ("→ missing field → hard refusal, named field, no invented figure.", "dim"),
+        ("# missing field, hard refusal, named field, no invented figure.", "dim"),
     ]
 
 
@@ -400,7 +400,7 @@ def offline_lines() -> list[tuple[str, str]]:
         lines.append((ln, _offline_style(ln)))
     lines.append(
         (
-            "→ unshare -n unavailable here → airplane-mode is manual Wi‑Fi off; binder still proven.",
+            "# unshare -n unavailable here, so airplane-mode is manual Wi-Fi off; binder still proven.",
             "dim",
         )
     )
@@ -415,7 +415,7 @@ def offline_lines_short() -> list[tuple[str, str]]:
         if ln.startswith(("repo:", "date:")) or ln == "":
             continue
         lines.append((ln, _offline_style(ln)))
-    lines.append(("→ no cloud dependency; answers track the ledger.", "dim"))
+    lines.append(("# no cloud dependency; answers track the ledger.", "dim"))
     return lines
 
 
@@ -448,7 +448,7 @@ def multilingual_lines() -> list[tuple[str, str]]:
         ),
         ("", "plain"),
         (
-            "→ same binder, same allowlisted queries, localized answers — no model needed.",
+            "# same binder, same allowlisted queries, localized answers, no model needed.",
             "dim",
         ),
     ]
@@ -504,30 +504,30 @@ def measured_lines() -> list[tuple[str, str]]:
     ]
     rss_n, tps_n, temp_n = (_num(x) for x in (rss, tps, temp))
     if rss_n is not None and rss_n < 5500:
-        lines.append((f"→ peak RSS {rss} clears the 5.5 GB self-limit.", "ok"))
+        lines.append((f"# peak RSS {rss} clears the 5.5 GB self-limit.", "ok"))
     else:
         lines.append(
             (
-                "→ peak RSS check inconclusive — inspect benchmarks/submission.summary.md.",
+                "# peak RSS check inconclusive. Inspect benchmarks/submission.summary.md.",
                 "warn",
             )
         )
     if tps_n is not None and tps_n >= 15:
-        lines.append((f"→ generation TPS {tps} clears the 15 tok/s target.", "ok"))
+        lines.append((f"# generation TPS {tps} clears the 15 tok/s target.", "ok"))
     else:
         lines.append(
-            ("→ generation TPS below the 15 tok/s target on this laptop.", "warn")
+            ("# generation TPS below the 15 tok/s target on this laptop.", "warn")
         )
     if (temp_n is not None and temp_n >= 85) or str(throttled).lower() == "true":
         thermal_note = (
-            f"→ core peak {temp}, throttled={throttled} on this laptop — soak record "
+            f"# core peak {temp}, throttled={throttled} on this laptop. Soak record "
             "in BENCHMARKS.md; authoritative P_thermal = eval machine."
         )
         lines.append((thermal_note, "warn"))
     else:
         lines.append(
             (
-                f"→ core peak {temp}, throttled={throttled} — thermal OK on this smoke.",
+                f"# core peak {temp}, throttled={throttled}. Thermal OK on this smoke.",
                 "ok",
             )
         )
@@ -541,24 +541,24 @@ def screenshots() -> None:
         (
             "01-credit-answer",
             credit_lines,
-            "dukabind — credit bind answer (real output)",
+            "dukabind: credit bind answer (real output)",
         ),
         (
             "02-ledger-flip",
             flip_lines,
-            "dukabind — the bind: edit a row, answer changes",
+            "dukabind: the bind, edit a row, answer changes",
         ),
         (
             "03-refuse-null-field",
             refuse_lines,
-            "dukabind — fail-closed refusal (missing field)",
+            "dukabind: fail-closed refusal (missing field)",
         ),
-        ("04-offline-proof", offline_lines, "dukabind — offline proof (no cloud)"),
-        ("05-measured-numbers", measured_lines, "dukabind — measured (adtc-profiler)"),
+        ("04-offline-proof", offline_lines, "dukabind: offline proof (no cloud)"),
+        ("05-measured-numbers", measured_lines, "dukabind: measured (adtc-profiler)"),
         (
             "06-multilingual",
             multilingual_lines,
-            "dukabind — French & Swahili binder tracks",
+            "dukabind: French and Swahili binder tracks",
         ),
     ]
     for key, fn, title in shots:
@@ -577,13 +577,13 @@ SCENES = [
         "dur": 5.0,
     },
     {
-        "caption": "It does not recall the shop's numbers — it reads the ledger and shows which rows it used.",
+        "caption": "It does not recall the shop's numbers. It reads the ledger and shows which rows it used.",
         "kind": "term",
         "lines": credit_lines,
         "dur": 20.0,
     },
     {
-        "caption": "Change one ledger row → the same question gives a new answer. That is binding, not recall.",
+        "caption": "Change one ledger row and the same question gives a new answer. That is binding, not recall.",
         "kind": "term",
         "lines": flip_lines,
         "dur": 20.0,
@@ -595,13 +595,13 @@ SCENES = [
         "dur": 16.0,
     },
     {
-        "caption": "Same binder, same queries, localized answers — French (Cameroon official language) and Swahili binder tracks.",
+        "caption": "Same binder, same queries, localized answers. French (Cameroon official language) and Swahili binder tracks.",
         "kind": "term",
         "lines": multilingual_lines,
         "dur": 16.0,
     },
     {
-        "caption": "Offline is not a mode — it is the operating assumption.",
+        "caption": "Offline is not a mode. It is the operating assumption.",
         "kind": "term",
         "lines": offline_lines_short,
         "dur": 14.0,
@@ -615,7 +615,7 @@ SCENES = [
     {
         "caption": "github.com/Vitalisn4/dukabind · English · Français · Kiswahili · Cameroon MSME offline use-case",
         "kind": "title",
-        "title": "DukaBind — offline ledger binder",
+        "title": "DukaBind: offline ledger binder",
         "dur": 5.0,
     },
 ]
@@ -689,7 +689,7 @@ def render_video_frame(scene: dict, progress: float, out_dir: Path, idx: int) ->
             caption = (
                 f"Measured: peak RSS {rss} (≪ 5.5 GB limit) · {tps} · "
                 f"core peak {temp}, throttled={throttled} on this laptop · "
-                "T11 100% (28/28). Thermal record honest — see BENCHMARKS.md; "
+                "T11 100% (28/28). Thermal record honest. See BENCHMARKS.md; "
                 "authoritative P_thermal = eval machine."
             )
         lines = scene.get("_lines") or scene["lines"]()
@@ -701,7 +701,7 @@ def render_video_frame(scene: dict, progress: float, out_dir: Path, idx: int) ->
         visible = visible[:max_fit]
         term = render_scene(
             visible,
-            title="dukabind — demo",
+            title="dukabind: demo",
             width=VIDEO_W - 120,
             height=term_h,
             font_size=17,

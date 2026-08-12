@@ -124,7 +124,7 @@ d = json.load(sys.stdin)
 sys.exit(0 if d.get("ok") is False and d.get("refuse_reason") == "balance_owed_null" else 1)'
 
 if [[ "$ask_fail" -ne 0 ]]; then
-  echo "error: narrated-ask validation failed — proof invalid" >&2
+  echo "error: narrated-ask validation failed; proof invalid" >&2
   exit 1
 fi
 

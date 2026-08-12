@@ -8,7 +8,7 @@
 #
 # Writes:
 #   - benchmarks/raw/submission.json   (gitignored raw dump)
-#   - benchmarks/submission.summary.md (measured summary — committed)
+#   - benchmarks/submission.summary.md (measured summary, committed)
 #
 # Usage:
 #   bash scripts/run_profiler_smoke.sh
@@ -27,7 +27,7 @@ fi
 
 MODEL="$HERE/model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 if [[ ! -f "$MODEL" ]]; then
-  echo "error: missing $MODEL — run ./download_model.sh first" >&2
+  echo "error: missing $MODEL. Run ./download_model.sh first" >&2
   exit 1
 fi
 
@@ -42,7 +42,7 @@ LLAMA_BIN="$HERE/third_party/llama.cpp/build/bin"
 if [[ -x "$LLAMA_BIN/llama-bench" ]]; then
   export PATH="$LLAMA_BIN:$PATH"
 else
-  echo "error: $LLAMA_BIN/llama-bench missing — run bash scripts/setup_llama.sh" >&2
+  echo "error: $LLAMA_BIN/llama-bench missing. Run bash scripts/setup_llama.sh" >&2
   exit 1
 fi
 
@@ -100,7 +100,7 @@ throttled = therm.get("throttled")
 now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 lines = [
-    "# Profiler participant smoke — summary",
+    "# Profiler participant smoke: summary",
     "",
     f"**Run:** {now} UTC",
     f"**Command:** `bash scripts/run_profiler_smoke.sh`{flag_desc}",
@@ -145,13 +145,13 @@ lines.append("")
 if isinstance(peak, (int, float)) and peak < 5500:
     lines.append("- Peak RSS clears &lt;5.5 GB self-limit.")
 else:
-    lines.append("- Peak RSS check inconclusive or above self-limit — inspect JSON.")
+    lines.append("- Peak RSS check inconclusive or above self-limit. Inspect JSON.")
 if (isinstance(temp, (int, float)) and temp >= 85) or throttled is True:
     lines.append("- Thermal **fails** contest soak target (&lt;85 °C / no throttle) on this run.")
     lines.append("- Next: `bash scripts/thread_matrix.sh`, then the frozen-default soak `bash scripts/thermal_soak.sh`.")
 else:
     lines.append("- Thermal looks within &lt;85 °C / no-throttle for this smoke.")
-lines.append("- Copy numbers into `REPORT.md` / `BENCHMARKS.md` only from this JSON — never invent.")
+lines.append("- Copy numbers into `REPORT.md` / `BENCHMARKS.md` only from this JSON. Never invent.")
 lines.append("")
 
 Path("benchmarks/submission.summary.md").write_text("\n".join(lines), encoding="utf-8")

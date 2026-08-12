@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS shop_meta (
 CREATE TABLE IF NOT EXISTS customers (
     customer_id     TEXT PRIMARY KEY,
     display_name    TEXT NOT NULL,
-    credit_limit    INTEGER,          -- NULL → refuse credit decisions
+    credit_limit    INTEGER,          -- NULL: refuse credit decisions
     outstanding     INTEGER NOT NULL DEFAULT 0,
     currency        TEXT NOT NULL DEFAULT 'XAF',
     status          TEXT NOT NULL DEFAULT 'active'
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS customers (
 CREATE TABLE IF NOT EXISTS suppliers (
     supplier_id     TEXT PRIMARY KEY,
     display_name    TEXT NOT NULL,
-    balance_owed    INTEGER,          -- NULL → refuse payment-amount answers
+    balance_owed    INTEGER,          -- NULL: refuse payment-amount answers
     last_invoice_at TEXT,
     status          TEXT NOT NULL DEFAULT 'active'
         CHECK (status IN ('active', 'pending_confirmation', 'blocked')),

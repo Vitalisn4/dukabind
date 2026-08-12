@@ -3,7 +3,7 @@
 Citation JSON is language-neutral; the model only rewrites the binder decision
 and must not introduce figures absent from LEDGER_JSON.
 Narration follows the ask language for English and French. Swahili answers are
-binder-only by design (see app/llm/ask.py) — the prompt below exists for
+binder-only by design (see app/llm/ask.py). The prompt below exists for
 direct use and testing, not for the shipped Swahili path, because the frozen
 Qwen2.5-1.5B model does not narrate Swahili reliably.
 
@@ -77,7 +77,7 @@ def build_narration_prompt(
     ledger = "" if lang == "sw" else f"\nLEDGER_JSON:\n{citation_json}\n"
     user = (
         f"STAFF_QUESTION:\n{staff_question}\n\n"
-        f"BINDER_DECISION (authoritative — copy these facts):\n{binder_message}\n"
+        f"BINDER_DECISION (authoritative; copy these facts):\n{binder_message}\n"
         f"{ledger}\n"
         f"{tail}"
     )

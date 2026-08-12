@@ -22,17 +22,17 @@ N_GEN="${N_GEN:-64}"
 THREADS_LIST="${THREADS_LIST:-2,3,4,6,8}"
 
 if [[ ! -x "$BENCH" ]]; then
-  echo "error: missing $BENCH — run bash scripts/setup_llama.sh" >&2
+  echo "error: missing $BENCH. Run bash scripts/setup_llama.sh" >&2
   exit 1
 fi
 if [[ ! -f "$MODEL" ]]; then
-  echo "error: missing $MODEL — run ./download_model.sh" >&2
+  echo "error: missing $MODEL. Run ./download_model.sh" >&2
   exit 1
 fi
 
 # Temp readings are only comparable without a concurrent server.
 if pgrep -f 'llama-serve[r] --model' >/dev/null 2>&1; then
-  echo "warning: a llama-server is already running — temp readings will be skewed" >&2
+  echo "warning: a llama-server is already running; temp readings will be skewed" >&2
 fi
 
 mkdir -p benchmarks/raw
@@ -74,9 +74,9 @@ print(f"{best:.1f}")
 PY
 }
 
-# Temperature readings are the whole point of this matrix — fail fast if none exist.
+# Temperature readings are the whole point of this matrix. Fail fast if none exist.
 if ! read_package_temp >/dev/null 2>&1; then
-  echo "error: no usable temperature sensor under /sys/class/hwmon — cannot run thread matrix" >&2
+  echo "error: no usable temperature sensor under /sys/class/hwmon. Cannot run thread matrix" >&2
   exit 1
 fi
 
@@ -88,7 +88,7 @@ echo "started: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo
 
 {
-  echo "# Thread matrix — $STAMP"
+  echo "# Thread matrix: $STAMP"
   echo
   echo "| threads | tg_tps | pp_tps | temp_c_after | notes |"
   echo "|---:|---:|---:|---:|---|"
