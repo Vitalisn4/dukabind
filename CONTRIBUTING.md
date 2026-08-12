@@ -36,10 +36,13 @@ Everything below is run from a fresh clone. Network is needed for the repository
 ```bash
 git clone https://github.com/Vitalisn4/dukabind.git
 cd dukabind
+git checkout --detach e092c7c   # pin to the exact verified commit (2026-08-12 fresh-machine reproduction)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+Detached-HEAD checkout pins the run to the verified commit so a later push to `main` cannot silently change what this runbook executes. The verification status in this document refers to that commit.
 
 ### 2.2 Binder tests — no model required (2 min)
 
