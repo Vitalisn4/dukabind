@@ -61,7 +61,7 @@ PYTHONPATH=. .venv/bin/python -m app.cli "Can I give Marie-Claire three crates o
 
 ## Why Q4_K_M 1.5B (T15 quant lock)
 
-- Q4_K_M is the ADTC-recommended quality/size trade-off; the 1.5B keeps Peak RSS far under the 5.5 GB self-limit while clearing the 3-intent bind/refuse held-out bar (T11 **37/37 = 100%** EN/FR/SW, target ≥ 90%).
+- Q4_K_M is the ADTC-recommended quality/size trade-off; the 1.5B keeps Peak RSS far under the 5.5 GB self-limit. The **DukaBind binder** (not the model) clears the 3-intent bind/refuse held-out bar (T11 **37/37 = 100%** across EN/FR/SW prompts, target ≥ 90%). Model narration evidence covers **English and French only**; Swahili remains binder-only.
 - **T15 lock:** stays frozen unless T11 regresses against the held-out set with RSS margin; a 3B Q4 would only be considered if T1-T3 stay green.
 - Tiny Aya (~3B) is **skipped** under the locked model scope; no Aya benchmark numbers are claimed or invented.
 

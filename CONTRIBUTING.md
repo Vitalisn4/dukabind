@@ -2,9 +2,9 @@
 
 **Goal:** from a clean, offline-capable Ubuntu machine to a working, verified DukaBind in ~15 minutes of machine time **plus model download** (~1.1 GB, network-dependent), with every number traceable to a committed artifact.
 
-> **Verified end-to-end 2026-08-12** from a clean clone of `main` (`e092c7c`): every step below (§2.1-§2.7) executed as written and passed. pytest 46/46 at the pinned commit (current tree has 78 tests), offline proof PASS, model sha256-verified + idempotent, llama.cpp build OK, server healthy, narrated asks correct. See [`REPORT.md`](REPORT.md) and tag `v1.0.0-gate1`.
+> **Runbook pin:** checkout the SHA in Quick facts below. On that revision, expect pytest **78 passed**, held-out **40/40** (T11 **37/37** = 100.0%, flips 3/3), and `offline_check.sh` **PASS**. Model download is sha256-verified and idempotent; llama.cpp build + narrated asks use the same commands. See [`REPORT.md`](REPORT.md). Product freeze tag `v1.0.0-gate1` (`fe5b506`) remains the Gate 1 packaging reference and is an ancestor of this pin.
 
-This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen. The freeze reference is Git tag **`v1.0.0-gate1`** (SHA `fe5b506`). If you want to verify DukaBind end to end, follow this runbook top to bottom.
+This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen. If you want to verify DukaBind end to end, follow this runbook top to bottom.
 
 **Quick facts**
 
@@ -14,7 +14,7 @@ This document is written for an **auditor or judge**, not for feature contributo
 | Domain / runtime | `corporate_enterprise` · llama.cpp + GGUF only |
 | Model | Qwen2.5-1.5B-Instruct Q4_K_M (pinned GGUF + sha256 in `download_model.sh`) |
 | Ship default | `THREADS=2` / `CTX=1024` (thermal-safety freeze) |
-| Reference commit | tag `v1.0.0-gate1` (SHA `fe5b506`); see [`REPORT.md`](REPORT.md) |
+| Reference commit | `f235c9a9bb722420974597cbd07de2ad671e9971` (this runbook); product freeze tag `v1.0.0-gate1` (`fe5b506`) |
 
 ---
 
@@ -36,13 +36,13 @@ Everything below is run from a fresh clone. Network is needed for the repository
 ```bash
 git clone https://github.com/Vitalisn4/dukabind.git
 cd dukabind
-git checkout --detach e092c7c   # pin to the exact verified commit (2026-08-12 fresh-machine reproduction)
+git checkout --detach f235c9a9bb722420974597cbd07de2ad671e9971   # pin to the runbook reference commit (Quick facts)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Detached-HEAD checkout pins the run to the verified commit so a later push to `main` cannot silently change what this runbook executes. The verification status in this document refers to that commit.
+Detached-HEAD checkout pins the run to the reference commit so a later push to `main` cannot silently change what this runbook executes. Counts below (78 tests, 40/40 held-out) refer to that commit.
 
 ### 2.2 Binder tests: no model required (2 min)
 
@@ -101,7 +101,7 @@ PYTHONPATH=. .venv/bin/python evals/run_heldout.py
 # expect: 40/40 checks, 0 failures (T11 37/37 = 100.0%, ledger-flip proofs 3/3)
 ```
 
-28 EN prompts against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`): credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak. Multilingual asks (French, Swahili) are covered by `tests/test_languages.py`.
+**37 prompts** (28 EN + 5 FR + 4 SW) against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`): credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak. French and Swahili prompts are in `evals/heldout/prompts.json` (same runner); unit coverage also lives in `tests/test_languages.py`.
 
 ### 2.8 (Optional) Multilingual + Ollama/LM Studio compatibility
 
