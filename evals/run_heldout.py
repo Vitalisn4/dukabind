@@ -229,7 +229,7 @@ def _write_report_text(
     return f"""# Held-out evaluation report: DukaBind
 
 **Generated:** {generated} by `evals/run_heldout.py --write-report` (measured run; numbers recomputed, never hand-edited)  
-**Set:** `evals/heldout/prompts.json`, frozen 2026-08-06, English only  
+**Set:** `evals/heldout/prompts.json`, frozen 2026-08-12, English + French + Swahili  
 **Command:** `PYTHONPATH=. .venv/bin/python evals/run_heldout.py`  
 **Fixtures:** Marché Akwa Viviane (`marche_akwa`) and Marché Nkolmébé (`duka_b`), two disjoint ledgers
 

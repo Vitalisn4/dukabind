@@ -1,6 +1,6 @@
 -- DukaBind ledger schema.
 -- Nullable money columns are intentional: NULL means "not on file" and must
--- produce a refusal rather than a computed answer. See docs/SECURITY.md (C1–C4).
+-- produce a refusal rather than a computed answer. See docs/SECURITY.md (C1-C4).
 
 PRAGMA foreign_keys = ON;
 

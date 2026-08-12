@@ -1,7 +1,7 @@
 # Held-out evaluation report: DukaBind
 
 **Generated:** 2026-08-12 by `evals/run_heldout.py --write-report` (measured run; numbers recomputed, never hand-edited)  
-**Set:** `evals/heldout/prompts.json`, frozen 2026-08-06, English only  
+**Set:** `evals/heldout/prompts.json`, frozen 2026-08-12, English + French + Swahili  
 **Command:** `PYTHONPATH=. .venv/bin/python evals/run_heldout.py`  
 **Fixtures:** Marché Akwa Viviane (`marche_akwa`) and Marché Nkolmébé (`duka_b`), two disjoint ledgers
 
@@ -9,22 +9,22 @@
 
 | Metric | Result |
 |---|---|
-| T11 held-out bind/refuse | 28/28 (**100.0%**); target ≥ 90 % |
+| T11 held-out bind/refuse | 37/37 (**100.0%**); target ≥ 90 % |
 | Ledger-flip proofs | 3/3 |
-| Total checks | 31, **0 failures** |
+| Total checks | 40, **0 failures** |
 
 ## Per category / fixture
 
-| adversarial          | 4/4 |
-| credit               | 8/8 |
+| adversarial          | 5/5 |
+| credit               | 11/11 |
 | cross_shop           | 4/4 |
-| refuse               | 4/4 |
-| stock                | 5/5 |
+| refuse               | 6/6 |
+| stock                | 8/8 |
 | supplier             | 3/3 |
-| **All prompts**      | 28/28 |
+| **All prompts**      | 37/37 |
 |                      |  |
-| fixture: duka_b      | 9/9 |
-| fixture: marche_akwa | 19/19 |
+| fixture: duka_b      | 11/11 |
+| fixture: marche_akwa | 26/26 |
 
 ## Cross-shop non-leak
 

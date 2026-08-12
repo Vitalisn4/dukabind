@@ -2,19 +2,19 @@
 
 **Goal:** from a clean, offline-capable Ubuntu machine to a working, verified DukaBind in ~15 minutes of machine time **plus model download** (~1.1 GB, network-dependent), with every number traceable to a committed artifact.
 
-> **Verified end-to-end 2026-08-12** from a clean clone of `main` (`e092c7c`): every step below (§2.1–§2.7) executed as written and passed. pytest 46/46 at the pinned commit (current `main` has 77 tests), offline proof PASS, model sha256-verified + idempotent, llama.cpp build OK, server healthy, narrated asks correct. See [`CHANGELOG.md`](CHANGELOG.md) `[Unreleased]`.
+> **Verified end-to-end 2026-08-12** from a clean clone of `main` (`e092c7c`): every step below (§2.1-§2.7) executed as written and passed. pytest 46/46 at the pinned commit (current tree has 78 tests), offline proof PASS, model sha256-verified + idempotent, llama.cpp build OK, server healthy, narrated asks correct. See [`REPORT.md`](REPORT.md) and tag `v1.0.0-gate1`.
 
-This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen. See [`CHANGELOG.md`](CHANGELOG.md) for the freeze commit. If you want to verify DukaBind end to end, follow this runbook top to bottom.
+This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen. The freeze reference is Git tag **`v1.0.0-gate1`** (SHA `fe5b506`). If you want to verify DukaBind end to end, follow this runbook top to bottom.
 
 **Quick facts**
 
 | Item | Value |
 |---|---|
-| Product | Offline English fail-closed SQLite ledger binder + optional local llama.cpp narration |
+| Product | Offline EN/FR/SW fail-closed SQLite ledger binder + optional local llama.cpp narration (en/fr) |
 | Domain / runtime | `corporate_enterprise` · llama.cpp + GGUF only |
 | Model | Qwen2.5-1.5B-Instruct Q4_K_M (pinned GGUF + sha256 in `download_model.sh`) |
 | Ship default | `THREADS=2` / `CTX=1024` (thermal-safety freeze) |
-| Reference commit | [`CHANGELOG.md`](CHANGELOG.md), `[1.0.0-gate1]`, tag `v1.0.0-gate1` |
+| Reference commit | tag `v1.0.0-gate1` (SHA `fe5b506`); see [`REPORT.md`](REPORT.md) |
 
 ---
 
@@ -47,7 +47,7 @@ Detached-HEAD checkout pins the run to the verified commit so a later push to `m
 ### 2.2 Binder tests: no model required (2 min)
 
 ```bash
-PYTHONPATH=. pytest tests/ -q        # expect 77 passed
+PYTHONPATH=. pytest tests/ -q        # expect 78 passed
 ```
 
 This exercises the binder (credit check, supplier balance, stock), the fail-closed refusal rules (NULL limit / NULL outstanding / NULL balance), injection battery, the second ledger fixture `duka_b`, the French + Swahili tracks, and the T13 metadata guard.
@@ -69,7 +69,7 @@ Proves the binder answers from the SQLite ledger with no cloud dependency: credi
 
 `model/qwen2.5-1.5b-instruct-q4_k_m.gguf` is created. The expected sha256 is pinned in the script (`EXPECTED_SHA256`); a mismatch fails the run.
 
-### 2.5 Build llama.cpp (5–10 min, one-time)
+### 2.5 Build llama.cpp (5-10 min, one-time)
 
 ```bash
 bash scripts/setup_llama.sh         # clone + CMake Release build into third_party/llama.cpp
@@ -98,7 +98,7 @@ The binder `message` is authoritative; the local model only narrates the cited r
 
 ```bash
 PYTHONPATH=. .venv/bin/python evals/run_heldout.py
-# expect: 31/31 checks, 0 failures (T11 28/28 = 100.0%, ledger-flip proofs 3/3)
+# expect: 40/40 checks, 0 failures (T11 37/37 = 100.0%, ledger-flip proofs 3/3)
 ```
 
 28 EN prompts against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`): credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak. Multilingual asks (French, Swahili) are covered by `tests/test_languages.py`.
@@ -136,7 +136,7 @@ See [`benchmarks/README.md`](benchmarks/README.md) and [`BENCHMARKS.md`](BENCHMA
 | Offline | `bash scripts/offline_check.sh` (incl. `unshare -n` when available) | PASS |
 | Binding, not recall | Ledger flip in §2.3 / [`demo/screenshots/02-ledger-flip.png`](demo/screenshots/02-ledger-flip.png) | answer changes when the row changes |
 | Fail-closed refusals | `python -m app.cli "How much do we owe SOCA?"` | `ok:false`, named missing field, no invented amount |
-| Two shop ledgers, no memorization | `evals/run_heldout.py` + `evals/heldout/REPORT.md` | 31/31; T11 28/28 = 100.0 %; flips 3/3 |
+| Two shop ledgers, no memorization | `evals/run_heldout.py` + `evals/heldout/REPORT.md` | 40/40; T11 37/37 = 100.0 %; flips 3/3 |
 | Measured RSS/TPS/thermal | `BENCHMARKS.md` + `benchmarks/submission.json` (freeze snapshot) | Peak RSS 1821.11 MB · 15.67 tok/s · thermal record honest (2026-08-06 PASS does not reproduce on 2026-08-10 re-run; authoritative P_thermal = official eval machine) |
 | Model provenance | `download_model.sh` sha256 + `MODEL_CARD.md` | pinned Qwen Q4_K_M |
 | Submission prompts T13-disjoint | `metadata.json` + `tests/test_metadata.py` | exactly 2 prompts; CI enforces disjointness from held-out |
@@ -150,7 +150,7 @@ See [`benchmarks/README.md`](benchmarks/README.md) and [`BENCHMARKS.md`](BENCHMA
 | GPU layers | `--n-gpu-layers 0` | `scripts/start_llama_server.sh` |
 | Model / quant | Qwen2.5-1.5B-Instruct Q4_K_M | `download_model.sh`, `MODEL_CARD.md` |
 
-Any change to these flags after the freeze is a re-freeze and must be recorded in `CHANGELOG.md`.
+Any change to these flags after the freeze is a re-freeze and must be recorded in `REPORT.md` and `BENCHMARKS.md`.
 
 ## 5. Common failure modes
 
@@ -159,6 +159,6 @@ Any change to these flags after the freeze is a re-freeze and must be recorded i
 | `llama-server binary not found` | Skip §2.5 or rebuild: `bash scripts/setup_llama.sh` |
 | `model missing at model/qwen2.5-…gguf` | Run `./download_model.sh` first (§2.4) |
 | sha256 mismatch on download | Network-corrupted download; delete `model/qwen2.5-1.5b-instruct-q4_k_m.gguf` and re-run (idempotent) |
-| `pytest` fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing. See §2.1–2.2 |
-| Held-out eval fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing (see §2.1–2.2). No seeding is needed. `evals/run_heldout.py` creates and seeds its temporary SQLite fixtures automatically. |
+| `pytest` fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing. See §2.1-2.2 |
+| Held-out eval fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing (see §2.1-2.2). No seeding is needed. `evals/run_heldout.py` creates and seeds its temporary SQLite fixtures automatically. |
 | Thermal on a hot laptop | This is the documented, honest risk: see `BENCHMARKS.md`. The authoritative P_thermal verdict is the official ADTC eval machine. |

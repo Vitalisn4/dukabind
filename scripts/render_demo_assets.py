@@ -689,7 +689,7 @@ def render_video_frame(scene: dict, progress: float, out_dir: Path, idx: int) ->
             caption = (
                 f"Measured: peak RSS {rss} (≪ 5.5 GB limit) · {tps} · "
                 f"core peak {temp}, throttled={throttled} on this laptop · "
-                "T11 100% (28/28). Thermal record honest. See BENCHMARKS.md; "
+                "T11 100% (37/37). Thermal record honest. See BENCHMARKS.md; "
                 "authoritative P_thermal = eval machine."
             )
         lines = scene.get("_lines") or scene["lines"]()

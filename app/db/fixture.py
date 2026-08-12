@@ -73,6 +73,7 @@ KNOWN_SKUS = [
     "Sac riz 25kg",
     "Bidon huile palme 5L",
     "soda",
+    "sodas",  # French plural used in cashier asks ("Combien de sodas…")
     "malt",
     "boisson",
     "rice",
@@ -140,6 +141,7 @@ _SUPPLIER_ALIASES = {
 _SKU_ALIASES = {
     "caisse boisson malt 300ml": "Caisse boisson malt 300ml",
     "soda": "Caisse boisson malt 300ml",
+    "sodas": "Caisse boisson malt 300ml",
     "malt": "Caisse boisson malt 300ml",
     "boisson": "Caisse boisson malt 300ml",
     "sac riz 25kg": "Sac riz 25kg",

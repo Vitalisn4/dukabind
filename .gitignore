@@ -51,13 +51,12 @@ docs/ADTC-2026-INDEX.md
 docs/PROGRESS.md
 docs/STAGE-*.md
 docs/COMPLIANCE_CHECKLIST.md
-# Code walkthrough is a local working document (internal change log + milestone notes);
-# the judge-facing module map lives in README.md and docs/README.md
 /docs/CODE_WALKTHROUGH.md
 TEMPLATE_README.md
 
-# Demo storyboard is local-only production planning (kept on disk, not published)
+/CHANGELOG.md
+/docs/FREEZE_CHECKLIST.md
+
 demo/storyboard.md
 
-# Demo storyboard + transcript are local-only production notes (kept on disk, not published)
 demo/VIDEO.md

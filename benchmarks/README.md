@@ -15,4 +15,4 @@ bash scripts/run_profiler_smoke.sh --full
 
 Raw JSON lands in `benchmarks/raw/` (gitignored). After each completed run, green or failed, copy measured Peak RSS / TPS / thermal into `BENCHMARKS.md` / `REPORT.md` and record the PASS/FAIL verdict. Never invent values.
 
-At the code freeze (2026-08-11) the measured participant output was snapshotted into `benchmarks/submission.json` (committed, un-ignored), the freeze-dated artifact referenced by `CHANGELOG.md`.
+At the code freeze (2026-08-11) the measured participant output was snapshotted into `benchmarks/submission.json` (committed, un-ignored), the freeze-dated artifact for tag `v1.0.0-gate1`.
