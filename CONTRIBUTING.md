@@ -111,6 +111,26 @@ bash scripts/run_profiler_smoke.sh        # writes benchmarks/raw + regenerates 
 
 See [`benchmarks/README.md`](benchmarks/README.md) and [`BENCHMARKS.md`](BENCHMARKS.md) for methodology. Raw dumps stay gitignored (`benchmarks/raw/`); only the summary and the freeze snapshot are committed.
 
+### 2.9 Authoritative P_thermal — official eval-machine thermal run
+
+The contest penalty is **−10 if the core/package temperature exceeds 85 °C *or* thermal throttling is flagged**. Every soak on the build laptop (i7-8650U) FAILED or is unreproducible — see [`BENCHMARKS.md`](BENCHMARKS.md) — so the authoritative verdict must come from the **official ADTC eval machine** (i5 10th–12th gen / Ryzen 5 3000–5000, 8 GB, Ubuntu 22.04). Run it there, then record the verdict in `BENCHMARKS.md`.
+
+```bash
+# 1. Prereqs (from §2.4–2.5): model downloaded + llama.cpp built.
+# 2. Idle baseline: let the machine idle ~5 min; read the idle temp.
+cat /sys/class/thermal/thermal_zone*/temp
+
+# 3. Soak at the SHIPPED default (THREADS=2 / CTX=1024):
+SOAK_MINUTES=10 bash scripts/thermal_soak.sh
+
+# 4. Optional eval-machine config (THREADS=3 / CTX=2048, the M5 fallback):
+THREADS=3 CTX=2048 SOAK_MINUTES=10 bash scripts/thermal_soak.sh
+```
+
+The soak prints a verdict and writes `benchmarks/raw/thermal_soak_<UTC>.csv`. Each row now also records `freq_khz` (kernel `scaling_cur_freq`) and a `no_turbo`/`boost` flag when the kernel exposes them — evidence for the throttling half of the rule (recorded; the temperature-based verdict is unchanged).
+
+**To record the result** (honesty rules — never invent): append the CSV path, peak/mean °C, http %, and verdict to the `## Thermal soak` section of `BENCHMARKS.md`, labelled `official eval machine`. If the soak FAILS on the eval machine, do **not** ship a different default — record the FAIL and rely on the official scoring run.
+
 ## 3. Verifying the claims (auditor checklist)
 
 | Claim | How to verify | Expected |

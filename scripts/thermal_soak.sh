@@ -2,11 +2,17 @@
 # Sustained generation thermal soak.
 #
 # Starts llama-server with frozen THREADS/CTX defaults, runs repeated
-# completions, samples package/core temp every SAMPLE_SECS, writes a CSV log.
+# completions, samples package/core temp (and, when the kernel exposes it, CPU
+# frequency + turbo/boost state) every SAMPLE_SECS, writes a CSV log.
 #
 # Usage:
 #   bash scripts/thermal_soak.sh              # default 10 minutes
 #   SOAK_MINUTES=3 bash scripts/thermal_soak.sh
+#
+# Verdict is temperature-based (peak <85 °C + http 100 % + single-server).
+# Frequency/turbo columns are recorded evidence for the P_thermal rule, which
+# also mentions throttling — they inform the evaluator, they do not override
+# the temperature verdict.
 
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -103,6 +109,41 @@ print(f"{best:.1f}")
 PY
 }
 
+# CPU frequency (kHz) of the hottest policy and the turbo/boost flag. Both are
+# recorded as evidence only — they never change the temperature-based verdict.
+read_cpu_state() {
+  python - <<'PY'
+import sys
+from pathlib import Path
+
+policies = sorted(Path("/sys/devices/system/cpu/cpufreq").glob("policy*")) if \
+    Path("/sys/devices/system/cpu/cpufreq").is_dir() else []
+freqs = []
+for pol in policies:
+    cur = pol / "scaling_cur_freq"
+    if cur.is_file():
+        try:
+            freqs.append(int(cur.read_text(encoding="utf-8").strip()))
+        except (OSError, ValueError):
+            pass
+freq_khz = max(freqs) if freqs else ""
+
+# Intel exposes intel_pstate/no_turbo (1 = turbo disabled); AMD exposes
+# cpufreq/boost (0 = boost disabled). Report whichever exists.
+flag = ""
+for cand in ("/sys/devices/system/cpu/intel_pstate/no_turbo",
+             "/sys/devices/system/cpu/cpufreq/boost"):
+    p = Path(cand)
+    if p.is_file():
+        try:
+            flag = p.read_text(encoding="utf-8").strip()
+        except OSError:
+            pass
+        break
+print(f"{freq_khz} {flag}")
+PY
+}
+
 # A soak without a usable temperature reading cannot produce a verdict.
 if ! read_package_temp >/dev/null 2>&1; then
   echo "error: no usable temperature sensor under /sys/class/hwmon — cannot run thermal soak" >&2
@@ -155,7 +196,7 @@ if [[ "$ready" -ne 1 ]]; then
   exit 1
 fi
 
-echo "ts_utc,elapsed_s,temp_c,http_ok" >"$LOG"
+echo "ts_utc,elapsed_s,temp_c,http_ok,freq_khz,no_turbo" >"$LOG"
 END=$((SECONDS + SOAK_MINUTES * 60))
 fail_hot=0
 contaminated=0
@@ -169,9 +210,10 @@ while (( SECONDS < END )); do
     http_ok=1
   fi
   temp="$(read_package_temp)"
+  read -r freq_khz turbo_flag <<<"$(read_cpu_state)"
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "$ts,$elapsed,$temp,$http_ok" >>"$LOG"
-  echo "sample +${elapsed}s  temp=${temp}C  http_ok=${http_ok}"
+  echo "$ts,$elapsed,$temp,$http_ok,$freq_khz,$turbo_flag" >>"$LOG"
+  echo "sample +${elapsed}s  temp=${temp}C  freq=${freq_khz}kHz  turbo=${turbo_flag}  http_ok=${http_ok}"
   if python -c "import sys; sys.exit(0 if float('$temp') >= 85 else 1)"; then
     fail_hot=1
   fi
@@ -193,6 +235,8 @@ contaminated = len(sys.argv) > 3 and sys.argv[3] == "1"
 rows = list(csv.DictReader(path.open(encoding="utf-8")))
 temps = [float(r["temp_c"]) for r in rows if r.get("temp_c")]
 https = [int(r["http_ok"]) for r in rows if r.get("http_ok") != ""]
+freqs = [int(r["freq_khz"]) for r in rows if r.get("freq_khz", "").strip()]
+turbo_flags = {r.get("no_turbo", "").strip() for r in rows if r.get("no_turbo", "").strip()}
 peak = max(temps) if temps else float("nan")
 mean = sum(temps) / len(temps) if temps else float("nan")
 ok_rate = (sum(https) / len(https) * 100) if https else 0.0
@@ -203,6 +247,14 @@ print()
 print(f"samples: {len(rows)}")
 print(f"temp peak: {peak:.1f} C")
 print(f"temp mean: {mean:.1f} C")
+if freqs:
+    print(f"freq mean: {sum(freqs) / len(freqs):.0f} kHz   freq min: {min(freqs)} kHz   freq max: {max(freqs)} kHz")
+else:
+    print("freq: (kernel exposes no cpufreq scaling_cur_freq — evidence column empty)")
+if turbo_flags:
+    print(f"turbo/no_turbo flag values observed: {sorted(turbo_flags)}   (recorded evidence for the P_thermal throttle rule)")
+else:
+    print("turbo flag: (kernel exposes neither intel_pstate/no_turbo nor cpufreq/boost)")
 print(f"http ok: {ok_rate:.0f}%")
 print(f"log: {path}")
 if contaminated:
