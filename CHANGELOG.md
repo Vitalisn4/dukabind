@@ -20,6 +20,13 @@ Docs, CI, and benchmark tooling only — no product features added after the 1.0
   llama-cpp-python path), `bash scripts/run_profiler_smoke.sh --full` emits a real
   participant score — `arc_easy` 50-sample **74.0 %** (`acc_norm`, 2026-08-12),
   recorded in `BENCHMARKS.md` as toolchain evidence only (official S_acc = audit mode).
+- Fresh-machine reproduction evidence (M7 Day 1, 2026-08-12): the full
+  `CONTRIBUTING.md` runbook was executed from a **clean clone of `main`**
+  (`e092c7c`): venv + `pip install` · pytest **46 passed** · `offline_check.sh`
+  **PASS** (incl. ledger flip + rollback) · `download_model.sh` **sha256-verified
+  + idempotent** · llama.cpp Release build (`OK`) · server healthy (ship default
+  `THREADS=2`/`CTX=1024`) · narrated credit **No** (8410 > 8000) and NULL-balance
+  refusal. Every step passed as documented.
 
 ### Changed
 

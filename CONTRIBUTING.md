@@ -2,6 +2,8 @@
 
 **Goal:** from a clean, offline-capable Ubuntu machine to a working, verified DukaBind in ~15 minutes of machine time **plus model download** (~1.1 GB — network-dependent), with every number traceable to a committed artifact.
 
+> ✅ **Verified end-to-end 2026-08-12** from a clean clone of `main` (`e092c7c`): every step below (§2.1–§2.7) executed as written and passed — pytest 46/46, offline proof PASS, model sha256-verified + idempotent, llama.cpp build OK, server healthy, narrated asks correct. See [`CHANGELOG.md`](CHANGELOG.md) `[Unreleased]`.
+
 This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen — see [`CHANGELOG.md`](CHANGELOG.md) for the freeze commit. If you want to verify DukaBind end to end, follow this runbook top to bottom.
 
 **Quick facts**
@@ -34,10 +36,13 @@ Everything below is run from a fresh clone. Network is needed for the repository
 ```bash
 git clone https://github.com/Vitalisn4/dukabind.git
 cd dukabind
+git checkout --detach e092c7c   # pin to the exact verified commit (2026-08-12 fresh-machine reproduction)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+Detached-HEAD checkout pins the run to the verified commit so a later push to `main` cannot silently change what this runbook executes. The verification status in this document refers to that commit.
 
 ### 2.2 Binder tests — no model required (2 min)
 
