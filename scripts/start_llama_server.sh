@@ -20,11 +20,14 @@ done
 MODEL="$HERE/model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 HOST="127.0.0.1"
 PORT="${PORT:-8080}"
-# Shipped default frozen at M5 (2026-08-07): THREADS=2/CTX=1024 is the only
-# config with a measured 10-min thermal soak PASS (<85 °C) on the build laptop
-# (peak 84.0 °C, 0/68 ≥85 °C, 2026-08-06). Risk gate: prefer thermal safety
-# over TPS. THREADS=3/CTX=2048 (peak tg_tps 17.94) stays reachable via env
-# override for eval-machine benchmarking.
+# Shipped default frozen at M5 (2026-08-07): THREADS=2/CTX=1024 was chosen as
+# the thermal-safe config after a measured 10-min soak PASS on the build laptop
+# (peak 84.0 °C, 0/68 ≥85 °C, 2026-08-06). That PASS does NOT reproduce: the
+# 2026-08-10 build-laptop re-run FAILED (peak 89.0 °C) — the source of the
+# README/BENCHMARKS non-reproduction note; the authoritative P_thermal verdict
+# is the official eval machine. Risk gate: prefer thermal safety over TPS.
+# THREADS=3/CTX=2048 (peak tg_tps 17.94) stays reachable via env override for
+# eval-machine benchmarking.
 CTX="${CTX:-1024}"
 THREADS="${THREADS:-2}"
 

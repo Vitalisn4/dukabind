@@ -64,18 +64,18 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 
 **Fail-closed rule:** a required money field that is `NULL` ("not on file") produces a refusal that names the field — no balance, no limit, no amount is invented. This applies to `credit_limit`, `outstanding`, and `balance_owed`, enforced by tests including an injection battery.
 
-**Two shop ledgers:** Marché Akwa Viviane (Douala) and Marché Nkolmébé (`duka_b`, Yaoundé) — fully disjoint names and numbers, proving answers bind to the live ledger and cannot be memorized from one shop.
+**Two shop ledgers:** Marché Akwa Viviane (Douala) and Marché Nkolmébé (`duka_b`, Yaoundé) — fully disjoint names and numbers. The held-out flip checks (3/3) demonstrate that, across the tested prompts, answers bind to the currently selected live ledger; they do not claim the system is incapable of memorization in general.
 
 ---
 
 ## Demo
 
-**114-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (edit a row, the answer changes) → fail-closed refusal → offline proof → measured numbers. English, captions burned in, every frame rendered from real CLI output.
+**114-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (a test harness edits one `credit_limit` row inside a temporary transaction and rolls it back, so the seed ledger is never modified; the answer changes with the row) → fail-closed refusal → offline proof → measured numbers. English, captions burned in, every frame rendered from real CLI output. The ask path stays read-only throughout.
 
 | | |
 |---|---|
 | ![Credit bind answer](demo/screenshots/01-credit-answer.png) | ![Ledger flip](demo/screenshots/02-ledger-flip.png) |
-| Credit ask answered from the ledger rows it read — arithmetic shown, no recall. | The bind: edit one `credit_limit` row, the same question gives a new answer. |
+| Credit ask answered from the ledger rows it read — arithmetic shown, no recall. | The bind: a test harness edits one `credit_limit` row in a temporary (rolled-back) transaction — the same question gives a new answer. |
 | ![Fail-closed refusal](demo/screenshots/03-refuse-null-field.png) | ![Offline proof](demo/screenshots/04-offline-proof.png) |
 | Missing field → hard refusal that names the field. Never an invented balance. | `offline_check.sh` — answers track the ledger with no cloud dependency. |
 | ![Measured numbers](demo/screenshots/05-measured-numbers.png) | |
