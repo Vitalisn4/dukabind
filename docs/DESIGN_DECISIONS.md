@@ -109,8 +109,7 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 ## Related documents
 
-- Threat model and control IDs: [`SECURITY.md`](./SECURITY.md)  
-- Module map and commands: [`CODE_WALKTHROUGH.md`](./CODE_WALKTHROUGH.md)
+- Threat model and control IDs: [`SECURITY.md`](./SECURITY.md)
 
 ---
 

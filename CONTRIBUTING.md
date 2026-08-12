@@ -92,7 +92,7 @@ python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"   # 
 python -m app.narrate_cli "How much do we owe SOCA?"                         # NULL balance, refusal naming the field
 ```
 
-The binder `message` is authoritative; the local model only narrates the cited rows (see `docs/CODE_WALKTHROUGH.md`).
+The binder `message` is authoritative; the local model only narrates the cited rows.
 
 ### 2.7 Held-out evaluation (5 min)
 

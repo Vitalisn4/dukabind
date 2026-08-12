@@ -109,7 +109,6 @@ Numbers above cite the committed freeze snapshot (`benchmarks/submission.json` /
 
 | Doc | Purpose |
 |---|---|
-| [`docs/CODE_WALKTHROUGH.md`](docs/CODE_WALKTHROUGH.md) | Every shipped module, end-to-end data flow, commands |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Threat model and binder security rules (C1–C10) |
 | [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) | Research-backed design choices and rejected alternatives |
 | [`docs/README.md`](docs/README.md) | Public docs index |

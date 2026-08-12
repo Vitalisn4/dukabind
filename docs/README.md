@@ -18,7 +18,6 @@ Offline **English** shop assistant: allowlisted SQLite ledger bind + optional lo
 | [`CHANGELOG.md`](../CHANGELOG.md) | Keep-a-Changelog release history + freeze commit hash | A commit changes behaviour or packaging |
 | [`SECURITY.md`](./SECURITY.md) | Threat model and control IDs (C1–C10) | A control ships, defers, or changes |
 | [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) | Research-backed product and runtime choices | A decision flips or evidence changes |
-| [`CODE_WALKTHROUGH.md`](./CODE_WALKTHROUGH.md) | Module map, shop ledger, commands, security map | Modules, seed rows, envs, or milestones change |
 | [`FREEZE_CHECKLIST.md`](./FREEZE_CHECKLIST.md) | Gate-freeze checklist (T1–T3, T5, T8–T9, T11, T13) | Gate status changes |
 
 Committed evidence under `benchmarks/` and `evals/`:
