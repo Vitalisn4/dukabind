@@ -1,11 +1,8 @@
 # Security model: DukaBind
 
-**Status:** Active, Gate 1  
-**Last reviewed:** 2026-07-26  
-**Audience:** Contributors and Gate auditors  
-**Authority:** Security-sensitive code paths should cite a control ID from this document.
+**Authority:** Security-sensitive code paths cite a control ID (C1–C10) from this document.
 
-This is the threat model for the ledger binder. Update the **Status** column when a control ships, is deferred, or changes.
+This is the threat model for the ledger binder. The status column shows which controls are implemented, deferred, or partial as of Gate 1.
 
 ---
 
@@ -85,13 +82,3 @@ Controls **C1–C5** and **C7–C9** in code under `app/binder/` and `app/llm/`.
 - OWASP Injection prevention cheat sheet  
 - Python `sqlite3` parameterized queries  
 - Architecture choices: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md)
-
----
-
-## Change log
-
-| Date | Change |
-|---|---|
-| 2026-08-04 | C9: no third-party PII in git; `seed.sql` |
-| 2026-07-26 | Added Gate 1 implementation status per control; clarified binder-authoritative message |
-| 2026-07-25 | Initial threat model |

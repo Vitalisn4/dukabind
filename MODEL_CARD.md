@@ -10,7 +10,7 @@
 | Source | Hugging Face: `Qwen/Qwen2.5-1.5B-Instruct-GGUF`, file `qwen2.5-1.5b-instruct-q4_k_m.gguf` |
 | Integrity | sha256-pinned in [`download_model.sh`](download_model.sh) (control C7) |
 | Upstream license | Apache-2.0 (Qwen weights on Hugging Face), separate from this repo's GPL-3.0 application code (see [`NOTICE`](NOTICE)) |
-| Lock status | **M3 model lock**, frozen as primary on measured evidence; see [`BENCHMARKS.md`](BENCHMARKS.md) |
+| Lock status | **Model lock**, frozen as primary on measured evidence; see [`BENCHMARKS.md`](BENCHMARKS.md) |
 
 ## Intended use
 

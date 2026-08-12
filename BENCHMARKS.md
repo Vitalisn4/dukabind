@@ -1,6 +1,6 @@
 # BENCHMARKS: DukaBind
 
-**Status:** Living. Update only from measured `adtc-profiler` / `llama-bench` / soak output  
+**Status:** Updated only from measured `adtc-profiler` / `llama-bench` / soak output  
 **Last updated:** 2026-08-12  
 **Product:** English offline ledger binder · Qwen2.5-1.5B Q4_K_M · participant laptop Intel i7-8650U  
 
@@ -75,7 +75,7 @@ Source: `benchmarks/raw/thread_matrix_20260805T204347Z.md` (+ raw JSONL). `-t 3`
 | 6 | 16.32 | 62.20 | 79.0 | ok |
 | 8 | 7.53 | 59.74 | 85.0 | hot, collapsed TPS |
 
-**Action taken (2026-08-05):** `THREADS=3`/`CTX=2048` was frozen as the default after this matrix (peak tg_tps 17.94). **Superseded 2026-08-07 (M5):** the shipped default is now `THREADS=2`/`CTX=1024`, the measured thermal-PASS config as of 2026-08-06 (FAIL on 2026-08-10 re-run; see soak sections below), with `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs. This matrix remains the TPS evidence for both choices.
+**Action taken (2026-08-05):** `THREADS=3`/`CTX=2048` was frozen as the default after this matrix (peak tg_tps 17.94). **Superseded 2026-08-07:** the shipped default is now `THREADS=2`/`CTX=1024`, the measured thermal-PASS config as of 2026-08-06 (FAIL on 2026-08-10 re-run; see soak sections below), with `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs. This matrix remains the TPS evidence for both choices.
 
 ## Thermal soak (2026-08-06, `THREADS=3` `ctx=2048`, single server)
 
@@ -156,13 +156,13 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 | TPS near 15 | **Pass / near** on smoke + matrix |
 | Thermal &lt; 85 °C (temperature-only, soak samples no throttle signal) | **PASS 2026-08-06 but FAIL on 2026-08-10 re-run** at shipped default `THREADS=2`/`CTX=1024` on this laptop (cold-start peak 89.0 °C, hot-start 98.0 °C, no longer reproducible); `THREADS=3`/`CTX=2048` (peak 97 °C) and `THREADS=2`/`CTX=2048` (peak 93 °C) documented FAIL. The official eval laptop is the authoritative P_thermal run |
 
-**M2 tooling: complete.** The measurement toolkit (profiler smoke, thread matrix, thermal soak) is shipped and reproducible.
+**Measurement toolkit: complete.** The profiler smoke, thread matrix, and thermal soak scripts are shipped and reproducible.
 
-**Ship default (M5 decision, 2026-08-07):** `scripts/start_llama_server.sh` now ships **`THREADS=2`/`CTX=1024`**, the only config with a measured 10-min thermal soak **PASS** on this laptop (peak 84.0 °C, mean 75.7 °C, 0/68 samples ≥ 85 °C, http 100 %). Risk gate applied: *prefer thermal safety over TPS* (TPS 14.96 at `-t 2` vs 17.94 at `-t 3`). `THREADS=3`/`CTX=2048` remains available via env override for the official eval-machine run, which is still the authoritative P_thermal decision. **Re-validation 2026-08-10: the PASS config no longer reproduces on this laptop (peak 89.0 °C, FAIL). The thermal decision must come from the official eval machine.**
+**Ship default (2026-08-07):** `scripts/start_llama_server.sh` now ships **`THREADS=2`/`CTX=1024`**, the only config with a measured 10-min thermal soak **PASS** on this laptop (peak 84.0 °C, mean 75.7 °C, 0/68 samples ≥ 85 °C, http 100 %). Risk gate applied: *prefer thermal safety over TPS* (TPS 14.96 at `-t 2` vs 17.94 at `-t 3`). `THREADS=3`/`CTX=2048` remains available via env override for the official eval-machine run, which is still the authoritative P_thermal decision. **Re-validation 2026-08-10: the PASS config no longer reproduces on this laptop (peak 89.0 °C, FAIL). The thermal decision must come from the official eval machine.**
 
 **P_thermal (temperature-only): FAIL on 2026-08-10 re-run at the shipped default `THREADS=2`/`CTX=1024` on this laptop**. Cold-start peak **89.0 °C** (mean 78.6 °C); the 2026-08-06 PASS (peak 84.0 °C, 0/68 ≥ 85 °C) **no longer reproduces on this host**. The former default `THREADS=3`/`CTX=2048` (peak 97 °C) and `THREADS=2` at `CTX=2048` (peak 93 °C) also FAIL at full context (documented above). Official Gate 1 scores use the ADTC eval machine. Record that separately.
 
-## Model lock (M3)
+## Model lock
 
 - **Primary (locked):** Qwen2.5-1.5B-Instruct Q4_K_M (`model/qwen2.5-1.5b-instruct-q4_k_m.gguf`, sha256-pinned in `download_model.sh`). Evidence above: Peak RSS 1825.72 MB, 16.44 tok/s (profiler `--full`; llama-bench up to 17.94), TTFT ~9.0 s, clearing the 5.5 GB self-limit with margin.
 - **T15 quant lock:** Q4_K_M 1.5B stays frozen unless T11 (answer accuracy) regresses against the held-out set with RSS margin; 3B Q4 only if T1–T3 stay green.
@@ -172,7 +172,7 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 
 - [x] Re-soak at `THREADS=2`: **measured FAIL** at `ctx=2048` (peak 93 °C, 2026-08-06)  
 - [x] Re-soak at `CTX=1024`: **measured PASS** 2026-08-06 (peak 84.0 °C) but **FAIL on 2026-08-10 re-run** (peak 89.0 °C), no longer a thermally-safe config on this laptop  
-- [x] **Decide ship default**: done 2026-08-07 (M5). Freeze `THREADS=2`/`CTX=1024` in `scripts/start_llama_server.sh`; documented above (thermal safety over TPS; `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs)  
+- [x] **Decide ship default**: done 2026-08-07. Freeze `THREADS=2`/`CTX=1024` in `scripts/start_llama_server.sh`; documented above (thermal safety over TPS; `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs)  
 - [x] `bash scripts/run_profiler_smoke.sh --full`: done 2026-08-06 (`accuracy: []`, profiler then skipped accuracy); **2026-08-12 re-run with in-process accuracy: 74.0% `arc_easy`** (see section above)  
 - [x] 8 GB-class memory-capped proof: done 2026-08-06, `bash scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap; see section above)  
 - [ ] Official eval-machine numbers (Gate 1 scoring machine ≠ this laptop)
