@@ -56,7 +56,7 @@ Authoritative writeups: `docs/DESIGN_DECISIONS.md`, `docs/SECURITY.md`.
 
 ## Benchmarks
 
-Participant smoke on build laptop (`bash scripts/run_profiler_smoke.sh --full`, definitive run 2026-08-06; earlier smoke 2026-08-04; **M6 freeze re-run 2026-08-11** (`--skip-accuracy`): Peak RSS 1821.11 MB, TPS 15.67 tok/s, TTFT 10548.82 ms, core temp peak 100.0 °C / throttled — honest FAIL on this laptop, consistent with the 2026-08-10 soak re-run; snapshot committed as `benchmarks/submission.json`). The profiler's `accuracy` block is `[]` in participant mode by design — official accuracy comes from ADTC audit mode on the eval machine. Full tables: [`BENCHMARKS.md`](BENCHMARKS.md). Official Gate 1 scores come from the ADTC eval machine.
+Participant smoke on build laptop (`bash scripts/run_profiler_smoke.sh --full`, definitive run 2026-08-06; earlier smoke 2026-08-04; **M6 freeze re-run 2026-08-11** (`--skip-accuracy`): Peak RSS 1821.11 MB, TPS 15.67 tok/s, TTFT 10548.82 ms, core temp peak 100.0 °C / throttled — honest FAIL on this laptop, consistent with the 2026-08-10 soak re-run; snapshot committed as `benchmarks/submission.json`). **Accuracy self-benchmark 2026-08-12:** with the current profiler (in-process llama-cpp-python path), `--full` emits a real participant score — `arc_easy` 50-sample **74.0%** (`acc_norm`), recorded in [`BENCHMARKS.md`](BENCHMARKS.md) as toolchain evidence only. Official S_acc still comes from ADTC audit mode on the eval machine. Full tables: [`BENCHMARKS.md`](BENCHMARKS.md). Official Gate 1 scores come from the ADTC eval machine.
 
 | Metric | Measured (participant, definitive `--full` run) |
 |---|---|

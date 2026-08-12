@@ -30,7 +30,7 @@
 - **English only.** Additional-language localisation is planned post–Gate 1.
 - **Thermal on hot laptops:** on the build laptop (Intel i7-8650U) a 10-minute soak passed **&lt; 85 °C at `THREADS=2`/`ctx=1024`** on 2026-08-06 (peak 84.0 °C, 0/68 samples ≥ 85 °C), but that **PASS no longer reproduces**: the identical config re-run on 2026-08-10 from a cooler 60 °C idle **FAILED** (mean 78.6 °C, peak **89.0 °C**, several samples ≥ 85 °C). `THREADS=3`/`ctx=2048` and `THREADS=2`/`ctx=2048` also fail on that host (peaks 97 °C / 93 °C). Treat P_thermal on the build laptop as **unverified (FAIL on 2026-08-10 re-run)**; the authoritative P_thermal call is the official ADTC eval machine. Shipped default: `THREADS=2`/`ctx=1024` (documented in [`BENCHMARKS.md`](BENCHMARKS.md)).
 - **Allowlist coverage:** the binder answers three intents (credit, supplier balance, stock) against the seeded ledgers. Unknown intents/entities refuse with `not_found` — by design, not a completeness claim.
-- **Accuracy measurement:** the profiler's participant-mode `accuracy` block is `[]` by design; official accuracy comes from ADTC audit mode on the eval machine. Held-out bind/refuse (T11) is measured separately by `evals/run_heldout.py` — see the [held-out report](evals/heldout/REPORT.md).
+- **Accuracy measurement:** official S_acc comes from ADTC audit mode on the eval machine. The profiler's participant mode can now emit a real self-benchmark (`arc_easy` 50-sample **74.0%** on 2026-08-12 — toolchain evidence, not a S_acc claim). Held-out bind/refuse (T11) is measured separately by `evals/run_heldout.py` — see the [held-out report](evals/heldout/REPORT.md).
 
 ## Measured performance (build laptop, participant mode)
 

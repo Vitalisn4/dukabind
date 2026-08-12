@@ -30,9 +30,21 @@ Source: committed freeze snapshot `benchmarks/submission.json` → see also `ben
 | Core temp peak | 100.0 °C |
 | Throttled | yes |
 | Host | Intel i7-8650U · 23.3 GB RAM · Ubuntu 22.04 · no GPU |
-| Accuracy block | `accuracy: []` — participant mode skips accuracy evals by design; ADTC audit mode scores the hidden subset |
+| Accuracy block | `accuracy: []` on this 2026-08-06 run (toolchain then skipped accuracy evals); a real participant self-benchmark is recorded below |
 
-**Accuracy note:** the profiler emits an empty `accuracy` block in participant mode. Forcing it by installing `lm-eval` fails upstream: the profiler calls `--model_args pretrained=<path>`, but every released lm-eval 0.4.x `gguf` model requires a llama-server `base_url` (installing it breaks `--full` with an AccuracyError). Official accuracy numbers come from the ADTC audit-mode run on the eval machine — never invented here.
+**Accuracy note:** the 2026-08-06 definitive run predates the in-process accuracy path, so its `accuracy` block is empty. Since the toolchain upgrade (2026-08-12), the profiler evaluates the quantized GGUF **in-process via llama-cpp-python** (no HTTP server), so `bash scripts/run_profiler_smoke.sh --full` now emits a real self-benchmark score — see [Accuracy self-benchmark (2026-08-12)](#accuracy-self-benchmark-2026-08-12) below. Official S_acc still comes from the ADTC audit-mode run on the eval machine — never invented here.
+
+## Accuracy self-benchmark (2026-08-12)
+
+Source: `benchmarks/raw/submission.json` (gitignored) + `benchmarks/submission.summary.md` — `bash scripts/run_profiler_smoke.sh --full` on the build laptop with the current profiler (in-process llama-cpp-python accuracy path).
+
+| Metric | Measured |
+|---|---|
+| Benchmark | `arc_easy` (lm-eval-harness) |
+| Samples | 50 (seed 42) |
+| Score (`acc_norm`) | **0.74 → 74.0%** |
+
+**Interpretation:** participant-mode self-benchmark on a public multiple-choice task — a healthy result for a 1.5B Q4_K_M. It is **not** the contest's S_acc: the judges score the hidden validation subset in audit mode on the eval machine. The score is committed as evidence of the *toolchain* path (not a S_acc claim).
 
 ## 8 GB-class memory-capped proof (2026-08-06, cgroup `MemoryMax=7.5G`)
 
@@ -161,6 +173,6 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 - [x] Re-soak at `THREADS=2` — **measured FAIL** at `ctx=2048` (peak 93 °C, 2026-08-06)  
 - [x] Re-soak at `CTX=1024` — **measured PASS** 2026-08-06 (peak 84.0 °C) but **FAIL on 2026-08-10 re-run** (peak 89.0 °C) — no longer a thermally-safe config on this laptop  
 - [x] **Decide ship default** — **done 2026-08-07 (M5):** freeze `THREADS=2`/`CTX=1024` in `scripts/start_llama_server.sh`; documented above (thermal safety over TPS; `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs)  
-- [x] `bash scripts/run_profiler_smoke.sh --full` — done 2026-08-06; `accuracy` block is `[]` in participant mode by design (see note above)  
+- [x] `bash scripts/run_profiler_smoke.sh --full` — done 2026-08-06 (`accuracy: []` — profiler then skipped accuracy); **2026-08-12 re-run with in-process accuracy: 74.0% `arc_easy`** (see section above)  
 - [x] 8 GB-class memory-capped proof — done 2026-08-06, `bash scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap; see section above)  
 - [ ] Official eval-machine numbers (Gate 1 scoring machine ≠ this laptop)

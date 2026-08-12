@@ -80,11 +80,17 @@ thr = data.get("throughput") or {}
 therm = data.get("cpu_thermal") or {}
 env = data.get("environment") or {}
 model = data.get("model_info") or {}
+acc_rows = data.get("accuracy") or []
 
 def fmt(v, suffix=""):
     if v is None:
         return "_not present_"
     return f"{v}{suffix}"
+
+def acc_pct(score):
+    if not isinstance(score, (int, float)):
+        return "_not present_"
+    return f"{score * 100:.1f}%"
 
 peak = mem.get("peak_rss_mb")
 tps = thr.get("tokens_per_second_generation")
@@ -118,10 +124,24 @@ lines = [
     f"| OS | {env.get('os', '_')} |",
     f"| GPU | {env.get('gpu', '_')} |",
     f"| Architecture | {model.get('architecture', '_')} |",
-    "",
-    "## Gate notes",
-    "",
 ]
+if acc_rows:
+    lines.append("")
+    lines.append("## Accuracy self-benchmark")
+    lines.append("")
+    lines.append("| Benchmark | Score | Metric | Samples |")
+    lines.append("|---|---|---|---|")
+    for row in acc_rows:
+        lines.append(
+            f"| {row.get('benchmark', '_')} | **{acc_pct(row.get('score'))}** "
+            f"| {row.get('metric', '_')} | {row.get('samples', '?')} |"
+        )
+    lines.append("")
+    lines.append("> Participant-mode self-benchmark on a public task (e.g. `arc_easy`). "
+                 "The authoritative S_acc comes from the judges' audit-mode run on their hidden subset.")
+lines.append("")
+lines.append("## Gate notes")
+lines.append("")
 if isinstance(peak, (int, float)) and peak < 5500:
     lines.append("- Peak RSS clears &lt;5.5 GB self-limit.")
 else:
