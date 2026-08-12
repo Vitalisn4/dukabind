@@ -42,10 +42,10 @@ pip install -r requirements.txt
 ### 2.2 Binder tests — no model required (2 min)
 
 ```bash
-PYTHONPATH=. pytest tests/ -q        # expect 46 passed
+PYTHONPATH=. pytest tests/ -q        # expect 77 passed
 ```
 
-This exercises the binder (credit check, supplier balance, stock), the fail-closed refusal rules (NULL limit / NULL outstanding / NULL balance), injection battery, the second ledger fixture `duka_b`, and the T13 metadata guard.
+This exercises the binder (credit check, supplier balance, stock), the fail-closed refusal rules (NULL limit / NULL outstanding / NULL balance), injection battery, the second ledger fixture `duka_b`, the French + Swahili tracks, and the T13 metadata guard.
 
 ### 2.3 Offline proof — no model required (30 s)
 

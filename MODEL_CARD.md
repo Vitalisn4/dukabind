@@ -1,6 +1,6 @@
 # Model card — Qwen2.5-1.5B-Instruct (GGUF Q4_K_M)
 
-**Model used by:** DukaBind (ADTC 2026 Gate 1) — offline English fail-closed SQLite ledger binder with optional local narration.
+**Model used by:** DukaBind (ADTC 2026 Gate 1) — offline fail-closed SQLite ledger binder (English, French, and Swahili binder tracks) with optional local narration (English and French).
 
 | Field | Value |
 |---|---|

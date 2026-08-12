@@ -241,6 +241,60 @@ def test_swahili_word_quantity_parsed() -> None:
     assert p.qty == 2
 
 
+def test_swahili_noun_before_digit_quantity() -> None:
+    # Noun-before-digit: "kreti 2,000" is a unit-qualified quantity, not a
+    # bare ledger amount — it must parse at full value and bypass MAX_BARE_QTY.
+    p = parse_ask("Ninaweza kumpa Fotso kreti 2,000?")
+    assert p.intent.value == "credit_check"
+    assert p.lang == "sw"
+    assert p.qty == 2000
+    p2 = parse_ask("Je, ninaweza kumpa Fotso makreti 2,000?")
+    assert p2.qty == 2000
+
+
+def test_swahili_large_credit_flow_refuses(db: sqlite3.Connection) -> None:
+    # 2000 crates @ 720 = 1,440,000 — far over limit 8000; must refuse
+    # (approved False), never default to a single crate.
+    r = handle_ask(db, "Ninaweza kumpa Fotso kreti 2,000?")
+    assert r.ok is True
+    assert r.approved is False
+    assert r.lang == "sw"
+    assert "1440000" in r.message
+    assert "inazidi" in r.message
+
+
+def test_detect_lang_tie_falls_back_to_english() -> None:
+    # One French and one Swahili marker — a tie must resolve to English,
+    # matching the docstring contract for detect_lang.
+    assert detect_lang("combien kreti") == "en"
+    assert detect_lang("devons duka") == "en"
+    assert detect_lang("bonjour") == "en"
+
+
+def test_refuse_not_found_identifier_localized(db: sqlite3.Connection) -> None:
+    # An ask naming no customer in French/Swahili must refuse with a
+    # localized identifier ("client" / "mteja"), never mixed-language.
+    r = handle_ask(db, "Puis-je donner trois caisses de crédit ?")
+    assert r.ok is False
+    assert r.lang == "fr"
+    assert "client" in r.message
+    assert "customer" not in r.message
+    r2 = handle_ask(db, "Ninaweza kumpa mtu kreti ya makreti matatu?")
+    assert r2.ok is False
+    assert r2.lang == "sw"
+    assert "mteja" in r2.message
+    assert "customer" not in r2.message
+
+
+def test_refuse_not_found_preserves_ledger_name(db: sqlite3.Connection) -> None:
+    # A known name with no row in this shop (duka_b supplier asked against the
+    # Akwa ledger) is not a translation key — it stays verbatim.
+    r = handle_ask(db, "Combien devons-nous à Sanaga Épicerie ?")
+    assert r.ok is False
+    assert "Sanaga Épicerie" in r.message
+    assert "fournisseur" not in r.message
+
+
 def test_english_still_default() -> None:
     p = parse_ask("How much do we owe SOCA?")
     assert p.lang == "en"

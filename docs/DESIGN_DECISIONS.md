@@ -1,7 +1,7 @@
 # Design decisions
 
 **Status:** Living document — lock choices early; revise only with measurement or rule changes  
-**Last updated:** 2026-08-04  
+**Last updated:** 2026-08-12  
 **Audience:** Contributors and Gate reviewers
 
 Each decision records **options** (when relevant), **choice**, **evidence**, and **how to reverse** if measurements fail. Update the change log when a decision flips.
@@ -118,6 +118,7 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 | Date | Change |
 |---|---|
+| 2026-08-12 | D6b: expanded from English-only to **English, French, and Swahili** binder tracks (`language_scope: ["en","fr","sw"]`); narration remains en/fr — Swahili is binder-only because the frozen Qwen2.5-1.5B does not narrate Swahili reliably |
 | 2026-08-04 | D6b: English-only scope; D3 drop Aya bake-off as Gate 1 plan |
 | 2026-08-04 | D8: seeded shop ledger (Marché Akwa Viviane) |
 | 2026-07-26 | Structured headers; Africa-wide product scope note; linked SECURITY / walkthrough |

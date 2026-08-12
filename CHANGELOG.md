@@ -7,7 +7,9 @@ up to the Gate 1 freeze; pre-1.0 versions are milestone snapshots.
 
 ## [Unreleased] - post-freeze (M7, submission readiness)
 
-Docs, CI, and benchmark tooling only — no product features added after the 1.0.0-gate1 freeze.
+Docs, CI, and benchmark tooling only, **plus the single deliberate post-freeze
+product change: the French + Swahili binder tracks** (owner-approved to claim
+the ADTC African-language bonus before submission).
 
 ### Added
 
@@ -20,17 +22,16 @@ Docs, CI, and benchmark tooling only — no product features added after the 1.0
   llama-cpp-python path), `bash scripts/run_profiler_smoke.sh --full` emits a real
   participant score — `arc_easy` 50-sample **74.0 %** (`acc_norm`, 2026-08-12),
   recorded in `BENCHMARKS.md` as toolchain evidence only (official S_acc = audit mode).
-
-### Added
-
 - French + Swahili binder tracks (`language_scope: ["en","fr","sw"]`):
-  language detection (marker-scored), localized deterministic binder messages
-  (credit / supplier / stock / all refusals), localized narration prompts, and
-  20 new tests (`tests/test_languages.py`). Narration ships for English and
-  French (verified on the frozen Qwen2.5-1.5B); Swahili is **binder-only** by
-  design — the 1.5B model does not narrate Swahili reliably, so the
-  authoritative deterministic message is never overridden with a mangled
-  figure.
+  language detection (marker-scored, word-boundary safe, ties fall back to
+  English), localized deterministic binder messages (credit / supplier / stock /
+  all refusals — internal identifiers localized too), localized narration
+  prompts, Swahili product aliases (`sukari`, `unga`, …), and 31 tests
+  (30 in `tests/test_languages.py` plus the narration-gate test in
+  `tests/test_ask.py`). Narration ships for English and French (verified
+  on the frozen Qwen2.5-1.5B); Swahili is **binder-only** by design — the 1.5B
+  model does not narrate Swahili reliably, so the authoritative deterministic
+  message is never overridden with a mangled figure.
 
 ### Changed
 

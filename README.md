@@ -26,7 +26,7 @@ Verify it yourself in 30 seconds: edit one `credit_limit` row in the shop ledger
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 1. Binder tests — no model required (46 tests)
+# 1. Binder tests — no model required (77 tests)
 PYTHONPATH=. pytest tests/ -q
 
 # 2. Try the binder directly (no model; the ask path is read-only)
@@ -72,7 +72,7 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 
 ## Demo
 
-**114-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (a test harness edits one `credit_limit` row inside a temporary transaction and rolls it back, so the seed ledger is never modified; the answer changes with the row) → fail-closed refusal → offline proof → measured numbers. English, captions burned in, every frame rendered from real CLI output. The ask path stays read-only throughout.
+**108-second demo video** ([`demo/demo.mp4`](demo/demo.mp4)) — credit bind answer → ledger flip (a test harness edits one `credit_limit` row inside a temporary transaction and rolls it back, so the seed ledger is never modified; the answer changes with the row) → fail-closed refusal → **French & Swahili binder asks** → offline proof → measured numbers. English captions, burned in, every frame rendered from real CLI output. The ask path stays read-only throughout.
 
 | | |
 |---|---|
@@ -80,8 +80,8 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 | Credit ask answered from the ledger rows it read — arithmetic shown, no recall. | The bind: a test harness edits one `credit_limit` row in a temporary (rolled-back) transaction — the same question gives a new answer. |
 | ![Fail-closed refusal](demo/screenshots/03-refuse-null-field.png) | ![Offline proof](demo/screenshots/04-offline-proof.png) |
 | Missing field → hard refusal that names the field. Never an invented balance. | `offline_check.sh` — answers track the ledger with no cloud dependency. |
-| ![Measured numbers](demo/screenshots/05-measured-numbers.png) | |
-| Measured: peak RSS 1821.11 MB · 15.67 tok/s · honest thermal record (see [`BENCHMARKS.md`](BENCHMARKS.md)). | |
+| ![Measured numbers](demo/screenshots/05-measured-numbers.png) | ![French & Swahili](demo/screenshots/06-multilingual.png) |
+| Measured: peak RSS 1821.11 MB · 15.67 tok/s · honest thermal record (see [`BENCHMARKS.md`](BENCHMARKS.md)). | French (Cameroon official) and Swahili asks answered deterministically in-language — no model needed. |
 
 ---
 

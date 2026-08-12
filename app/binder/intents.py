@@ -132,8 +132,13 @@ _INTENT_PATTERNS: dict[str, dict[Intent, re.Pattern[str]]] = {
     },
 }
 
+# Unit words shared across languages; "kreti" is the Swahili word for
+# crate/credit and is a quantity qualifier here ("kreti 2,000"). The
+# noun may precede or follow the digit ("3 crates" / "makreti 2,000").
+_UNIT_WORDS = r"crates?|bags?|units?|caisses?|sacs?|makreti|mifuko|kreti"
 _QTY = re.compile(
-    r"\b(\d{1,3}(?:,\d{3})+|\d+)\s*(crates?|bags?|units?|caisses?|sacs?|makreti|mifuko)?\b",
+    rf"\b(?:(?P<num1>\d{{1,3}}(?:,\d{{3}})+|\d+)\s*(?P<unit1>{_UNIT_WORDS})?"
+    rf"|(?P<unit2>{_UNIT_WORDS})\s+(?P<num2>\d{{1,3}}(?:,\d{{3}})+|\d+))\b",
     re.IGNORECASE,
 )
 # Bare digits at or above this are ledger amounts (limits/prices/balances),
@@ -211,7 +216,7 @@ def detect_lang(text: str) -> str:
     scores = {lang: _hits(markers) for lang, markers in _LANG_MARKERS.items()}
     if scores["sw"] > scores["fr"] and scores["sw"] > 0:
         return "sw"
-    if scores["fr"] > 0:
+    if scores["fr"] > scores["sw"] and scores["fr"] > 0:
         return "fr"
     return "en"
 
@@ -220,12 +225,13 @@ def _extract_qty(text: str, lang: str) -> int | None:
     """Parse a digit or word quantity (one…ten) from the utterance.
 
     A digit is a quantity only when it carries a unit word (``3 crates``,
-    ``1 bag``, ``trois caisses``, ``makreti matatu``), is a small bare count
-    (< ``MAX_BARE_QTY``), or is a comma-grouped magnitude parsed at its full
-    value (``2,000 crates`` → 2000). Ledger amounts like limits, prices, or
-    balances in the question are never quantities — but an amount mentioned
-    before the real quantity must not swallow it (``his balance is 6250, can I
-    give Fotso 2 crates?`` → 2).
+    ``1 bag``, ``trois caisses``, ``makreti matatu``, or noun-before-digit
+    ``kreti 2,000`` → 2000), is a small bare count (< ``MAX_BARE_QTY``), or
+    is a comma-grouped magnitude parsed at its full value (``2,000 crates``
+    → 2000). Ledger amounts like limits, prices, or balances in the question
+    are never quantities — but an amount mentioned before the real quantity
+    must not swallow it (``his balance is 6250, can I give Fotso 2 crates?``
+    → 2).
 
     Known limitations (all fail closed — toward refuse, never a wrong
     approval): word-written amounts (``eight thousand crates``) refuse via a
@@ -235,8 +241,8 @@ def _extract_qty(text: str, lang: str) -> int | None:
     can only move a credit decision toward refuse, never toward a wrong Yes.
     """
     for m in _QTY.finditer(text):
-        qty = int(m.group(1).replace(",", ""))
-        if m.group(2) or qty < MAX_BARE_QTY:
+        qty = int((m.group("num1") or m.group("num2")).replace(",", ""))
+        if m.group("unit1") or m.group("unit2") or qty < MAX_BARE_QTY:
             return qty
     lower = text.lower()
     if _SCALED.search(lower):

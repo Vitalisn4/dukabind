@@ -36,6 +36,39 @@ def _t(lang: str, en: str, fr: str, sw: str) -> str:
     return {"en": en, "fr": fr, "sw": sw}.get(lang, en)
 
 
+# Internal ``not_found`` identifiers from the pipeline are translated so the
+# localized message never mixes languages ("… pour customer"). Ledger names
+# supplied by the user are preserved unchanged — they are not keys here.
+_NOT_FOUND_LABELS: dict[str, dict[str, str]] = {
+    "en": {
+        "customer": "customer",
+        "supplier": "supplier",
+        "sku": "product",
+        "quantity": "quantity",
+        "unit_price": "unit price",
+    },
+    "fr": {
+        "customer": "client",
+        "supplier": "fournisseur",
+        "sku": "produit",
+        "quantity": "quantité",
+        "unit_price": "prix unitaire",
+    },
+    "sw": {
+        "customer": "mteja",
+        "supplier": "msambazaji",
+        "sku": "bidhaa",
+        "quantity": "idadi",
+        "unit_price": "bei ya kitengo",
+    },
+}
+
+
+def _label(lang: str, what: str) -> str:
+    """Localize an internal identifier; leave user-supplied names untouched."""
+    return _NOT_FOUND_LABELS.get(lang, _NOT_FOUND_LABELS["en"]).get(what, what)
+
+
 def refuse_credit_missing_limit(lang: str, name: str) -> BinderResult:
     """Refuse when credit_limit is NULL — never invent a limit."""
     return BinderResult(
@@ -88,7 +121,13 @@ def refuse_supplier_missing_balance(lang: str, name: str) -> BinderResult:
 
 
 def refuse_not_found(lang: str, what: str) -> BinderResult:
-    """Refuse when the named customer, supplier, or SKU is absent."""
+    """Refuse when the named customer, supplier, or SKU is absent.
+
+    ``what`` may be an internal identifier (``customer``, ``supplier``,
+    ``sku``, ``quantity``, ``unit_price``) — localized — or a user-supplied
+    ledger name, which is preserved verbatim.
+    """
+    what = _label(lang, what)
     return BinderResult(
         ok=False,
         intent=Intent.UNKNOWN,
