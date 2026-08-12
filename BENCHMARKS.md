@@ -1,7 +1,7 @@
 # BENCHMARKS — DukaBind
 
 **Status:** Living — update only from measured `adtc-profiler` / `llama-bench` / soak output  
-**Last updated:** 2026-08-10  
+**Last updated:** 2026-08-12  
 **Product:** English offline ledger binder · Qwen2.5-1.5B Q4_K_M · participant laptop Intel i7-8650U  
 
 ## How to reproduce
@@ -19,7 +19,7 @@ THREADS=3 CTX=2048 bash scripts/ram_capped_proof.sh   # 8 GB-class proof; envs p
 
 ## Participant smoke (2026-08-06, `--full` — definitive run)
 
-Source: committed freeze snapshot `benchmarks/submission.json` → see also `benchmarks/submission.summary.md`.
+Source: the 2026-08-06 `--full` profiler run on the build laptop (values also recorded in [`REPORT.md`](REPORT.md); raw JSON gitignored under `benchmarks/raw/`). The committed freeze snapshot [`benchmarks/submission.json`](benchmarks/submission.json) is the **2026-08-11 `--skip-accuracy` re-run** (Peak RSS 1821.11 MB · 15.67 tok/s · TTFT 10548.82 ms — see `CHANGELOG.md` `[1.0.0-gate1]`) and is **not** the source of this table; the regenerated [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md) reflects the 2026-08-12 re-run.
 
 | Metric | Measured |
 |---|---|
