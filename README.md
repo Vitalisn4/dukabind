@@ -76,7 +76,7 @@ Full fresh-machine walkthrough (auditor-oriented): [`CONTRIBUTING.md`](CONTRIBUT
 
 <video controls muted preload="metadata" width="100%" poster="https://raw.githubusercontent.com/Vitalisn4/dukabind/bb538bf/demo/demo-poster.png" src="https://raw.githubusercontent.com/Vitalisn4/dukabind/bb538bf/demo/demo.mp4"></video>
 
-**Watch or download:** [`demo/demo.mp4`](demo/demo.mp4) (108 s, 1280×720, H.264, ~566 KB) · poster: [`demo/demo-poster.png`](demo/demo-poster.png)
+**Watch or download:** [`demo/demo.mp4`](demo/demo.mp4) (108 s, 1280×720, H.264 Main + AAC, ~650 KB) · poster: [`demo/demo-poster.png`](demo/demo-poster.png)
 
 | | |
 |---|---|
