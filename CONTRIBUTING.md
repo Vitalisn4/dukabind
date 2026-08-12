@@ -2,6 +2,8 @@
 
 **Goal:** from a clean, offline-capable Ubuntu machine to a working, verified DukaBind in ~15 minutes of machine time **plus model download** (~1.1 GB — network-dependent), with every number traceable to a committed artifact.
 
+> ✅ **Verified end-to-end 2026-08-12** from a clean clone of `main` (`e092c7c`): every step below (§2.1–§2.7) executed as written and passed — pytest 46/46, offline proof PASS, model sha256-verified + idempotent, llama.cpp build OK, server healthy, narrated asks correct. See [`CHANGELOG.md`](CHANGELOG.md) `[Unreleased]`.
+
 This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen — see [`CHANGELOG.md`](CHANGELOG.md) for the freeze commit. If you want to verify DukaBind end to end, follow this runbook top to bottom.
 
 **Quick facts**
