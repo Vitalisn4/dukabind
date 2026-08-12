@@ -9,7 +9,7 @@ Usage (from repo root):
     PYTHONPATH=. .venv/bin/python evals/run_heldout.py --write-report  # also writes evals/heldout/REPORT.md
 
 The ``--write-report`` flag regenerates the committed evidence report
-(``evals/heldout/REPORT.md``) from the measured run — numbers are always
+(``evals/heldout/REPORT.md``) from the measured run. Numbers are always
 recomputed, never hand-edited.
 """
 
@@ -220,24 +220,24 @@ def _write_report_text(
     body = "\n".join(f"| {str(r[0]).ljust(width)} | {r[1]} |" for r in rows)
 
     flip_lines = "\n".join(
-        f"- `{f['fixture']}` — {'PASS' if f['ok'] else 'FAIL'} "
+        f"- `{f['fixture']}`: {'PASS' if f['ok'] else 'FAIL'} "
         f"(token `{f['token']}` in the flipped answer)"
         for f in details["flips"]
     )
 
     generated = datetime.now(timezone.utc).date().isoformat()
-    return f"""# Held-out evaluation report — DukaBind
+    return f"""# Held-out evaluation report: DukaBind
 
-**Generated:** {generated} by `evals/run_heldout.py --write-report` (measured run — numbers recomputed, never hand-edited)  
-**Set:** `evals/heldout/prompts.json` — frozen 2026-08-06, English only  
+**Generated:** {generated} by `evals/run_heldout.py --write-report` (measured run; numbers recomputed, never hand-edited)  
+**Set:** `evals/heldout/prompts.json`, frozen 2026-08-06, English only  
 **Command:** `PYTHONPATH=. .venv/bin/python evals/run_heldout.py`  
-**Fixtures:** Marché Akwa Viviane (`marche_akwa`) and Marché Nkolmébé (`duka_b`) — two disjoint ledgers
+**Fixtures:** Marché Akwa Viviane (`marche_akwa`) and Marché Nkolmébé (`duka_b`), two disjoint ledgers
 
 ## Summary
 
 | Metric | Result |
 |---|---|
-| T11 held-out bind/refuse | {correct}/{n_prompts} (**{t11:.1f}%**) — target ≥ 90 % |
+| T11 held-out bind/refuse | {correct}/{n_prompts} (**{t11:.1f}%**); target ≥ 90 % |
 | Ledger-flip proofs | {len(details["flips"]) - flip_fail}/{len(details["flips"])} |
 | Total checks | {n_prompts + len(details["flips"])}, **{prompt_fail + flip_fail} failures** |
 
@@ -247,7 +247,7 @@ def _write_report_text(
 
 ## Cross-shop non-leak
 
-{cross_ok}/{len(cross_shop)} cross-shop prompts passed — entities of one shop
+{cross_ok}/{len(cross_shop)} cross-shop prompts passed; entities of one shop
 asked against the other ledger refuse with `not_found` and never leak the other
 shop's numbers (no memorization between fixtures).
 
@@ -255,7 +255,7 @@ shop's numbers (no memorization between fixtures).
 
 {flip_lines}
 
-## T13 — submission prompts stay disjoint
+## T13: submission prompts stay disjoint
 
 The 2 submission prompts in `metadata.json` are chosen from a pool **disjoint**
 from this held-out set (T13). `tests/test_metadata.py` fails CI if any staff
@@ -294,7 +294,7 @@ def _console_lines(
         "",
         (
             f"T11 held-out bind/refuse: {correct}/{n_prompts} prompts correct "
-            f"({t11:.1f}%) — target ≥90%"
+            f"({t11:.1f}%), target ≥90%"
         ),
         f"ledger-flip proofs: {len(FLIP_CHECKS) - flip_fail}/{len(FLIP_CHECKS)}",
         (

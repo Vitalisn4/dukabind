@@ -1,4 +1,4 @@
-# DukaBind — Gate 1 Python deps (exact versions validated by CI)
+# DukaBind Gate 1 Python deps (exact versions validated by CI)
 pytest==8.4.2
 ruff==0.16.0
 

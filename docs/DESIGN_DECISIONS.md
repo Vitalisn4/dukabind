@@ -1,35 +1,31 @@
 # Design decisions
 
-**Status:** Living document — lock choices early; revise only with measurement or rule changes  
-**Last updated:** 2026-08-04  
-**Audience:** Contributors and Gate reviewers
-
-Each decision records **options** (when relevant), **choice**, **evidence**, and **how to reverse** if measurements fail. Update the change log when a decision flips.
+Each decision records **options** (when relevant), **choice**, **evidence**, and **how to reverse** if measurements fail.
 
 ---
 
-## D1 — Product: fail-closed ledger binder (not chat RAG)
+## D1: Product, fail-closed ledger binder (not chat RAG)
 
 | | |
 |---|---|
 | **Options** | Generic shop chatbot; vector RAG over SOPs; allowlisted SQL binder |
 | **Choice** | Allowlisted SQL binder + optional LLM narration |
 | **Evidence** | Differentiates from multilingual chat demos; 7 GB ceiling punishes large embedding indexes; judges reward products beyond demos |
-| **Reverse if** | Reviewers require corpus RAG — add FTS5 SOP search only after RSS headroom is proven |
+| **Reverse if** | Reviewers require corpus RAG. Add FTS5 SOP search only after RSS headroom is proven |
 
 ---
 
-## D2 — Domain: `corporate_enterprise`
+## D2: Domain, `corporate_enterprise`
 
 | | |
 |---|---|
 | **Choice** | `corporate_enterprise` in `metadata.json` |
 | **Evidence** | Devpost frames knowledge-work for SMEs/operators; challenge narrative centres African small-business / corner-shop contexts |
-| **Scope note** | Seeded ledger uses Douala (XAF). Product intent is African MSME counters with intermittent connectivity — not a Cameroon-only chatbot |
+| **Scope note** | Seeded ledger uses Douala (XAF). Product intent is African MSME counters with intermittent connectivity, not a Cameroon-only chatbot |
 
 ---
 
-## D3 — Model: Qwen2.5-1.5B-Instruct GGUF Q4_K_M (primary)
+## D3: Model, Qwen2.5-1.5B-Instruct GGUF Q4_K_M (primary)
 
 | | |
 |---|---|
@@ -38,11 +34,11 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 | **Evidence** | Official quant guidance favours Q4_K_M; official Qwen GGUF ~1.12 GB; 7B risks Peak RSS DQ; SmolLM is weak for refuse/arithmetic accuracy |
 | **URL** | `https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf` |
 | **License** | Upstream Apache-2.0 for weights (confirm card at download); separate from repo GPL-3.0 |
-| **Reverse if** | Peak RSS / refuse quality fail on contest laptop — try Q3_K_M before any larger model |
+| **Reverse if** | Peak RSS / refuse quality fail on contest laptop. Try Q3_K_M before any larger model |
 
 ---
 
-## D4 — Runtime: llama.cpp only
+## D4: Runtime, llama.cpp only
 
 | | |
 |---|---|
@@ -52,7 +48,7 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 ---
 
-## D5 — Storage: SQLite + WAL
+## D5: Storage, SQLite + WAL
 
 | | |
 |---|---|
@@ -63,40 +59,40 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 ---
 
-## D6 — Intent routing: rules first
+## D6: Intent routing, rules first
 
 | | |
 |---|---|
-| **Choice** | Keyword / lexicon English → named allowlist query |
+| **Choice** | Keyword / lexicon English maps to a named allowlist query |
 | **Evidence** | Deterministic; near-zero RAM; reduces intent hallucination |
-| **Reverse if** | Coverage gaps after English held-out — add constrained LLM JSON parse as fallback only |
+| **Reverse if** | Coverage gaps after English held-out. Add constrained LLM JSON parse as fallback only |
 
 ---
 
-## D6b — Product language: English only (Gate 1)
+## D6b: Product language, English, French, Swahili binder tracks (Gate 1)
 
 | | |
 |---|---|
-| **Choice** | `language_scope: ["en"]` — cashier asks and binder messages in English |
-| **Evidence** | English-only product scope locked at Gate 1; Cameroon MSME use-case does not require another language |
-| **African claim** | `african_alpha_claim: true` is for **offline Cameroon/Douala MSME ledger use-case**, not an African-language claim |
-| **Deferred** | French localisation (Cameroon official language) and any further languages after Gate 1 |
-| **Reverse if** | Held-out quality proven in an additional language before the freeze |
+| **Choice** | `language_scope: ["en","fr","sw"]`. Cashier asks and binder messages localized deterministically in English, French (Cameroon official language), and Swahili (pan-African) |
+| **Evidence** | Language detection is keyword-based and deterministic; binder messages are templated per language with tests; narration was verified empirically on the frozen Qwen2.5-1.5B. English and French narrate reliably, **Swahili does not, so Swahili is binder-only** (narration skipped so money figures are never mis-stated) |
+| **African claim** | `african_alpha_claim: true` covers the **offline Cameroon/Douala MSME ledger use-case** plus French/Swahili binder tracks |
+| **Deferred** | Additional languages after Gate 1 |
+| **Reverse if** | Held-out quality regresses in English, or a bigger model narrates Swahili reliably within the 8 GB envelope |
 
 ---
 
-## D7 — License posture
+## D7: License posture
 
 | | |
 |---|---|
-| **Repository** | **GNU GPL v3** (`LICENSE`) — governing license for this codebase |
+| **Repository** | **GNU GPL v3** (`LICENSE`), the governing license for this codebase |
 | **Provenance** | Initialized from the ADTC submission template (GPL-3.0) |
 | **Model weights** | Not in git; Qwen2.5 GGUF remains under upstream Apache-2.0 on Hugging Face |
 | **Action** | Keep `NOTICE` and `LICENSE` aligned; do not claim Apache-2.0 for application code |
 
 ---
 
-## D8 — Seeded shop ledger
+## D8: Seeded shop ledger
 
 | | |
 |---|---|
@@ -109,16 +105,4 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 ## Related documents
 
-- Threat model and control IDs: [`SECURITY.md`](./SECURITY.md)  
-- Module map and commands: [`CODE_WALKTHROUGH.md`](./CODE_WALKTHROUGH.md)
-
----
-
-## Change log
-
-| Date | Change |
-|---|---|
-| 2026-08-04 | D6b: English-only scope; D3 drop Aya bake-off as Gate 1 plan |
-| 2026-08-04 | D8: seeded shop ledger (Marché Akwa Viviane) |
-| 2026-07-26 | Structured headers; Africa-wide product scope note; linked SECURITY / walkthrough |
-| 2026-07-25 | Initial decisions locked for Week 0–1 implementation |
+- Threat model and control IDs: [`SECURITY.md`](./SECURITY.md)

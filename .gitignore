@@ -1,4 +1,4 @@
-# Model weights — never commit (ADTC rule)
+# Model weights. Never commit (ADTC rule)
 model/*.gguf
 model/*.bin
 model/*.safetensors
@@ -34,13 +34,13 @@ benchmarks/raw/
 # Vendored llama.cpp clone + build (rebuild via scripts/setup_llama.sh)
 third_party/
 
-# Secrets — never commit
+# Secrets. Never commit
 .env
 .env.*
 !.env.example
 
 # ── Local-only strategy / working docs (keep on disk, do not publish) ─────────
-# Full phase pack, prompts, roadmap, progress logs — for your build process.
+# Full phase pack, prompts, roadmap, progress logs for your build process.
 # Public judge-facing docs are allowlisted below via negation if needed.
 docs/ADTC-2026-Phase*.md
 docs/ADTC-2026-Master-Prompt-Framework.md
@@ -51,6 +51,9 @@ docs/ADTC-2026-INDEX.md
 docs/PROGRESS.md
 docs/STAGE-*.md
 docs/COMPLIANCE_CHECKLIST.md
+# Code walkthrough is a local working document (internal change log + milestone notes);
+# the judge-facing module map lives in README.md and docs/README.md
+/docs/CODE_WALKTHROUGH.md
 TEMPLATE_README.md
 
 # Demo storyboard is local-only production planning (kept on disk, not published)

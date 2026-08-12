@@ -51,11 +51,11 @@ jobs:
           SIZE=$(curl -sSIL --max-time 60 "$URL" | awk 'tolower($1)=="content-length:" {print $2}' | tr -d '\r' | tail -1)
           echo "HTTP $HTTP, content-length: ${SIZE:-unknown}"
           if [[ "$HTTP" != "200" ]]; then
-            echo "::error::GGUF URL returned HTTP $HTTP (expected 200) — model download will fail for judges"
+            echo "::error::GGUF URL returned HTTP $HTTP (expected 200). The model download will fail for judges"
             exit 1
           fi
           if [[ ! "$SIZE" =~ ^[0-9]+$ ]] || (( SIZE < 1000000000 )); then
-            echo "::error::GGUF content-length '${SIZE:-missing}' is not a valid size ≥ 1 GB — possibly a stub page, not the model"
+            echo "::error::GGUF content-length '${SIZE:-missing}' is not a valid size ≥ 1 GB. Possibly a stub page, not the model"
             exit 1
           fi
           echo "OK: GGUF URL is alive"

@@ -1,6 +1,6 @@
 # Benchmarks & profiler outputs
 #
-# - `raw/` — gitignored dumps (`submission.json`, soak logs)
+# - `raw/` gitignored dumps (`submission.json`, soak logs)
 # - Commit only summaries / tables with **measured** numbers
 # - Run: `bash scripts/run_profiler_smoke.sh` (needs `.venv311` + GGUF)
 
@@ -9,5 +9,5 @@
 !README.md
 !submission.summary.md
 
-# Freeze snapshot of the measured participant output (2026-08-11) — see CHANGELOG
+# Freeze snapshot of the measured participant output (2026-08-11). See CHANGELOG
 !submission.json

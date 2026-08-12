@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Clone + build upstream llama.cpp — the only inference runtime ADTC permits.
+# Clone and build upstream llama.cpp, the only inference runtime ADTC permits.
 
 set -euo pipefail
 
@@ -9,7 +9,7 @@ SRC="$HERE/third_party/llama.cpp"
 mkdir -p "$HERE/third_party"
 
 if [[ ! -d "$SRC/.git" ]]; then
-  echo "cloning ggml-org/llama.cpp …"
+  echo "cloning ggml-org/llama.cpp ..."
   git clone --depth 1 https://github.com/ggml-org/llama.cpp.git "$SRC"
 else
   echo "llama.cpp already present at $SRC"

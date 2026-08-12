@@ -1,4 +1,4 @@
-"""Binder pipeline: utterance → intent → allowlisted SQL → decision or refuse.
+"""Binder pipeline: utterance, intent, allowlisted SQL, decision or refuse.
 
 Produces the authoritative answer without any model call.
 """
@@ -56,12 +56,17 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
         if row.get("balance_owed") is None:
             return refuse_supplier_missing_balance(parsed.lang, row["display_name"])
         bal = int(row["balance_owed"])
+        msg = {
+            "en": f"Amount owed to {row['display_name']}: {bal}.",
+            "fr": f"Montant dû à {row['display_name']} : {bal}.",
+            "sw": f"Kiasi kinachodaiwa na {row['display_name']}: {bal}.",
+        }.get(parsed.lang, f"Amount owed to {row['display_name']}: {bal}.")
         return BinderResult(
             ok=True,
             intent=parsed.intent,
             lang=parsed.lang,
             citation_rows=[dict(row)],
-            message=f"Amount owed to {row['display_name']}: {bal}.",
+            message=msg,
         )
 
     if parsed.intent == Intent.STOCK_CHECK:
@@ -71,15 +76,30 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
         if not rows:
             return refuse_not_found(parsed.lang, parsed.sku)
         row = rows[0]
+        msg = {
+            "en": (
+                f"{row['name']}: on_hand={row['on_hand']}, "
+                f"unit_price={row['unit_price']} {row['currency']}."
+            ),
+            "fr": (
+                f"{row['name']} : en stock={row['on_hand']}, "
+                f"prix unitaire={row['unit_price']} {row['currency']}."
+            ),
+            "sw": (
+                f"{row['name']}: hifadhi={row['on_hand']}, "
+                f"bei ya kitengo={row['unit_price']} {row['currency']}."
+            ),
+        }.get(
+            parsed.lang,
+            f"{row['name']}: on_hand={row['on_hand']}, "
+            f"unit_price={row['unit_price']} {row['currency']}.",
+        )
         return BinderResult(
             ok=True,
             intent=parsed.intent,
             lang=parsed.lang,
             citation_rows=[dict(row)],
-            message=(
-                f"{row['name']}: on_hand={row['on_hand']}, "
-                f"unit_price={row['unit_price']} {row['currency']}."
-            ),
+            message=msg,
         )
 
     return refuse_unknown(parsed.lang)

@@ -1,11 +1,8 @@
-# Security model — DukaBind
+# Security model: DukaBind
 
-**Status:** Active — Gate 1  
-**Last reviewed:** 2026-07-26  
-**Audience:** Contributors and Gate auditors  
-**Authority:** Security-sensitive code paths should cite a control ID from this document.
+**Authority:** Security-sensitive code paths cite a control ID (C1–C10) from this document.
 
-This is the threat model for the ledger binder. Update the **Status** column when a control ships, is deferred, or changes.
+This is the threat model for the ledger binder. The status column shows which controls are implemented, deferred, or partial as of Gate 1.
 
 ---
 
@@ -46,16 +43,16 @@ The language model is never trusted to choose SQL, invent balances, or execute w
 
 | ID | Control | Basis | Gate 1 status |
 |---|---|---|---|
-| **C1** | **Allowlisted queries only** — finite named SQL; no SQL built from user or model text | OWASP A03; deterministic ground truth | **Implemented** — `app/binder/allowlist.py` |
-| **C2** | **Parameterized binds** — `?` via `sqlite3`; never f-string SQL | CWE-89; Python DB-API | **Implemented** — same module |
-| **C3** | **No LLM-generated SQL** | Hallucination + injection surface | **Implemented** — model receives staff question + binder message + citation JSON; never receives SQL or chooses a query |
-| **C4** | **Fail closed** — NULL/missing required fields → refuse; never invent numbers | Financial safety | **Implemented** — `refuse.py` + tests |
-| **C5** | **Loopback only** — `llama-server` and client use `127.0.0.1`; no redirects | Offline rule; reduce remote surface | **Implemented** — start script + `assert_loopback_http` |
-| **C6** | **Owner-gated writes** — mutating actions need local PIN/password; LLM cannot write | Separation of duties | **Deferred** — no write UI at Gate 1 |
-| **C7** | **Weight integrity** — `download_model.sh` verifies sha256 | Supply-chain hygiene | **Implemented** — pinned digest |
-| **C8** | **No secrets in git** — no API keys; offline product | ADTC offline rule | **Implemented** — weights/env ignored |
-| **C9** | **No third-party PII in git** — seeded shop rows only; do not commit customer files without consent | Privacy / eligibility honesty | **Implemented** — `seed.sql` + `fixture.py` |
-| **C10** | **Injection / hallucination tests** — refuse and ledger-flip coverage; expand “invent amount” cases | Judge exposure questions | **Partial** — core refuse/flip tests; expand before Gate 3 |
+| **C1** | **Allowlisted queries only**: finite named SQL; no SQL built from user or model text | OWASP A03; deterministic ground truth | **Implemented** in `app/binder/allowlist.py` |
+| **C2** | **Parameterized binds**: `?` via `sqlite3`; never f-string SQL | CWE-89; Python DB-API | **Implemented** in the same module |
+| **C3** | **No LLM-generated SQL** | Hallucination + injection surface | **Implemented**. The model receives staff question + binder message + citation JSON; never receives SQL or chooses a query |
+| **C4** | **Fail closed**: NULL/missing required fields refuse; never invent numbers | Financial safety | **Implemented** in `refuse.py` + tests |
+| **C5** | **Loopback only**: `llama-server` and client use `127.0.0.1`; no redirects | Offline rule; reduce remote surface | **Implemented** in the start script + `assert_loopback_http` |
+| **C6** | **Owner-gated writes**: mutating actions need local PIN/password; LLM cannot write | Separation of duties | **Deferred**, no write UI at Gate 1 |
+| **C7** | **Weight integrity**: `download_model.sh` verifies sha256 | Supply-chain hygiene | **Implemented**, pinned digest |
+| **C8** | **No secrets in git**: no API keys; offline product | ADTC offline rule | **Implemented**, weights/env ignored |
+| **C9** | **No third-party PII in git**: seeded shop rows only; do not commit customer files without consent | Privacy / eligibility honesty | **Implemented** in `seed.sql` + `fixture.py` |
+| **C10** | **Injection / hallucination tests**: refuse and ledger-flip coverage; expand “invent amount” cases | Judge exposure questions | **Partial**, core refuse/flip tests; expand before Gate 3 |
 
 ---
 
@@ -80,18 +77,8 @@ Controls **C1–C5** and **C7–C9** in code under `app/binder/` and `app/llm/`.
 
 ## 6. References
 
-- [ADTC submission template](https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template) — offline, llama.cpp, no weights in git  
-- [Devpost overview](https://adtc-2026.devpost.com/) — memory / OOM / thermal rules  
+- [ADTC submission template](https://github.com/Africa-Deep-Tech-Foundation/adtc-2026-submission-template), offline, llama.cpp, no weights in git  
+- [Devpost overview](https://adtc-2026.devpost.com/), memory / OOM / thermal rules  
 - OWASP Injection prevention cheat sheet  
 - Python `sqlite3` parameterized queries  
 - Architecture choices: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md)
-
----
-
-## Change log
-
-| Date | Change |
-|---|---|
-| 2026-08-04 | C9: no third-party PII in git; `seed.sql` |
-| 2026-07-26 | Added Gate 1 implementation status per control; clarified binder-authoritative message |
-| 2026-07-25 | Initial threat model |

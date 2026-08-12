@@ -1,7 +1,7 @@
 """Shop identities for the two ledger fixtures.
 
-* Marché Akwa Viviane (Akwa, Douala) — the primary demo shop (``seed.sql``).
-* Marché Nkolmébé (Yaoundé) — the second fixture (``seed_duka_b.sql``) used by
+* Marché Akwa Viviane (Akwa, Douala), the primary demo shop (``seed.sql``).
+* Marché Nkolmébé (Yaoundé), the second fixture (``seed_duka_b.sql``) used by
   the held-out eval to prove answers bind to the live ledger and cannot be
   memorized from the first shop.
 
@@ -35,7 +35,7 @@ KNOWN_CUSTOMERS = [
     "Esther Tchamba",
     "Esther",
     "Tchamba",
-    # Marché Nkolmébé (Yaoundé) — second fixture, disjoint names.
+    # Marché Nkolmébé (Yaoundé), second fixture, disjoint names.
     "Amina Bello",
     "Amina",
     "Bello",
@@ -56,11 +56,11 @@ KNOWN_SUPPLIERS = [
     "Grosserie Portuaire",
     "Portuaire",
     "Bonaberi",
-    # Marché Nkolmébé (Yaoundé) — second fixture, disjoint names.
+    # Marché Nkolmébé (Yaoundé), second fixture, disjoint names.
     "Sanaga Épicerie",
     "Sanaga",
     "Épicerie",
-    # ASCII variants — cashiers often skip accents when typing.
+    # ASCII variants; cashiers often skip accents when typing.
     "Sanaga Epicerie",
     "Epicerie",
     "Ciment du Cameroun",
@@ -79,7 +79,7 @@ KNOWN_SKUS = [
     "riz",
     "oil",
     "huile",
-    # Marché Nkolmébé (Yaoundé) — second fixture, disjoint names.
+    # Marché Nkolmébé (Yaoundé), second fixture, disjoint names.
     "Sucre 25kg",
     "sugar",
     "sucre",
@@ -89,6 +89,12 @@ KNOWN_SKUS = [
     "Farine 50kg",
     "flour",
     "farine",
+    # Swahili product words; stock asks in Swahili bind to the same SKUs.
+    "sukari",  # sugar
+    "unga",  # flour
+    "mchele",  # rice
+    "mafuta",  # oil
+    "sabuni",  # soap
 ]
 
 _CUSTOMER_ALIASES = {
@@ -151,6 +157,12 @@ _SKU_ALIASES = {
     "farine 50kg": "Farine 50kg",
     "flour": "Farine 50kg",
     "farine": "Farine 50kg",
+    # Swahili product words.
+    "sukari": "Sucre 25kg",
+    "unga": "Farine 50kg",
+    "mchele": "Sac riz 25kg",
+    "mafuta": "Bidon huile palme 5L",
+    "sabuni": "Savon carton 24",
 }
 
 

@@ -1,8 +1,8 @@
--- Marché Nkolmébé (Nkolmébé, Yaoundé · XAF) — second shop fixture.
+-- Marché Nkolmébé (Nkolmébé, Yaoundé · XAF), second shop fixture.
 -- Distinct names/balances/stock from seed.sql (anti-memorization held-out proof).
 -- Keep names in sync with app/db/fixture.py.
--- Maman Rachel: NULL credit_limit → refuse credit asks.
--- Ciment du Cameroun: NULL balance_owed → refuse payable asks.
+-- Maman Rachel: NULL credit_limit forces a credit refusal.
+-- Ciment du Cameroun: NULL balance_owed forces a payable refusal.
 
 INSERT OR REPLACE INTO shop_meta(key, value) VALUES
   ('shop_name', 'Marché Nkolmébé'),

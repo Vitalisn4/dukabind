@@ -47,7 +47,7 @@ jobs:
           sed '/^\*\*Generated:/d' evals/heldout/REPORT.md > /tmp/report.committed.md
           sed '/^\*\*Generated:/d' /tmp/report.generated.md > /tmp/report.normalized.md
           diff -u /tmp/report.committed.md /tmp/report.normalized.md || {
-            echo "::error::evals/heldout/REPORT.md is stale — rerun 'PYTHONPATH=. python evals/run_heldout.py --write-report' and commit the regenerated file"
+            echo "::error::evals/heldout/REPORT.md is stale. Rerun 'PYTHONPATH=. python evals/run_heldout.py --write-report' and commit the regenerated file"
             exit 1
           }
 

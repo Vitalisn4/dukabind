@@ -1,4 +1,4 @@
-"""Allowlisted SQL — the only queries this program may run (controls C1/C2).
+"""Allowlisted SQL. These are the only queries this program may run (controls C1/C2).
 
 User and model text is never concatenated into SQL; callers pass a query name
 and bound parameters only.
@@ -21,7 +21,7 @@ class AllowlistedQuery:
     required_params: tuple[str, ...]
 
 
-# Extend this map for new intents — never assemble SQL at call sites.
+# Extend this map for new intents. Never assemble SQL at call sites.
 QUERIES: dict[str, AllowlistedQuery] = {
     "customer_credit": AllowlistedQuery(
         name="customer_credit",

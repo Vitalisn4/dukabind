@@ -79,7 +79,7 @@ try:
     before = handle_ask(conn, "Can I give Fotso 3 crates on credit?")
     assert before.approved is False and "No" in before.message, before
     # One transaction: flip the limit, prove the answer follows, then roll back
-    # so the seed file is never left modified — even if an assert fails mid-way.
+    # so the seed file is never left modified, even if an assert fails mid-way.
     conn.execute("BEGIN")
     conn.execute(
         "UPDATE customers SET credit_limit = ? WHERE display_name = ?",
@@ -120,10 +120,10 @@ assert d[\"refuse_reason\"]==\"balance_owed_null\"
   '
 else
   echo
-  echo "note: unshare -n unavailable on this host — binder path still proven."
-  echo "      Manual airplane-mode: disable Wi‑Fi/Ethernet and re-run this script."
+  echo "note: unshare -n unavailable on this host; the binder path is still proven."
+  echo "      Manual airplane-mode: disable Wi-Fi/Ethernet and re-run this script."
 fi
 
 echo
-echo "PASS: offline_check — binder answers track the ledger with no cloud dependency"
+echo "PASS: offline_check. Binder answers track the ledger with no cloud dependency"
 exit 0

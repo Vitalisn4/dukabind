@@ -1,4 +1,4 @@
-# Profiler participant smoke — summary
+# Profiler participant smoke: summary
 
 **Run:** 2026-08-12T09:47:46Z UTC
 **Command:** `bash scripts/run_profiler_smoke.sh` --full
@@ -36,4 +36,4 @@
 - Peak RSS clears &lt;5.5 GB self-limit.
 - Thermal **fails** contest soak target (&lt;85 °C / no throttle) on this run.
 - Next: `bash scripts/thread_matrix.sh`, then the frozen-default soak `bash scripts/thermal_soak.sh`.
-- Copy numbers into `REPORT.md` / `BENCHMARKS.md` only from this JSON — never invent.
+- Copy numbers into `REPORT.md` / `BENCHMARKS.md` only from this JSON. Never invent.

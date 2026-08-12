@@ -1,4 +1,4 @@
-"""Narrate CLI — binder first, then optional local LLM polish.
+"""Narrate CLI. Binder first, then optional local LLM polish.
 
 Usage:
   PYTHONPATH=. python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"

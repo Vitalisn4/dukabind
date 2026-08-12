@@ -19,11 +19,11 @@ echo "== ruff =="
 ruff check app tests evals scripts
 
 echo
-echo "== bandit (shipped code — no exclusions) =="
+echo "== bandit (shipped code, no exclusions) =="
 bandit -q -r app evals
 
 echo
-echo "== bandit (tests — skip assert_used; pytest is assert-based) =="
+echo "== bandit (tests, skip assert_used; pytest is assert-based) =="
 bandit -q -r tests -s B101
 
 echo

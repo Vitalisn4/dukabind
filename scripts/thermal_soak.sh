@@ -21,23 +21,23 @@ export CTX="${CTX:-1024}"
 export PORT
 
 if [[ ! -x "$HERE/third_party/llama.cpp/build/bin/llama-server" ]]; then
-  echo "error: llama-server missing — run bash scripts/setup_llama.sh" >&2
+  echo "error: llama-server missing. Run bash scripts/setup_llama.sh" >&2
   exit 1
 fi
 if [[ ! -f "$HERE/model/qwen2.5-1.5b-instruct-q4_k_m.gguf" ]]; then
-  echo "error: GGUF missing — run ./download_model.sh" >&2
+  echo "error: GGUF missing. Run ./download_model.sh" >&2
   exit 1
 fi
 
 # Measurement integrity: the soak must be a single-server run. Refuse to start
-# if another llama-server is alive or the port is already bound — a concurrent
+# if another llama-server is alive or the port is already bound, a concurrent
 # server skews temps and makes the verdict meaningless.
 if pgrep -f 'llama-serve[r] --model' >/dev/null 2>&1; then
-  echo "error: another llama-server is already running — stop it first (soak must be single-server)" >&2
+  echo "error: another llama-server is already running. Stop it first (soak must be single-server)" >&2
   exit 1
 fi
 if command -v ss >/dev/null 2>&1 && ss -tln 2>/dev/null | grep -q ":$PORT "; then
-  echo "error: port $PORT is already in use — free it first" >&2
+  echo "error: port $PORT is already in use. Free it first" >&2
   exit 1
 fi
 
@@ -105,7 +105,7 @@ PY
 
 # A soak without a usable temperature reading cannot produce a verdict.
 if ! read_package_temp >/dev/null 2>&1; then
-  echo "error: no usable temperature sensor under /sys/class/hwmon — cannot run thermal soak" >&2
+  echo "error: no usable temperature sensor under /sys/class/hwmon. Cannot run thermal soak" >&2
   exit 1
 fi
 
@@ -178,7 +178,7 @@ while (( SECONDS < END )); do
   # Flag concurrent servers so the verdict is never claimed on a dirty run.
   if (( $(pgrep -fc 'llama-serve[r] --model' 2>/dev/null || echo 0) > 1 )); then
     contaminated=1
-    echo "WARNING: another llama-server detected — this run is contaminated" >&2
+    echo "WARNING: another llama-server detected; this run is contaminated" >&2
   fi
   sleep "$SAMPLE_SECS"
 done
@@ -197,7 +197,7 @@ peak = max(temps) if temps else float("nan")
 mean = sum(temps) / len(temps) if temps else float("nan")
 ok_rate = (sum(https) / len(https) * 100) if https else 0.0
 if any(not math.isfinite(t) for t in temps):
-    print("RESULT: FAIL — non-finite temperature values in log (sensor unavailable?).")
+    print("RESULT: FAIL: non-finite temperature values in log (sensor unavailable?).")
     raise SystemExit(2)
 print()
 print(f"samples: {len(rows)}")
@@ -206,13 +206,13 @@ print(f"temp mean: {mean:.1f} C")
 print(f"http ok: {ok_rate:.0f}%")
 print(f"log: {path}")
 if contaminated:
-    print("RESULT: FAIL — another llama-server ran concurrently; not a single-server measurement.")
+    print("RESULT: FAIL: another llama-server ran concurrently; not a single-server measurement.")
     raise SystemExit(2)
 if ok_rate < 100.0:
-    print("RESULT: FAIL — server health degraded (http_ok < 100%). Inspect the server log and re-soak.")
+    print("RESULT: FAIL: server health degraded (http_ok < 100%). Inspect the server log and re-soak.")
     raise SystemExit(2)
 if peak >= 85 or fail_hot:
-    print("RESULT: FAIL — peak ≥85°C (P_thermal risk). Lower THREADS or ctx and re-soak.")
+    print("RESULT: FAIL: peak ≥85°C (P_thermal risk). Lower THREADS or ctx and re-soak.")
     raise SystemExit(2)
-print("RESULT: PASS — single-server, http_ok 100%, peak <85°C on this soak")
+print("RESULT: PASS: single-server, http_ok 100%, peak <85°C on this soak")
 PY
