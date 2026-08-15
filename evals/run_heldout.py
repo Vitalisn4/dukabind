@@ -228,8 +228,8 @@ def _write_report_text(
     generated = datetime.now(timezone.utc).date().isoformat()
     return f"""# Held-out evaluation report: DukaBind
 
-**Generated:** {generated} by `evals/run_heldout.py --write-report` (measured run; numbers recomputed, never hand-edited)  
-**Set:** `evals/heldout/prompts.json`, frozen 2026-08-12, English + French + Swahili  
+**Generated:** {generated} by `evals/run_heldout.py --write-report` (measured run)  
+**Set:** `evals/heldout/prompts.json`, frozen 2026-08-12, English, French, and Swahili  
 **Command:** `PYTHONPATH=. .venv/bin/python evals/run_heldout.py`  
 **Fixtures:** Marché Akwa Viviane (`marche_akwa`) and Marché Nkolmébé (`duka_b`), two disjoint ledgers
 
@@ -237,7 +237,7 @@ def _write_report_text(
 
 | Metric | Result |
 |---|---|
-| T11 held-out bind/refuse | {correct}/{n_prompts} (**{t11:.1f}%**); target ≥ 90 % |
+| T11 held-out bind/refuse | {correct}/{n_prompts} (**{t11:.1f}%**); target ≥ 90% |
 | Ledger-flip proofs | {len(details["flips"]) - flip_fail}/{len(details["flips"])} |
 | Total checks | {n_prompts + len(details["flips"])}, **{prompt_fail + flip_fail} failures** |
 
@@ -247,9 +247,7 @@ def _write_report_text(
 
 ## Cross-shop non-leak
 
-{cross_ok}/{len(cross_shop)} cross-shop prompts passed; entities of one shop
-asked against the other ledger refuse with `not_found` and never leak the other
-shop's numbers (no memorization between fixtures).
+{cross_ok}/{len(cross_shop)} cross-shop prompts passed. An entity from one shop asked against the other ledger refuses with `not_found` and does not leak the other shop's numbers.
 
 ## Ledger flips (answers track ledger rows)
 
@@ -257,10 +255,7 @@ shop's numbers (no memorization between fixtures).
 
 ## T13: submission prompts stay disjoint
 
-The 2 submission prompts in `metadata.json` are chosen from a pool **disjoint**
-from this held-out set (T13). `tests/test_metadata.py` fails CI if any staff
-ask string overlaps this file, so the submission prompts cannot drift into the
-held-out set without breaking the build.
+The two submission staff asks in `metadata.json` do not exactly overlap this held-out set. `tests/test_metadata.py` fails CI if a staff-ask string overlaps this file.
 
 ---
 

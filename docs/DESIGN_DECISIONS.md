@@ -63,9 +63,9 @@ Each decision records **options** (when relevant), **choice**, **evidence**, and
 
 | | |
 |---|---|
-| **Choice** | Keyword / lexicon English maps to a named allowlist query |
+| **Choice** | Keyword / lexicon maps (English, French, Swahili) to a named allowlist query |
 | **Evidence** | Deterministic; near-zero RAM; reduces intent hallucination |
-| **Reverse if** | Coverage gaps after English held-out. Add constrained LLM JSON parse as fallback only |
+| **Reverse if** | Coverage gaps after held-out evaluation. Add constrained LLM JSON parse as fallback only |
 
 ---
 

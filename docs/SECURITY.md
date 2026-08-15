@@ -1,8 +1,6 @@
 # Security model: DukaBind
 
-**Authority:** Security-sensitive code paths cite a control ID (C1-C10) from this document.
-
-This is the threat model for the ledger binder. The status column shows which controls are implemented, deferred, or partial as of Gate 1.
+This document maps controls C1-C10. Implementation comments currently cite C1-C5 and C7. C6 is deferred. C8-C10 are documented here without code-level ID comments. Status is Gate 1.
 
 ---
 
@@ -29,7 +27,7 @@ This is the threat model for the ledger binder. The status column shows which co
 [Trusted] Citation JSON (rows from DB)
       │
       ▼
-[Semi-trusted] LLM narration  (may polish prose; MUST NOT invent amounts)
+[Untrusted] LLM narration  (optional polish; not validated for figures)
       │
       ▼
 [Trusted] Binder message remains authoritative; refuse skips the model
@@ -68,10 +66,10 @@ The language model is never trusted to choose SQL, invent balances, or execute w
 ## 5. Reviewer FAQ
 
 **What stops the model inventing a balance?**  
-Architecture: the model only receives citation JSON from allowlisted SQL. Missing fields refuse before narration. Cashier-facing `message` stays the binder decision; optional polish is stored in `narration`. Tests cover NULL refuse and ledger flip.
+Architecture: the model only receives citation JSON from allowlisted SQL. Missing fields refuse before narration. Cashier-facing `message` is the only financial answer; optional `narration` is untrusted polish and is not validated for numbers. Tests cover NULL refuse and ledger flip.
 
 **Where is the policy encoded?**  
-Controls **C1-C5** and **C7-C9** in code under `app/binder/` and `app/llm/`. Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
+Controls **C1-C5** and **C7** are cited in `app/binder/`, `app/llm/`, `scripts/start_llama_server.sh`, and `download_model.sh`. C8-C10 are repo and test practice described in this table, not ID comments in those paths. Design rationale: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md).
 
 ---
 
