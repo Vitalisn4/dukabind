@@ -1,8 +1,6 @@
 # Security model: DukaBind
 
-**Authority:** Security-sensitive code paths cite a control ID (C1-C10) from this document.
-
-This is the threat model for the ledger binder. The status column shows which controls are implemented, deferred, or partial as of Gate 1.
+Security-sensitive code paths cite a control ID (C1-C10) from this document. Status is Gate 1.
 
 ---
 

@@ -1,8 +1,8 @@
 # BENCHMARKS: DukaBind
 
-**Status:** Updated only from measured `adtc-profiler` / `llama-bench` / soak output  
+**Status:** Updated only from measured `adtc-profiler` / `llama-bench` / soak output.  
 **Last updated:** 2026-08-12  
-**Product:** English offline ledger binder · Qwen2.5-1.5B Q4_K_M · participant laptop Intel i7-8650U  
+**Product:** Offline EN/FR/SW ledger binder · Qwen2.5-1.5B Q4_K_M · participant laptop Intel i7-8650U
 
 ## How to reproduce
 
@@ -12,14 +12,14 @@ bash scripts/setup_llama.sh
 bash scripts/run_profiler_smoke.sh
 bash scripts/thread_matrix.sh
 SOAK_MINUTES=10 bash scripts/thermal_soak.sh
-THREADS=3 CTX=2048 bash scripts/ram_capped_proof.sh   # 8 GB-class proof; envs pin the 2026-08-06 recorded config
+THREADS=3 CTX=2048 bash scripts/ram_capped_proof.sh
 ```
 
-> Env-override note: the scripts read **uppercase** `THREADS` and `CTX` (e.g. `THREADS=2 CTX=1024 bash scripts/thermal_soak.sh`). The shipped default is `THREADS=2`/`CTX=1024`; the recorded 2026-08-06 runs below use the then-default `THREADS=3`/`CTX=2048` unless stated otherwise.
+Scripts read uppercase `THREADS` and `CTX` (example: `THREADS=2 CTX=1024 bash scripts/thermal_soak.sh`). Shipped default is `THREADS=2`/`CTX=1024`. Recorded 2026-08-06 runs below use the then-default `THREADS=3`/`CTX=2048` unless stated otherwise.
 
 ## Participant smoke (2026-08-06, `--full`, definitive run)
 
-Source: the 2026-08-06 `--full` profiler run on the build laptop (values also recorded in [`REPORT.md`](REPORT.md); raw JSON gitignored under `benchmarks/raw/`). The committed freeze snapshot [`benchmarks/submission.json`](benchmarks/submission.json) is the **2026-08-11 `--skip-accuracy` re-run** (Peak RSS 1821.11 MB · 15.67 tok/s · TTFT 10548.82 ms, freeze tag `v1.0.0-gate1`) and is **not** the source of this table; the regenerated [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md) reflects the 2026-08-12 re-run.
+Source: 2026-08-06 `--full` profiler run on the build laptop (also in [`REPORT.md`](REPORT.md); raw JSON under gitignored `benchmarks/raw/`). The committed freeze snapshot [`benchmarks/submission.json`](benchmarks/submission.json) is the **2026-08-11 `--skip-accuracy` re-run** (Peak RSS 1821.11 MB · 15.67 tok/s · TTFT 10548.82 ms, tag `v1.0.0-gate1`). That snapshot is **not** the source of this table. [`benchmarks/submission.summary.md`](benchmarks/submission.summary.md) reflects the 2026-08-12 re-run.
 
 | Metric | Measured |
 |---|---|
@@ -168,11 +168,6 @@ A short 1-min positive run (`thermal_soak_20260806T073357Z`, after the single-se
 - **T15 quant lock:** Q4_K_M 1.5B stays frozen unless T11 (answer accuracy) regresses against the held-out set with RSS margin; 3B Q4 only if T1-T3 stay green.
 - **Tiny Aya, skipped:** the Aya bake-off is out of scope for Gate 1. No Aya benchmark numbers are claimed or invented.
 
-## Still to run
+## Remaining
 
-- [x] Re-soak at `THREADS=2`: **measured FAIL** at `ctx=2048` (peak 93 °C, 2026-08-06)  
-- [x] Re-soak at `CTX=1024`: **measured PASS** 2026-08-06 (peak 84.0 °C) but **FAIL on 2026-08-10 re-run** (peak 89.0 °C), no longer a thermally-safe config on this laptop  
-- [x] **Decide ship default**: done 2026-08-07. Freeze `THREADS=2`/`CTX=1024` in `scripts/start_llama_server.sh`; documented above (thermal safety over TPS; `THREADS=3`/`CTX=2048` reachable via env override for eval-machine runs)  
-- [x] `bash scripts/run_profiler_smoke.sh --full`: done 2026-08-06 (`accuracy: []`, profiler then skipped accuracy); **2026-08-12 re-run with in-process accuracy: 74.0% `arc_easy`** (see section above)  
-- [x] 8 GB-class memory-capped proof: done 2026-08-06, `bash scripts/ram_capped_proof.sh` (cgroup peak 0.77 GiB under 7.5 GiB cap; see section above)  
-- [ ] Official eval-machine numbers (Gate 1 scoring machine ≠ this laptop)
+- [ ] Official eval-machine numbers (Gate 1 scoring machine is not this laptop)

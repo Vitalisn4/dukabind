@@ -1,164 +1,156 @@
 # DukaBind: Reproduction runbook
 
-**Goal:** from a clean, offline-capable Ubuntu machine to a working, verified DukaBind in ~15 minutes of machine time **plus model download** (~1.1 GB, network-dependent), with every number traceable to a committed artifact.
+From a clean Ubuntu machine to a verified DukaBind. Setup needs network (clone, Python packages, llama.cpp source, model download). After that, the stack runs offline. Numbers below cite committed artifacts in [`REPORT.md`](REPORT.md) and [`BENCHMARKS.md`](BENCHMARKS.md).
 
-> **Runbook pin:** checkout the SHA in Quick facts below. On that revision, expect pytest **78 passed**, held-out **40/40** (T11 **37/37** = 100.0%, flips 3/3), and `offline_check.sh` **PASS**. Model download is sha256-verified and idempotent; llama.cpp build + narrated asks use the same commands. See [`REPORT.md`](REPORT.md). Product freeze tag `v1.0.0-gate1` (`fe5b506`) remains the Gate 1 packaging reference and is an ancestor of this pin.
-
-This document is written for an **auditor or judge**, not for feature contributors. There are no contribution guidelines here because the product is frozen. If you want to verify DukaBind end to end, follow this runbook top to bottom.
+This is an **auditor runbook**, not a contributor guide. The product is frozen. Follow the sections in order.
 
 **Quick facts**
 
 | Item | Value |
 |---|---|
-| Product | Offline EN/FR/SW fail-closed SQLite ledger binder + optional local llama.cpp narration (en/fr) |
+| Product | Offline EN/FR/SW fail-closed SQLite ledger binder; optional local llama.cpp narration (en/fr) |
 | Domain / runtime | `corporate_enterprise` · llama.cpp + GGUF only |
-| Model | Qwen2.5-1.5B-Instruct Q4_K_M (pinned GGUF + sha256 in `download_model.sh`) |
-| Ship default | `THREADS=2` / `CTX=1024` (thermal-safety freeze) |
-| Reference commit | `29d1eba5131b72cd5fe29705905cc5c5b31a6c38` (this runbook); product freeze tag `v1.0.0-gate1` (`fe5b506`) |
+| Model | Qwen2.5-1.5B-Instruct Q4_K_M (GGUF + sha256 in `download_model.sh`) |
+| Defaults | `THREADS=2` / `CTX=1024` |
+| Source | Clone **`main`**. Tag `v1.0.0-gate1` is a packaging snapshot. |
 
 ---
 
-## 1. Hardware assumptions
+## 1. Hardware
 
-- Ubuntu 22.04 LTS (or close), x86-64 CPU (Intel i5 class / Ryzen 5 class, an i7-8650U participant laptop is sufficient)
-- **≥ 8 GB RAM** (the contest target; measured full-stack peak RSS ~1.8 GB, see `BENCHMARKS.md`)
+- Ubuntu 22.04 LTS (or close), x86-64 (Intel i5 / Ryzen 5 class; an i7-8650U is sufficient)
+- **≥ 8 GB RAM** (measured full-stack peak RSS ~1.8 GB; see `BENCHMARKS.md`)
 - ~20 GB free disk (llama.cpp build + 1.1 GB GGUF)
-- Python 3.10+ and `cmake` + a C compiler (for the llama.cpp build)
+- Python 3.10+, `cmake`, and a C compiler
 
-No GPU required. `--n-gpu-layers 0` is the frozen flag.
+No GPU. `--n-gpu-layers 0` is the frozen flag.
 
-## 2. Fresh-machine reproduction (from zero)
+## 2. Fresh-machine reproduction
 
-Everything below is run from a fresh clone. Network is needed for the repository clone, Python dependency installation, the llama.cpp source clone, and the model download; after these setup steps, the whole stack runs offline.
-
-### 2.1 Clone + Python environment
+### 2.1 Clone and Python environment
 
 ```bash
 git clone https://github.com/Vitalisn4/dukabind.git
 cd dukabind
-git checkout --detach 29d1eba5131b72cd5fe29705905cc5c5b31a6c38   # pin to the runbook reference commit (Quick facts)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Detached-HEAD checkout pins the run to the reference commit so a later push to `main` cannot silently change what this runbook executes. Counts below (78 tests, 40/40 held-out) refer to that commit.
+Expect: pytest **78 passed**, held-out **40/40** (T11 **37/37**, flips 3/3), `offline_check.sh` **PASS**.
 
-### 2.2 Binder tests: no model required (2 min)
+### 2.2 Binder tests (no model, ~2 min)
 
 ```bash
 PYTHONPATH=. pytest tests/ -q        # expect 78 passed
 ```
 
-This exercises the binder (credit check, supplier balance, stock), the fail-closed refusal rules (NULL limit / NULL outstanding / NULL balance), injection battery, the second ledger fixture `duka_b`, the French + Swahili tracks, and the T13 metadata guard.
+Covers credit, supplier balance, stock, NULL-field refusals, injection cases, the second ledger `duka_b`, French and Swahili tracks, and the T13 metadata guard.
 
-### 2.3 Offline proof: no model required (30 s)
-
-```bash
-bash scripts/offline_check.sh        # expect: PASS, binder answers track the ledger
-```
-
-Proves the binder answers from the SQLite ledger with no cloud dependency: credit over-limit refusal, supplier NULL-balance refusal, stock answer, and the **ledger-flip** (edit a `credit_limit` row, same question, new answer, rollback, original answer).
-
-### 2.4 Model download: network once, sha256-verified, idempotent
+### 2.3 Offline proof (no model, ~30 s)
 
 ```bash
-./download_model.sh                  # ~1.1 GB from HF; pinned sha256 checked
-./download_model.sh                  # run twice: second run skips + re-verifies (idempotent)
+bash scripts/offline_check.sh        # expect PASS
 ```
 
-`model/qwen2.5-1.5b-instruct-q4_k_m.gguf` is created. The expected sha256 is pinned in the script (`EXPECTED_SHA256`); a mismatch fails the run.
+Confirms ledger-backed answers with no cloud: credit over-limit, supplier NULL-balance refusal, stock, and a **ledger flip** (edit `credit_limit`, same question, new answer, rollback).
 
-### 2.5 Build llama.cpp (5-10 min, one-time)
+### 2.4 Model download (network once)
 
 ```bash
-bash scripts/setup_llama.sh         # clone + CMake Release build into third_party/llama.cpp
+./download_model.sh                  # ~1.1 GB; sha256 checked
+./download_model.sh                  # second run skips and re-verifies
 ```
 
-Requires `cmake`, a C compiler, and `nproc` cores.
+Writes `model/qwen2.5-1.5b-instruct-q4_k_m.gguf`. Expected hash is `EXPECTED_SHA256` in the script.
 
-### 2.6 Start the server + narrated asks
+### 2.5 Build llama.cpp (~5-10 min, once)
 
 ```bash
-bash scripts/start_llama_server.sh   # terminal A, llama-server on 127.0.0.1:8080 (ship default THREADS=2/CTX=1024)
+bash scripts/setup_llama.sh          # CMake Release build in third_party/llama.cpp
 ```
 
-Then, in a second terminal:
+Needs `cmake`, a C compiler, and CPU cores from `nproc`.
+
+### 2.6 Local server and narrated asks
+
+Terminal A:
+
+```bash
+bash scripts/start_llama_server.sh   # 127.0.0.1:8080, THREADS=2, CTX=1024
+```
+
+Terminal B:
 
 ```bash
 source .venv/bin/activate
 export PYTHONPATH=.
-python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"   # over-limit, No, arithmetic shown
-python -m app.narrate_cli "How much do we owe SOCA?"                         # NULL balance, refusal naming the field
+python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"
+python -m app.narrate_cli "How much do we owe SOCA?"
 ```
 
-The binder `message` is authoritative; the local model only narrates the cited rows.
+The binder `message` is authoritative. The model narrates cited rows only.
 
-### 2.7 Held-out evaluation (5 min)
+### 2.7 Held-out evaluation (~5 min)
 
 ```bash
 PYTHONPATH=. .venv/bin/python evals/run_heldout.py
-# expect: 40/40 checks, 0 failures (T11 37/37 = 100.0%, ledger-flip proofs 3/3)
+# expect: 40/40, T11 37/37 = 100.0%, flips 3/3
 ```
 
-**37 prompts** (28 EN + 5 FR + 4 SW) against **two disjoint shop ledgers** (`marche_akwa` + `duka_b`): credit, payables, stock, NULL-field refusals, adversarial/jailbreak asks, and cross-shop non-leak. French and Swahili prompts are in `evals/heldout/prompts.json` (same runner); unit coverage also lives in `tests/test_languages.py`.
+**37 prompts** (28 English, 5 French, 4 Swahili) on two disjoint ledgers (`marche_akwa`, `duka_b`): credit, payables, stock, NULL refusals, adversarial asks, and cross-shop non-leak. See `evals/heldout/prompts.json` and `tests/test_languages.py`.
 
-### 2.8 (Optional) Multilingual + Ollama/LM Studio compatibility
-
-The binder answers English, French, and Swahili asks with localized deterministic messages (`tests/test_languages.py`):
+### 2.8 Optional: French, Swahili, and bare GGUF
 
 ```bash
 PYTHONPATH=. python -m app.cli "Puis-je donner trois caisses de crédit à Marie-Claire ?"
 PYTHONPATH=. python -m app.cli "Tunadaiwa kiasi gani na SOCA?"
 ```
 
-English and French answers may be narrated by the local model; Swahili is binder-only by design (the 1.5B model does not narrate Swahili reliably; see `MODEL_CARD.md`).
+English and French may be narrated. Swahili is binder-only (`MODEL_CARD.md`). The GGUF is a standard Qwen2.5 file and loads in LM Studio or Ollama; that is compatibility, not a shipped runtime. llama.cpp is the only runtime this repo builds. Binder-only `python -m app.cli` never needs the model.
 
-**Judge-compatibility smoke:** judges may bare-load the GGUF in LM Studio or Ollama rather than our repo scripts. The weights are a standard Qwen2.5 GGUF, so any GGUF loader works; the binder-only `python -m app.cli` path never needs the model at all. This is a documented compatibility note, not a shipped dependency (llama.cpp remains the only runtime the repo builds).
+### 2.9 Optional: profiler regeneration
 
-### 2.9 (Optional) Profiler: `benchmarks/` regeneration
-
-The committed `benchmarks/submission.json` is the freeze snapshot; only regenerate it if you are re-measuring on a new host. Requirements are documented in the script header: a Python ≥ 3.11 venv with `adtc-profiler` installed (the repo convention is `.venv311`, created with `uv` or `python3.11 -m venv`), the GGUF from §2.4, and `llama-bench` from the §2.5 build on `PATH`:
+`benchmarks/submission.json` is the freeze snapshot. Regenerate only when measuring a new host. Needs Python ≥ 3.11, `adtc-profiler`, the GGUF from §2.4, and `llama-bench` from §2.5:
 
 ```bash
-# Python 3.11 venv for adtc-profiler only (uv or python3.11 -m venv both work)
 python3.11 -m venv .venv311 && source .venv311/bin/activate
-# install adtc-profiler per its README (https://github.com/Africa-Deep-Tech-Foundation/adtc-profiler)
-bash scripts/run_profiler_smoke.sh        # writes benchmarks/raw + regenerates the summary
+# install adtc-profiler: https://github.com/Africa-Deep-Tech-Foundation/adtc-profiler
+bash scripts/run_profiler_smoke.sh
 ```
 
-See [`benchmarks/README.md`](benchmarks/README.md) and [`BENCHMARKS.md`](BENCHMARKS.md) for methodology. Raw dumps stay gitignored (`benchmarks/raw/`); only the summary and the freeze snapshot are committed.
+See [`benchmarks/README.md`](benchmarks/README.md) and [`BENCHMARKS.md`](BENCHMARKS.md). Raw dumps stay in gitignored `benchmarks/raw/`.
 
-## 3. Verifying the claims (auditor checklist)
+## 3. Claim checklist
 
 | Claim | How to verify | Expected |
 |---|---|---|
-| Offline | `bash scripts/offline_check.sh` (incl. `unshare -n` when available) | PASS |
-| Binding, not recall | Ledger flip in §2.3 / [`demo/screenshots/02-ledger-flip.png`](demo/screenshots/02-ledger-flip.png) | answer changes when the row changes |
-| Fail-closed refusals | `python -m app.cli "How much do we owe SOCA?"` | `ok:false`, named missing field, no invented amount |
-| Two shop ledgers, no memorization | `evals/run_heldout.py` + `evals/heldout/REPORT.md` | 40/40; T11 37/37 = 100.0 %; flips 3/3 |
-| Measured RSS/TPS/thermal | `BENCHMARKS.md` + `benchmarks/submission.json` (freeze snapshot) | Peak RSS 1821.11 MB · 15.67 tok/s · thermal record honest (2026-08-06 PASS does not reproduce on 2026-08-10 re-run; authoritative P_thermal = official eval machine) |
-| Model provenance | `download_model.sh` sha256 + `MODEL_CARD.md` | pinned Qwen Q4_K_M |
-| Submission prompts T13-disjoint | `metadata.json` + `tests/test_metadata.py` | exactly 2 prompts; CI enforces disjointness from held-out |
+| Offline | `bash scripts/offline_check.sh` (`unshare -n` when available) | PASS |
+| Binding, not recall | Ledger flip in §2.3; [`demo/screenshots/02-ledger-flip.png`](demo/screenshots/02-ledger-flip.png) | Answer changes with the row |
+| Fail-closed refusals | `python -m app.cli "How much do we owe SOCA?"` | `ok: false`, named missing field, no invented amount |
+| Two ledgers | `evals/run_heldout.py` and `evals/heldout/REPORT.md` | 40/40; T11 37/37; flips 3/3 |
+| RSS / TPS / thermal | `BENCHMARKS.md` and `benchmarks/submission.json` | Peak RSS 1821.11 MB · 15.67 tok/s. Thermal: 2026-08-06 PASS does not reproduce on 2026-08-10; official P_thermal is the eval machine |
+| Model provenance | `download_model.sh` sha256 and `MODEL_CARD.md` | Pinned Qwen Q4_K_M |
+| T13 prompts | `metadata.json` and `tests/test_metadata.py` | Exactly two prompts, disjoint from held-out |
 
-## 4. Frozen configuration (do not change for judging)
+## 4. Frozen configuration
 
-| Flag | Frozen value | Where |
+| Flag | Value | Where |
 |---|---|---|
-| Threads | `THREADS=2` (env-overridable for eval-machine runs) | `scripts/start_llama_server.sh` |
+| Threads | `THREADS=2` (overridable for eval-machine runs) | `scripts/start_llama_server.sh` |
 | Context | `CTX=1024` | `scripts/start_llama_server.sh` |
 | GPU layers | `--n-gpu-layers 0` | `scripts/start_llama_server.sh` |
 | Model / quant | Qwen2.5-1.5B-Instruct Q4_K_M | `download_model.sh`, `MODEL_CARD.md` |
 
-Any change to these flags after the freeze is a re-freeze and must be recorded in `REPORT.md` and `BENCHMARKS.md`.
+Record any later change in `REPORT.md` and `BENCHMARKS.md`.
 
-## 5. Common failure modes
+## 5. Common failures
 
 | Symptom | Cause / fix |
 |---|---|
-| `llama-server binary not found` | Skip §2.5 or rebuild: `bash scripts/setup_llama.sh` |
-| `model missing at model/qwen2.5-…gguf` | Run `./download_model.sh` first (§2.4) |
-| sha256 mismatch on download | Network-corrupted download; delete `model/qwen2.5-1.5b-instruct-q4_k_m.gguf` and re-run (idempotent) |
-| `pytest` fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing. See §2.1-2.2 |
-| Held-out eval fails on a fresh clone | `.venv` not active / `PYTHONPATH=.` missing (see §2.1-2.2). No seeding is needed. `evals/run_heldout.py` creates and seeds its temporary SQLite fixtures automatically. |
-| Thermal on a hot laptop | This is the documented, honest risk: see `BENCHMARKS.md`. The authoritative P_thermal verdict is the official ADTC eval machine. |
+| `llama-server binary not found` | Run `bash scripts/setup_llama.sh` |
+| Model missing at `model/qwen2.5-…gguf` | Run `./download_model.sh` first (§2.4) |
+| sha256 mismatch | Delete the GGUF and re-run `download_model.sh` |
+| `pytest` fails on a fresh clone | Activate `.venv` and set `PYTHONPATH=.` (§2.1-2.2) |
+| Held-out eval fails on a fresh clone | Same as above. The runner seeds temporary SQLite fixtures itself |
+| Thermal on a hot laptop | Documented in `BENCHMARKS.md`. Official P_thermal is the ADTC eval machine |
