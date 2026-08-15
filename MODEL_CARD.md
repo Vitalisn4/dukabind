@@ -14,7 +14,7 @@ DukaBind uses this model for optional local narration of English and French bind
 
 ## Intended use
 
-- **Narrate cited ledger rows only.** The binder (`app/binder/`) runs allowlisted SQL on a local SQLite ledger and produces an authoritative `message` plus `citation_json`. The model may polish wording of those rows. It does not choose SQL, compute balances, or emit amounts missing from the citation.
+- **Narrate cited ledger rows only.** The binder (`app/binder/`) runs allowlisted SQL on a local SQLite ledger and produces an authoritative `message` plus `citation_json`. Optional LLM narration is **untrusted**: it may polish wording of cited rows, but it is not validated for numeric claims. Treat `message` as the only financial answer. The model does not choose SQL or compute balances.
 - **Offline counter Q&A** on credit, supplier payables, and stock, on 8 GB laptops without connectivity.
 - **Language:** `language_scope=["en","fr","sw"]`. Binder answers are localized without the LLM. The African claim is the Cameroon MSME offline ledger use-case (`african_alpha_claim: true`).
 

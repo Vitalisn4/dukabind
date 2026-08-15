@@ -2,7 +2,7 @@
 
 **An offline shop assistant that cannot invent your money.**
 
-DukaBind answers **credit**, **supplier payable**, and **stock** questions for African MSME counters. Staff ask in **English, French, or Swahili**. Answers come from a local SQLite ledger through allowlisted queries. A local GGUF model may narrate only the rows those queries returned. Missing data produces a hard refusal. Change a ledger row, and the answer must change.
+DukaBind answers **credit**, **supplier payable**, and **stock** questions for African MSME counters. Staff ask in **English, French, or Swahili**. Answers come from a local SQLite ledger through allowlisted queries. A local GGUF model may polish the wording of those rows, but narration is **untrusted** and is not a source of figures. The binder `message` is the only financial answer. Missing data produces a hard refusal. Change a ledger row, and the answer must change.
 
 > Domain: **Corporate / Enterprise** · Runtime: **llama.cpp + GGUF** · Offline at inference · Languages: English, French, Swahili (`language_scope: ["en", "fr", "sw"]`)
 
@@ -13,7 +13,7 @@ DukaBind answers **credit**, **supplier payable**, and **stock** questions for A
 Most offline LLM demos answer from model memory. Asked for a customer's balance, they produce a plausible number. DukaBind cannot.
 
 1. The model never sees the database. It receives a **JSON citation** of the rows an allowlisted query returned, and a rule that forbids amounts absent from that block.
-2. The binder's deterministic `message` is **authoritative**. The model may polish wording. It does not choose SQL, compute balances, or add figures.
+2. The binder's deterministic `message` is **authoritative**. LLM narration is untrusted polish. Do not treat it as a source of figures. The model does not choose SQL or compute balances.
 3. Every ask path is **read-only**: no cloud, no telemetry, no writes. Binder-only asks make no network call. Optional narration talks only to the local model on **127.0.0.1**.
 
 Proof: edit one `credit_limit` row and ask the same question again. The answer follows the row. That is **binding, not recall**.
@@ -62,7 +62,7 @@ Full reproduction runbook: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 | Stock on hand | "How many soda crates on hand?" / "Combien de sodas en stock ?" / "Tuna hifadhi ngapi ya soda?" | Reads `on_hand`, localized |
 | Anything else | "Who owns this shop?", jailbreaks | Refusal: `unknown_intent` or `not_found`, in the ask language |
 
-**Narration.** English and French may be narrated by the local Qwen2.5-1.5B Q4_K_M model. Swahili is **binder-only**: the 1.5B model does not narrate Swahili reliably, so money figures stay on the deterministic message.
+**Narration.** English and French may be polished by the local Qwen2.5-1.5B Q4_K_M model. That polish is untrusted and is not a source of figures. Swahili is **binder-only**: the 1.5B model does not narrate Swahili reliably, so money figures stay on the deterministic message.
 
 **Fail-closed.** A required money field that is `NULL` produces a refusal that names the field. No balance, limit, or amount is invented. Applies to `credit_limit`, `outstanding`, and `balance_owed`.
 

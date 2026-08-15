@@ -1,6 +1,6 @@
 # Benchmarks
 
-Official Gate 1 numbers come from **adtc-profiler** participant mode.
+**adtc-profiler** participant mode records Peak RSS, generation TPS, TTFT, and on-laptop thermal / accuracy self-checks. Official Gate 1 `S_acc` and `P_thermal` come from an ADTC audit-mode run on the evaluation machine, not from this snapshot.
 
 ```bash
 ./download_model.sh

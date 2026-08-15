@@ -81,7 +81,7 @@ Tables and method: [`BENCHMARKS.md`](BENCHMARKS.md). Model limits: [`MODEL_CARD.
 
 **40/40 checks pass** (`PYTHONPATH=. .venv/bin/python evals/run_heldout.py`; `pytest tests/ -q` = 78 passed). T11 bind/refuse: **37/37 = 100.0%** (target ≥ 90%). Report: [`evals/heldout/REPORT.md`](evals/heldout/REPORT.md).
 
-**T13.** The two prompts in `metadata.json` are disjoint from the held-out set. `tp_001` (Esther Tchamba, NULL credit limit) uses an entity absent from held-out. `tp_002` (Chidi Okafor × Sucre 25kg) is a novel entity×product ask. Chidi Okafor appears in held-out only as a different scenario (`cb_02`, one bag of flour). The projected total 31000 is not in any held-out binder message. `tests/test_metadata.py` fails CI if a staff-ask string appears in the held-out file.
+**T13.** The two submission staff asks in `metadata.json` do not exactly overlap the held-out set. `tp_001` (Esther Tchamba, NULL credit limit) uses an entity absent from held-out. `tp_002` (Chidi Okafor × Sucre 25kg) is a novel entity×product ask. Chidi Okafor appears in held-out only as a different scenario (`cb_02`, one bag of flour). The projected total 31000 is not in any held-out binder message. `tests/test_metadata.py` fails CI if a staff-ask string appears in the held-out file.
 
 ---
 

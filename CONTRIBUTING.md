@@ -12,7 +12,7 @@ This is an **auditor runbook**, not a contributor guide. The product is frozen. 
 | Domain / runtime | `corporate_enterprise` · llama.cpp + GGUF only |
 | Model | Qwen2.5-1.5B-Instruct Q4_K_M (GGUF + sha256 in `download_model.sh`) |
 | Defaults | `THREADS=2` / `CTX=1024` |
-| Source | Clone **`main`**. Tag `v1.0.0-gate1` is a packaging snapshot. |
+| Source | Detached checkout of the commit that last changed this file. Tag `v1.0.0-gate1` is a packaging snapshot. |
 
 ---
 
@@ -32,12 +32,13 @@ No GPU. `--n-gpu-layers 0` is the frozen flag.
 ```bash
 git clone https://github.com/Vitalisn4/dukabind.git
 cd dukabind
+git checkout --detach "$(git log -1 --format=%H -- CONTRIBUTING.md)"
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Expect: pytest **78 passed**, held-out **40/40** (T11 **37/37**, flips 3/3), `offline_check.sh` **PASS**.
+That checkout pins the runbook you are reading, so a later push to `main` cannot change the commands or expected counts. On that revision, expect pytest **78 passed**, held-out **40/40** (T11 **37/37**, flips 3/3), `offline_check.sh` **PASS**.
 
 ### 2.2 Binder tests (no model, ~2 min)
 
@@ -89,7 +90,7 @@ python -m app.narrate_cli "Can I give Marie-Claire three crates on credit?"
 python -m app.narrate_cli "How much do we owe SOCA?"
 ```
 
-The binder `message` is authoritative. The model narrates cited rows only.
+The binder `message` is the only financial answer. Optional LLM narration is untrusted polish of cited rows; it is not validated for figures.
 
 ### 2.7 Held-out evaluation (~5 min)
 
@@ -107,7 +108,7 @@ PYTHONPATH=. python -m app.cli "Puis-je donner trois caisses de crédit à Marie
 PYTHONPATH=. python -m app.cli "Tunadaiwa kiasi gani na SOCA?"
 ```
 
-English and French may be narrated. Swahili is binder-only (`MODEL_CARD.md`). The GGUF is a standard Qwen2.5 file and loads in LM Studio or Ollama; that is compatibility, not a shipped runtime. llama.cpp is the only runtime this repo builds. Binder-only `python -m app.cli` never needs the model.
+English and French may be narrated; that polish is untrusted. Swahili is binder-only (`MODEL_CARD.md`). The GGUF is a standard Qwen2.5 file and loads in LM Studio or Ollama; that is compatibility, not a shipped runtime. llama.cpp is the only runtime this repo builds. Binder-only `python -m app.cli` never needs the model.
 
 ### 2.9 Optional: profiler regeneration
 
@@ -131,7 +132,7 @@ See [`benchmarks/README.md`](benchmarks/README.md) and [`BENCHMARKS.md`](BENCHMA
 | Two ledgers | `evals/run_heldout.py` and `evals/heldout/REPORT.md` | 40/40; T11 37/37; flips 3/3 |
 | RSS / TPS / thermal | `BENCHMARKS.md` and `benchmarks/submission.json` | Peak RSS 1821.11 MB · 15.67 tok/s. Thermal: 2026-08-06 PASS does not reproduce on 2026-08-10; official P_thermal is the eval machine |
 | Model provenance | `download_model.sh` sha256 and `MODEL_CARD.md` | Pinned Qwen Q4_K_M |
-| T13 prompts | `metadata.json` and `tests/test_metadata.py` | Exactly two prompts, disjoint from held-out |
+| T13 staff asks | `metadata.json` and `tests/test_metadata.py` | Two submission staff asks; CI fails if either ask string is in held-out |
 
 ## 4. Frozen configuration
 

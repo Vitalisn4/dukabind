@@ -38,7 +38,7 @@
 
 ## T13: submission prompts stay disjoint
 
-The two prompts in `metadata.json` are disjoint from this held-out set. `tests/test_metadata.py` fails CI if a staff-ask string overlaps this file.
+The two submission staff asks in `metadata.json` do not exactly overlap this held-out set. `tests/test_metadata.py` fails CI if a staff-ask string overlaps this file.
 
 ---
 
