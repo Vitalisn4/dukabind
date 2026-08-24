@@ -162,6 +162,57 @@ def refuse_unknown(lang: str) -> BinderResult:
     )
 
 
+def refuse_no_customers(lang: str) -> BinderResult:
+    """Refuse when no active customers exist for aggregate debt."""
+    return BinderResult(
+        ok=False,
+        intent=Intent.TOTAL_DEBT,
+        lang=lang,
+        citation_rows=[],
+        refuse_reason="no_customers",
+        message=_t(
+            lang,
+            "No active customers on file.",
+            "Aucun client actif enregistré.",
+            "Hakuna wateja wanaofanya kazi kwenye kumbukumbu.",
+        ),
+    )
+
+
+def refuse_no_skus(lang: str) -> BinderResult:
+    """Refuse when no SKUs exist for aggregate stock value."""
+    return BinderResult(
+        ok=False,
+        intent=Intent.TOTAL_STOCK_VALUE,
+        lang=lang,
+        citation_rows=[],
+        refuse_reason="no_skus",
+        message=_t(
+            lang,
+            "No products on file.",
+            "Aucun produit enregistré.",
+            "Hakuna bidhaa kwenye kumbukumbu.",
+        ),
+    )
+
+
+def refuse_no_suppliers(lang: str) -> BinderResult:
+    """Refuse when no suppliers exist for aggregate payables."""
+    return BinderResult(
+        ok=False,
+        intent=Intent.TOTAL_SUPPLIER_PAYABLES,
+        lang=lang,
+        citation_rows=[],
+        refuse_reason="no_suppliers",
+        message=_t(
+            lang,
+            "No suppliers on file.",
+            "Aucun fournisseur enregistré.",
+            "Hakuna wasambazaji kwenye kumbukumbu.",
+        ),
+    )
+
+
 def credit_decision(
     lang: str,
     row: dict[str, Any],

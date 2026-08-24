@@ -31,6 +31,17 @@ PORT="${PORT:-8080}"
 CTX="${CTX:-1024}"
 THREADS="${THREADS:-2}"
 
+# ── Thermal mitigation (2026-08-18) ──────────────────────────────────
+# CPU affinity: pin threads to physical cores (CPU0-3) to avoid
+# hyperthreads (CPU4-7) which share ALUs and increase thermal density.
+CPU_RANGE="${CPU_RANGE:-0-3}"
+# Batch size: smaller ubatch reduces sustained CPU load per generation
+# step, trading marginal throughput for lower peak temperature.
+UBATCH="${UBATCH:-256}"
+# Process priority: lower priority reduces contention with system
+# processes, improving thermal headroom on shared eval machines.
+PRIO="${PRIO:--1}"
+
 if [[ -z "$BIN" ]]; then
   echo "error: llama-server binary not found. Build llama.cpp first." >&2
   echo "  cmake -S third_party/llama.cpp -B third_party/llama.cpp/build -DCMAKE_BUILD_TYPE=Release" >&2
@@ -45,11 +56,14 @@ if [[ ! -f "$MODEL" ]]; then
 fi
 
 echo "starting llama-server"
-echo "  bin:     $BIN"
-echo "  model:   $MODEL"
-echo "  bind:    $HOST:$PORT"
-echo "  ctx:     $CTX"
-echo "  threads: $THREADS"
+echo "  bin:      $BIN"
+echo "  model:    $MODEL"
+echo "  bind:     $HOST:$PORT"
+echo "  ctx:      $CTX"
+echo "  threads:  $THREADS"
+echo "  cpu:      $CPU_RANGE (physical cores only)"
+echo "  ubatch:   $UBATCH"
+echo "  prio:     $PRIO"
 
 exec "$BIN" \
   --model "$MODEL" \
@@ -57,4 +71,7 @@ exec "$BIN" \
   --port "$PORT" \
   --ctx-size "$CTX" \
   --threads "$THREADS" \
+  --cpu-range "$CPU_RANGE" \
+  --ubatch-size "$UBATCH" \
+  --prio "$PRIO" \
   --n-gpu-layers 0

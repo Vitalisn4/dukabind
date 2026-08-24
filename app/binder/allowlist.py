@@ -56,6 +56,41 @@ QUERIES: dict[str, AllowlistedQuery] = {
         """,
         required_params=("name", "name"),
     ),
+    "total_stock_value": AllowlistedQuery(
+        name="total_stock_value",
+        sql="""
+            SELECT
+                COUNT(*) AS item_count,
+                COALESCE(SUM(on_hand * unit_price), 0) AS total_value,
+                COALESCE(SUM(on_hand), 0) AS total_units,
+                currency
+            FROM skus
+        """,
+        required_params=(),
+    ),
+    "total_debt": AllowlistedQuery(
+        name="total_debt",
+        sql="""
+            SELECT
+                COUNT(*) AS customer_count,
+                COALESCE(SUM(COALESCE(outstanding, 0)), 0) AS total_outstanding,
+                currency
+            FROM customers
+            WHERE status = 'active'
+        """,
+        required_params=(),
+    ),
+    "total_supplier_payables": AllowlistedQuery(
+        name="total_supplier_payables",
+        sql="""
+            SELECT
+                COUNT(*) AS supplier_count,
+                SUM(balance_owed) AS total_owed,
+                SUM(CASE WHEN balance_owed IS NULL THEN 1 ELSE 0 END) AS null_count
+            FROM suppliers
+        """,
+        required_params=(),
+    ),
 }
 
 

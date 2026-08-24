@@ -47,8 +47,12 @@ def test_exactly_two_test_prompts(meta: dict) -> None:
     assert len(prompts) == 2
     for p in prompts:
         assert p["prompt_id"].startswith("tp_")
-        # Both prompts must be ledger-grounded (mention a money field).
-        assert "credit_limit" in p["prompt"] or "balance_owed" in p["prompt"]
+        # Both prompts must be ledger-grounded (mention a ledger field).
+        assert (
+            "credit_limit" in p["prompt"]
+            or "balance_owed" in p["prompt"]
+            or "on_hand" in p["prompt"]
+        )
 
 
 def test_submission_prompts_disjoint_from_heldout(meta: dict) -> None:
