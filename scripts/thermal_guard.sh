@@ -84,15 +84,7 @@ get_temp() {
       esac
     fi
   done
-  # Fallback: try thermal_zone0 (usually CPU on most systems)
-  if [[ -f /sys/class/thermal/thermal_zone0/temp ]]; then
-    temp_raw=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null)
-    if [[ -n "$temp_raw" && "$temp_raw" -gt 0 ]]; then
-      echo "$((temp_raw / 1000))"
-      return
-    fi
-  fi
-  # No valid sensor found — return high value to fail safe
+  # No valid CPU sensor found — return high value to fail safe
   echo "999"
 }
 
