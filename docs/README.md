@@ -11,7 +11,7 @@ Offline shop assistant in **English, French, and Swahili**: allowlisted SQLite l
 | Doc | Purpose |
 |---|---|
 | [`README.md`](../README.md) | Product pitch, quick start, demo, measured numbers |
-| [`REPORT.md`](../REPORT.md) | Gate 1 technical writeup |
+| [`REPORT.md`](../REPORT.md) | Technical writeup (problem, design, benchmarks) |
 | [`MODEL_CARD.md`](../MODEL_CARD.md) | Qwen2.5-1.5B Q4_K_M: intended use, limits, honesty |
 | [`BENCHMARKS.md`](../BENCHMARKS.md) | Measured profiler, matrix, and soak numbers |
 | [`CONTRIBUTING.md`](../CONTRIBUTING.md) | Reproduction runbook |
@@ -23,5 +23,5 @@ Evidence:
 - [`benchmarks/submission.json`](../benchmarks/submission.json): freeze snapshot of participant output
 - [`benchmarks/submission.summary.md`](../benchmarks/submission.summary.md): latest profiler summary
 - [`benchmarks/README.md`](../benchmarks/README.md): how to re-run the profiler
-- [`evals/heldout/REPORT.md`](../evals/heldout/REPORT.md): held-out report (T11, flips, both fixtures, EN/FR/SW)
+- [`evals/heldout/REPORT.md`](../evals/heldout/REPORT.md): held-out report (37/37 bind/refuse, ledger-flip proofs, two shops, EN/FR/SW)
 - [`evals/run_heldout.py`](../evals/run_heldout.py): offline held-out runner

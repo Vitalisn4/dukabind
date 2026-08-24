@@ -14,6 +14,9 @@ from app.binder.intents import Intent, parse_ask
 from app.binder.refuse import (
     BinderResult,
     credit_decision,
+    refuse_no_customers,
+    refuse_no_skus,
+    refuse_no_suppliers,
     refuse_not_found,
     refuse_supplier_missing_balance,
     refuse_unknown,
@@ -27,6 +30,51 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
 
     if parsed.intent == Intent.UNKNOWN:
         return refuse_unknown(parsed.lang)
+
+    if parsed.intent == Intent.CREDIT_HEADROOM:
+        if not parsed.customer:
+            from dataclasses import replace
+            return replace(refuse_not_found(parsed.lang, "customer"), intent=Intent.CREDIT_HEADROOM)
+        rows = run_query(conn, "customer_credit", {"name": parsed.customer})
+        if not rows:
+            from dataclasses import replace
+            return replace(refuse_not_found(parsed.lang, parsed.customer), intent=Intent.CREDIT_HEADROOM)
+        row = rows[0]
+        limit = row["credit_limit"]
+        if limit is None:
+            from dataclasses import replace
+
+            from app.binder.refuse import refuse_credit_missing_limit
+            return replace(refuse_credit_missing_limit(parsed.lang, row["display_name"]), intent=Intent.CREDIT_HEADROOM)
+        outstanding = row["outstanding"]
+        if outstanding is None:
+            from dataclasses import replace
+
+            from app.binder.refuse import refuse_credit_missing_outstanding
+            return replace(refuse_credit_missing_outstanding(parsed.lang, row["display_name"]), intent=Intent.CREDIT_HEADROOM)
+        room = int(limit) - int(outstanding)
+        currency = row.get("currency") or "XAF"
+        msg = {
+            "en": (
+                f"{row['display_name']} credit: limit {limit}, "
+                f"outstanding {outstanding}, available {room} {currency}."
+            ),
+            "fr": (
+                f"Crédit de {row['display_name']} : limite {limit}, "
+                f"dû {outstanding}, disponible {room} {currency}."
+            ),
+            "sw": (
+                f"Kreti ya {row['display_name']}: kikomo {limit}, "
+                f"deni {outstanding}, inapatikana {room} {currency}."
+            ),
+        }.get(parsed.lang, f"{row['display_name']} credit: available {room} {currency}.")
+        return BinderResult(
+            ok=True,
+            intent=parsed.intent,
+            lang=parsed.lang,
+            citation_rows=[dict(row)],
+            message=msg,
+        )
 
     if parsed.intent == Intent.CREDIT_CHECK:
         if not parsed.customer:
@@ -93,6 +141,109 @@ def handle_ask(conn: sqlite3.Connection, text: str) -> BinderResult:
             parsed.lang,
             f"{row['name']}: on_hand={row['on_hand']}, "
             f"unit_price={row['unit_price']} {row['currency']}.",
+        )
+        return BinderResult(
+            ok=True,
+            intent=parsed.intent,
+            lang=parsed.lang,
+            citation_rows=[dict(row)],
+            message=msg,
+        )
+
+    if parsed.intent == Intent.TOTAL_STOCK_VALUE:
+        rows = run_query(conn, "total_stock_value", {})
+        if not rows or int(rows[0]["item_count"]) == 0:
+            return refuse_no_skus(parsed.lang)
+        row = rows[0]
+        total_value = int(row["total_value"])
+        total_units = int(row["total_units"])
+        item_count = int(row["item_count"])
+        currency = row.get("currency") or "XAF"
+        msg = {
+            "en": (
+                f"Total inventory: {item_count} products, {total_units} units, "
+                f"total value {total_value} {currency}."
+            ),
+            "fr": (
+                f"Inventaire total : {item_count} produits, {total_units} unités, "
+                f"valeur totale {total_value} {currency}."
+            ),
+            "sw": (
+                f"Hifadhi yote: bidhaa {item_count}, vitengo {total_units}, "
+                f"thamani yote {total_value} {currency}."
+            ),
+        }.get(
+            parsed.lang,
+            f"Total inventory value: {total_value} {currency}.",
+        )
+        return BinderResult(
+            ok=True,
+            intent=parsed.intent,
+            lang=parsed.lang,
+            citation_rows=[dict(row)],
+            message=msg,
+        )
+
+    if parsed.intent == Intent.TOTAL_DEBT:
+        rows = run_query(conn, "total_debt", {})
+        if not rows or int(rows[0]["customer_count"]) == 0:
+            return refuse_no_customers(parsed.lang)
+        row = rows[0]
+        total_outstanding = int(row["total_outstanding"])
+        customer_count = int(row["customer_count"])
+        currency = row.get("currency") or "XAF"
+        msg = {
+            "en": (
+                f"Total debt from {customer_count} active customers: "
+                f"{total_outstanding} {currency}."
+            ),
+            "fr": (
+                f"Dette totale de {customer_count} clients actifs : "
+                f"{total_outstanding} {currency}."
+            ),
+            "sw": (
+                f"Deni la jumla kutoka kwa wateja {customer_count} wanaofanya kazi: "
+                f"{total_outstanding} {currency}."
+            ),
+        }.get(
+            parsed.lang,
+            f"Total outstanding debt: {total_outstanding} {currency}.",
+        )
+        return BinderResult(
+            ok=True,
+            intent=parsed.intent,
+            lang=parsed.lang,
+            citation_rows=[dict(row)],
+            message=msg,
+        )
+
+    if parsed.intent == Intent.TOTAL_SUPPLIER_PAYABLES:
+        rows = run_query(conn, "total_supplier_payables", {})
+        if not rows or int(rows[0]["supplier_count"]) == 0:
+            return refuse_no_suppliers(parsed.lang)
+        row = rows[0]
+        null_count = int(row["null_count"])
+        if null_count > 0:
+            # Some suppliers have unknown balances. Cannot give a reliable total.
+            return refuse_unknown(parsed.lang)
+        total_owed = int(row["total_owed"])
+        supplier_count = int(row["supplier_count"])
+        msg = {
+            "en": (
+                f"Total owed to {supplier_count} suppliers: "
+                f"{total_owed} XAF."
+            ),
+            "fr": (
+                f"Total dû à {supplier_count} fournisseurs : "
+                f"{total_owed} XAF."
+            ),
+            "sw": (
+                f"Jumla ya deni kwa wasambazaji {supplier_count}: "
+                f"{total_owed} XAF."
+            ),
+        }.get(
+            parsed.lang,
+            f"Total supplier payables: {total_owed} XAF.",
         )
         return BinderResult(
             ok=True,

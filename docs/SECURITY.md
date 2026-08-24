@@ -1,6 +1,6 @@
 # Security model: DukaBind
 
-This document maps controls C1-C10. Implementation comments currently cite C1-C5 and C7. C6 is deferred. C8-C10 are documented here without code-level ID comments. Status is Gate 1.
+This document maps controls C1-C10. Implementation comments currently cite C1-C5 and C7. C6 is deferred. C8-C10 are documented here without code-level ID comments.
 
 ---
 
@@ -39,14 +39,14 @@ The language model is never trusted to choose SQL, invent balances, or execute w
 
 ## 3. Controls
 
-| ID | Control | Basis | Gate 1 status |
+| ID | Control | Basis | Status |
 |---|---|---|---|
 | **C1** | **Allowlisted queries only**: finite named SQL; no SQL built from user or model text | OWASP A03; deterministic ground truth | **Implemented** in `app/binder/allowlist.py` |
 | **C2** | **Parameterized binds**: `?` via `sqlite3`; never f-string SQL | CWE-89; Python DB-API | **Implemented** in the same module |
 | **C3** | **No LLM-generated SQL** | Hallucination + injection surface | **Implemented**. The model receives staff question + binder message + citation JSON; never receives SQL or chooses a query |
 | **C4** | **Fail closed**: NULL/missing required fields refuse; never invent numbers | Financial safety | **Implemented** in `refuse.py` + tests |
 | **C5** | **Loopback only**: `llama-server` and client use `127.0.0.1`; no redirects | Offline rule; reduce remote surface | **Implemented** in the start script + `assert_loopback_http` |
-| **C6** | **Owner-gated writes**: mutating actions need local PIN/password; LLM cannot write | Separation of duties | **Deferred**, no write UI at Gate 1 |
+| **C6** | **Owner-gated writes**: mutating actions need local PIN/password; LLM cannot write | Separation of duties | **Deferred**, no write UI at this stage |
 | **C7** | **Weight integrity**: `download_model.sh` verifies sha256 | Supply-chain hygiene | **Implemented**, pinned digest |
 | **C8** | **No secrets in git**: no API keys; offline product | ADTC offline rule | **Implemented**, weights/env ignored |
 | **C9** | **No third-party PII in git**: seeded shop rows only; do not commit customer files without consent | Privacy / eligibility honesty | **Implemented** in `seed.sql` + `fixture.py` |
@@ -54,7 +54,7 @@ The language model is never trusted to choose SQL, invent balances, or execute w
 
 ---
 
-## 4. Explicit non-goals (Gate 1)
+## 4. Explicit non-goals (initial submission)
 
 - Full-disk encryption (recommend OS-level for operators)
 - SQLCipher (CPU cost on contest laptops)
