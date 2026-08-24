@@ -27,8 +27,12 @@ class Intent(str, Enum):
     """Supported binder intents; UNKNOWN triggers a refuse."""
 
     CREDIT_CHECK = "credit_check"
+    CREDIT_HEADROOM = "credit_headroom"
     SUPPLIER_BALANCE = "supplier_balance"
     STOCK_CHECK = "stock_check"
+    TOTAL_STOCK_VALUE = "total_stock_value"
+    TOTAL_DEBT = "total_debt"
+    TOTAL_SUPPLIER_PAYABLES = "total_supplier_payables"
     UNKNOWN = "unknown"
 
 
@@ -59,6 +63,8 @@ _LANG_MARKERS: dict[str, tuple[str, ...]] = {
         "à crédit",
         "devons",
         "dû",
+        "dette",
+        "totale",
         "fournisseur",
         "combien",
         "en stock",
@@ -71,6 +77,10 @@ _LANG_MARKERS: dict[str, tuple[str, ...]] = {
         "puis",
         "peut",
         "nous",
+        "clients",
+        "fournisseurs",
+        "créance",
+        "impayé",
     ),
     "sw": (
         "kreti",
@@ -96,6 +106,13 @@ _LANG_MARKERS: dict[str, tuple[str, ...]] = {
 
 _INTENT_PATTERNS: dict[str, dict[Intent, re.Pattern[str]]] = {
     "en": {
+        # Headroom before generic credit so "credit left" matches headroom.
+        # "credit ... left/remaining/available/room" with optional words between.
+        Intent.CREDIT_HEADROOM: re.compile(
+            r"\bcredit\b.*?\b(?:left|remaining|available|room)\b|"
+            r"\b(?:remaining|available)\s+credit\b",
+            re.IGNORECASE,
+        ),
         Intent.CREDIT_CHECK: re.compile(
             r"\b(credit|on\s+credit|can\s+i\s+(give|sell)|allow\s+credit)\b",
             re.IGNORECASE,
@@ -103,11 +120,37 @@ _INTENT_PATTERNS: dict[str, dict[Intent, re.Pattern[str]]] = {
         Intent.SUPPLIER_BALANCE: re.compile(
             r"\b(owe|owed|payable|supplier|vendor|pay\s+them)\b", re.IGNORECASE
         ),
+        # Aggregates BEFORE stock_check so "total value" doesn't match stock_check.
+        Intent.TOTAL_STOCK_VALUE: re.compile(
+            r"\b(total\s+(?:value|worth)|all\s+(?:stock|inventory|products|items)\s+value|"
+            r"value\s+of\s+(?:all|total|the)\s+(?:stock|inventory|products|items)|"
+            r"total\s+inventory|inventory\s+value|how\s+much\s+(?:is\s+)?(?:all\s+)?(?:the\s+)?stock\s+worth)\b",
+            re.IGNORECASE,
+        ),
+        Intent.TOTAL_DEBT: re.compile(
+            r"\b(total\s+(?:debt(?!\s+(?:to|of|for)\s+suppliers?)|outstanding|credit|receivable(?!\s+to\s+suppliers?))|"
+            r"all\s+(?:customer|customers?)\s+(?:owe|owed|debt|outstanding)|"
+            r"how\s+much\s+(?:do\s+)?(?:all\s+)?(?:customers?\s+)?owe)\b",
+            re.IGNORECASE,
+        ),
+        Intent.TOTAL_SUPPLIER_PAYABLES: re.compile(
+            r"\b(total\s+(?:supplier\s+)?(?:payable|payables)|"
+            r"all\s+(?:suppliers?|vendors?)\s+(?:owe|owed|debt|payable)|"
+            r"total\s+(?:supplier|vendors?)\s+debt|"
+            r"how\s+much\s+(?:do\s+)?(?:we\s+)?owe\s+(?:all\s+)?(?:suppliers?|vendors?))\b",
+            re.IGNORECASE,
+        ),
         Intent.STOCK_CHECK: re.compile(
-            r"\b(stock|on\s+hand|inventory|how\s+many|crates?\s+left)\b", re.IGNORECASE
+            r"\b(stock|on\s+hand|inventory|how\s+(?:many|much)|do\s+we\s+have|crates?\s+left)\b",
+            re.IGNORECASE,
         ),
     },
     "fr": {
+        Intent.CREDIT_HEADROOM: re.compile(
+            r"\bcrédit\b.*?\b(?:restant|disponible|reste)\b|"
+            r"\breste\s+(?:de\s+)?crédit\b|\bencore\s+(?:de\s+)?crédit\b",
+            re.IGNORECASE,
+        ),
         Intent.CREDIT_CHECK: re.compile(
             r"\b(crédit|credit|à\s+crédit|a\s+credit|donner|accorder|vendre)\b",
             re.IGNORECASE,
@@ -115,16 +158,55 @@ _INTENT_PATTERNS: dict[str, dict[Intent, re.Pattern[str]]] = {
         Intent.SUPPLIER_BALANCE: re.compile(
             r"\b(devons|doit|dû|due|fournisseur)\b", re.IGNORECASE
         ),
+        Intent.TOTAL_STOCK_VALUE: re.compile(
+            r"\b(valeur\s+(?:totale|de\s+tout|du\s+stock)|tout\s+(?:le\s+)?stock\s+vaut|"
+            r"stock\s+total|valeur\s+du\s+stock|combien\s+vaut\s+(?:tout|le)\s+(?:stock|inventaire))\b",
+            re.IGNORECASE,
+        ),
+        Intent.TOTAL_DEBT: re.compile(
+            r"\b(dette\s+(?:totale(?!\s+(?:aux|des|pour)\s+fournisseurs?)|globale)|"
+            r"total\s+(?:dû|impayé|créance)(?!\s+(?:aux|des|pour)\s+fournisseurs?)|"
+            r"tout\s+(?:les\s+)?clients?\s+doivent|"
+            r"combien\s+(?:les\s+)?clients?\s+doivent|"
+            r"créance\s+totale|impayé\s+total)\b",
+            re.IGNORECASE,
+        ),
+        Intent.TOTAL_SUPPLIER_PAYABLES: re.compile(
+            r"\b(total\s+(?:à\s+payer|fournisseurs?)|tout\s+(?:les\s+)?fournisseurs?\s+doivent|"
+            r"combien\s+(?:devons-nous\s+)?à\s+(?:tous\s+)?(?:les\s+)?fournisseurs|"
+            r"dette\s+fournisseur\s+totale)\b",
+            re.IGNORECASE,
+        ),
         Intent.STOCK_CHECK: re.compile(
             r"\b(stock|en\s+stock|inventaire|combien\s+de|reste)\b", re.IGNORECASE
         ),
     },
     "sw": {
+        Intent.CREDIT_HEADROOM: re.compile(
+            r"\bkreti\b.*?\b(?:kilichobaki|iliyobaki|inapatikana)\b|"
+            r"\bbaki\s+ya\s+kreti\b",
+            re.IGNORECASE,
+        ),
         Intent.CREDIT_CHECK: re.compile(
             r"\b(kreti|mkopo|mikopo|kumpa|kutoa)\b", re.IGNORECASE
         ),
         Intent.SUPPLIER_BALANCE: re.compile(
             r"\b(tunadaiwa|deni|msambazaji|malipo|dai)\b", re.IGNORECASE
+        ),
+        Intent.TOTAL_STOCK_VALUE: re.compile(
+            r"\b(thamani\s+(?:ya\s+jumla|ya\s+hesabu|ya\s+hifadhi)|hifadhi\s+yote\s+thamani|"
+            r"jumla\s+ya\s+hifadhi|bidhaa\s+zote\s+thamani|thamani\s+ya\s+bidhaa\s+zote)\b",
+            re.IGNORECASE,
+        ),
+        Intent.TOTAL_DEBT: re.compile(
+            r"\b(deni\s+(?:la\s+jumla|lote|la\s+wateja\s+wote)|wateja\s+wote\s+wanadaiwa|"
+            r"ni\s+ngapi\s+wateja\s+wanadaiwa)\b",
+            re.IGNORECASE,
+        ),
+        Intent.TOTAL_SUPPLIER_PAYABLES: re.compile(
+            r"\b(deni\s+la\s+wasambazaji|wasambazaji\s+wote\s+wanadaiwa|"
+            r"jumla\s+ya\s+deni\s+la\s+wasambazaji|ni\s+ngapi\s+wasambazaji\s+wanadaiwa)\b",
+            re.IGNORECASE,
         ),
         Intent.STOCK_CHECK: re.compile(
             r"\b(hifadhi|idadi|ngapi|vifaa|bidhaa|kiasi|mangapi)\b", re.IGNORECASE
@@ -287,9 +369,26 @@ def parse_ask(text: str) -> ParsedAsk:
     sku = normalize_sku(_extract_known_name(text, KNOWN_SKUS))
 
     patterns = _INTENT_PATTERNS[lang]
+
+    # Headroom before generic credit so "credit left" matches headroom.
+    if patterns[Intent.CREDIT_HEADROOM].search(text):
+        cust = normalize_customer(_extract_known_name(text, KNOWN_CUSTOMERS))
+        return ParsedAsk(Intent.CREDIT_HEADROOM, lang, customer=cust)
+
     if patterns[Intent.CREDIT_CHECK].search(text):
         cust = normalize_customer(_extract_known_name(text, KNOWN_CUSTOMERS))
         return ParsedAsk(Intent.CREDIT_CHECK, lang, customer=cust, sku=sku, qty=qty)
+
+    # Aggregate intents BEFORE per-entity intents (supplier_balance, stock_check)
+    # so "owe" in "total debt" doesn't match supplier_balance.
+    if patterns[Intent.TOTAL_DEBT].search(text):
+        return ParsedAsk(Intent.TOTAL_DEBT, lang)
+
+    if patterns[Intent.TOTAL_SUPPLIER_PAYABLES].search(text):
+        return ParsedAsk(Intent.TOTAL_SUPPLIER_PAYABLES, lang)
+
+    if patterns[Intent.TOTAL_STOCK_VALUE].search(text):
+        return ParsedAsk(Intent.TOTAL_STOCK_VALUE, lang)
 
     if patterns[Intent.SUPPLIER_BALANCE].search(text):
         sup = normalize_supplier(_extract_known_name(text, KNOWN_SUPPLIERS))

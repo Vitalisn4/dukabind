@@ -1,11 +1,13 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "profiler_version": "adtc-profiler 0.1.0",
   "submission": {
     "team_id": "vitalisn4",
     "domain": "corporate_enterprise",
     "language_scope": [
-      "en"
+      "en",
+      "fr",
+      "sw"
     ],
     "african_alpha_claim": true,
     "budget_laptop_claim": true,
@@ -22,11 +24,11 @@
     "test_prompts": [
       {
         "prompt_id": "tp_001",
-        "prompt": "LEDGER_JSON is authoritative. Customer Esther Tchamba has credit_limit=null (not on file) and outstanding=500 XAF. Caisse boisson malt 300ml unit_price=720. Staff ask: Can I give Esther Tchamba one crate on credit? Refuse because her credit limit is not on file; do not invent a figure."
+        "prompt": "LEDGER_JSON is authoritative. Customer Esther Tchamba has credit_limit=null (not on file) and outstanding=500 XAF. Caisse boisson malt 300ml unit_price=720. Staff ask: Can I give Esther Tchamba one crate on credit? Answer using only the ledger data provided; refuse if any required field is missing."
       },
       {
         "prompt_id": "tp_002",
-        "prompt": "LEDGER_JSON is authoritative. Customer Chidi Okafor has credit_limit=12000 XAF and outstanding=4000 XAF. Sucre 25kg unit_price=13500. Staff ask: Can I give Chidi Okafor two bags of sugar on credit? Answer using only these numbers; refuse if any required field is missing."
+        "prompt": "LEDGER_JSON is authoritative. Product Sucre 25kg has on_hand=4 and unit_price=13500 XAF. Staff ask: How many bags of sugar do we have in stock? Answer using only the ledger data provided."
       }
     ],
     "model": {
@@ -45,32 +47,41 @@
     "os": "Ubuntu 22.04.5 LTS"
   },
   "throughput": {
-    "tokens_per_second_generation": 15.67,
-    "first_token_latency_ms": 10548.82,
+    "tokens_per_second_generation": 17.35,
+    "first_token_latency_ms": 8175.55,
     "prompt_tokens": 512,
     "generated_tokens": 128
   },
   "memory": {
-    "peak_rss_mb": 1821.11,
-    "steady_state_rss_mb": 1757.46,
-    "peak_vms_mb": 2318.8
+    "peak_rss_mb": 1826.23,
+    "steady_state_rss_mb": 1747.49,
+    "peak_vms_mb": 2318.82
   },
-  "accuracy": [],
+  "accuracy": [
+    {
+      "benchmark": "arc_easy",
+      "dataset_version": "lm-eval-harness",
+      "language": "en",
+      "samples": 50,
+      "score": 0.74,
+      "metric": "acc_norm"
+    }
+  ],
   "cpu_thermal": {
-    "cpu_percent_p99": 98.5,
+    "cpu_percent_p99": 83.7,
     "core_temp_c_peak": 100.0,
     "throttled": true
   },
   "reproducibility": {
-    "git_commit_sha": "bc3f1644ac97",
+    "git_commit_sha": "faa2c90a500c",
     "docker_image_digest": "unknown",
     "random_seed": 42
   },
   "model_info": {
-    "params_count": null,
+    "params_count": 1777088000,
     "context_length": 32768,
     "architecture": "qwen2",
-    "claimed_params_estimate": "1.5B",
+    "claimed_params_estimate": "1.5B (1.777B actual)",
     "params_match": true
   }
 }

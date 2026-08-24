@@ -1,6 +1,6 @@
 # Profiler participant smoke: summary
 
-**Run:** 2026-08-12T09:47:46Z UTC
+**Run:** 2026-08-24T02:10:54Z UTC
 **Command:** `bash scripts/run_profiler_smoke.sh` --full
 
 > Auto-generated from the latest profiler run. The authoritative, curated benchmark story is [`BENCHMARKS.md`](../BENCHMARKS.md).
@@ -10,11 +10,11 @@
 
 | Field | Value |
 |---|---|
-| Peak RSS | **1825.86 MB** |
-| Steady-state RSS | 1745.84 MB |
-| Generation TPS | **15.57 tok/s** |
-| First-token latency | 9455.85 ms |
-| CPU p99 | 96.2% |
+| Peak RSS | **1825.82 MB** |
+| Steady-state RSS | 1758.59 MB |
+| Generation TPS | **14.71 tok/s** |
+| First-token latency | 10811.29 ms |
+| CPU p99 | 98.8% |
 | Core temp peak | **100.0 °C** |
 | Throttled | **True** |
 | CPU | Intel(R) Core(TM) i7-8650U CPU @ 1.90GHz |
