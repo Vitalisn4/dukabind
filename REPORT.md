@@ -1,6 +1,6 @@
 # Technical Report: DukaBind
 
-**Team ID:** vitalisn4  
+**Team ID:** project-dukabind  
 **Submitter:** Vitalis Ngam · ngamvitailisyuh@gmail.com · [Vitalisn4](https://github.com/Vitalisn4)  
 **Domain:** `corporate_enterprise`  
 **Model:** Qwen2.5-1.5B-Instruct-Q4_K_M  
