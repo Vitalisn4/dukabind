@@ -84,7 +84,7 @@ get_temp() {
       esac
     fi
   done
-  # No valid CPU sensor found — return high value to fail safe
+  # No valid CPU sensor found; return high value to fail safe
   echo "999"
 }
 

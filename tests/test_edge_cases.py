@@ -33,7 +33,7 @@ def db(tmp_path: Path) -> sqlite3.Connection:
 
 
 class TestCreditHeadroomIntent:
-    """How much credit left for Fotso? → CREDIT_HEADROOM intent."""
+    """How much credit left for Fotso? maps to CREDIT_HEADROOM intent."""
 
     def test_intent_english(self) -> None:
         p = parse_ask("How much credit does Fotso have left?")
@@ -62,7 +62,7 @@ class TestCreditHeadroomIntent:
 
 
 class TestTotalStockValueIntent:
-    """Total value of all stock? → TOTAL_STOCK_VALUE intent."""
+    """Total value of all stock? maps to TOTAL_STOCK_VALUE intent."""
 
     def test_intent_english(self) -> None:
         p = parse_ask("What is the total value of all stock?")
@@ -86,7 +86,7 @@ class TestTotalStockValueIntent:
 
 
 class TestTotalDebtIntent:
-    """Total outstanding debt? → TOTAL_DEBT intent."""
+    """Total outstanding debt? maps to TOTAL_DEBT intent."""
 
     def test_intent_english(self) -> None:
         p = parse_ask("What is the total outstanding debt?")
@@ -110,7 +110,7 @@ class TestTotalDebtIntent:
 
 
 class TestTotalSupplierPayablesIntent:
-    """How much do we owe all suppliers? → TOTAL_SUPPLIER_PAYABLES intent."""
+    """How much do we owe all suppliers? maps to TOTAL_SUPPLIER_PAYABLES intent."""
 
     def test_intent_english(self) -> None:
         p = parse_ask("How much do we owe all suppliers?")
@@ -140,7 +140,7 @@ class TestCreditHeadroomBinder:
     """Credit headroom: limit - outstanding = available."""
 
     def test_fotso_headroom(self, db: sqlite3.Connection) -> None:
-        """Fotso: limit 8000, outstanding 6250 → headroom 1750."""
+        """Fotso: limit 8000, outstanding 6250 = headroom 1750."""
         r = handle_ask(db, "How much credit does Fotso have left?")
         assert r.ok is True
         assert r.intent == Intent.CREDIT_HEADROOM
@@ -150,19 +150,19 @@ class TestCreditHeadroomBinder:
         assert r.citation_rows
 
     def test_njoya_headroom(self, db: sqlite3.Connection) -> None:
-        """Njoya: limit 15000, outstanding 2000 → headroom 13000."""
+        """Njoya: limit 15000, outstanding 2000 = headroom 13000."""
         r = handle_ask(db, "How much credit does Njoya have left?")
         assert r.ok is True
         assert "13000" in r.message
 
     def test_tchamba_null_limit_refuses(self, db: sqlite3.Connection) -> None:
-        """Tchamba: NULL credit_limit → must refuse, not invent."""
+        """Tchamba: NULL credit_limit must refuse, not invent."""
         r = handle_ask(db, "How much credit does Esther have left?")
         assert r.ok is False
         assert r.refuse_reason == "credit_limit_null"
 
     def test_unknown_customer_refuses(self, db: sqlite3.Connection) -> None:
-        """Unknown customer → must refuse."""
+        """Unknown customer must refuse."""
         r = handle_ask(db, "How much credit does Unknown Person have left?")
         assert r.ok is False
 
@@ -192,7 +192,7 @@ class TestTotalStockValueBinder:
     """Total stock value: sum of (on_hand × unit_price) across all SKUs."""
 
     def test_total_stock_value(self, db: sqlite3.Connection) -> None:
-        """malt: 14×720=10080, riz: 6×18500=111000, huile: 0×4500=0 → total 121080."""
+        """malt: 14×720=10080, riz: 6×18500=111000, huile: 0×4500=0 = total 121080."""
         r = handle_ask(db, "What is the total value of all stock?")
         assert r.ok is True
         assert r.intent == Intent.TOTAL_STOCK_VALUE
@@ -270,23 +270,23 @@ class TestTotalSupplierPayablesBinder:
     """Total supplier payables: sum of balance_owed across all suppliers."""
 
     def test_total_supplier_payables(self, db: sqlite3.Connection) -> None:
-        """SOCA has NULL balance_owed → refuse, not silently sum to zero."""
+        """SOCA has NULL balance_owed refuses, not silently sum to zero."""
         r = handle_ask(db, "How much do we owe all suppliers?")
         assert r.ok is False
         assert r.refuse_reason is not None
 
     def test_total_payable_english(self, db: sqlite3.Connection) -> None:
-        """Alternative phrasing — still refuses on NULL supplier."""
+        """Alternative phrasing still refuses on NULL supplier."""
         r = handle_ask(db, "Total supplier payables?")
         assert r.ok is False
 
     def test_french_total_payables(self, db: sqlite3.Connection) -> None:
-        """French total supplier payables — refuses on NULL."""
+        """French total supplier payables refuses on NULL."""
         r = handle_ask(db, "Total fournisseurs?")
         assert r.ok is False
 
     def test_swahili_total_payables(self, db: sqlite3.Connection) -> None:
-        """Swahili total supplier payables — refuses on NULL."""
+        """Swahili total supplier payables refuses on NULL."""
         r = handle_ask(db, "Jumla ya deni la wasambazaji?")
         assert r.ok is False
 
@@ -316,17 +316,17 @@ class TestEmptyDatabaseEdgeCases:
         conn.close()
 
     def test_total_stock_value_empty(self, db_empty: sqlite3.Connection) -> None:
-        """No products → must refuse, not crash."""
+        """No products must refuse, not crash."""
         r = handle_ask(db_empty, "What is the total value of all stock?")
         assert r.ok is False
 
     def test_total_debt_empty(self, db_empty: sqlite3.Connection) -> None:
-        """No customers → must refuse, not crash."""
+        """No customers must refuse, not crash."""
         r = handle_ask(db_empty, "What is the total outstanding debt?")
         assert r.ok is False
 
     def test_total_supplier_payables_empty(self, db_empty: sqlite3.Connection) -> None:
-        """No suppliers → must refuse, not crash."""
+        """No suppliers must refuse, not crash."""
         r = handle_ask(db_empty, "How much do we owe all suppliers?")
         assert r.ok is False
 
@@ -363,7 +363,7 @@ class TestDukaBCrossShop:
         assert r.intent == Intent.TOTAL_DEBT
 
     def test_duka_b_total_supplier_payables(self, db_b: sqlite3.Connection) -> None:
-        """Duka B: Ciment du Cameroun has NULL balance_owed → refuse."""
+        """Duka B: Ciment du Cameroun has NULL balance_owed refuses."""
         r = handle_ask(db_b, "Total supplier payables?")
         assert r.ok is False
         assert r.refuse_reason is not None

@@ -16,19 +16,19 @@ Scripts read uppercase `THREADS` and `CTX` (example: `THREADS=2 CTX=1024 bash sc
 
 ## Measured performance (2026-08-18, `--full` profiler run)
 
-Source: [`benchmarks/submission.json`](benchmarks/submission.json) — the committed snapshot from the latest `--full` profiler run on the build laptop.
+Source: [`benchmarks/submission.json`](benchmarks/submission.json), the committed snapshot from the latest `--full` profiler run on the build laptop.
 
 | Metric | Measured | Target |
 |---|---|---:|
 | Peak RSS (full stack) | **1826.23 MB** | < 5.5 GB |
-| Steady-state RSS | 1747.49 MB | — |
+| Steady-state RSS | 1747.49 MB | n/a |
 | Generation TPS | **17.35 tok/s** | ≥ 15 tok/s |
-| Time to first token | 8175.55 ms | — |
+| Time to first token | 8175.55 ms | n/a |
 | Core temp peak | 100.0 °C | < 85 °C |
-| Throttled | Yes | — |
-| Host | Intel i7-8650U · 23.3 GB RAM · Ubuntu 22.04 · no GPU | — |
-| Accuracy | `arc_easy` 74.0% (50 samples, `acc_norm`) | — |
-| Language scope | `["en", "fr", "sw"]` | — |
+| Throttled | Yes | n/a |
+| Host | Intel i7-8650U · 23.3 GB RAM · Ubuntu 22.04 · no GPU | n/a |
+| Accuracy | `arc_easy` 74.0% (50 samples, `acc_norm`) | n/a |
+| Language scope | `["en", "fr", "sw"]` | n/a |
 
 **Accuracy note:** The 74.0% `arc_easy` score is a participant-mode self-benchmark on a public multiple-choice task. It is **not** the contest's S_acc: the judges score the hidden validation subset in audit mode on the eval machine. The score is committed as evidence of the toolchain path only.
 
@@ -42,7 +42,7 @@ Source: [`benchmarks/submission.json`](benchmarks/submission.json) — the commi
 | 6 | 16.32 | 79 °C | ok |
 | 8 | 7.53 | 85 °C | collapsed throughput, hot |
 
-**Shipped default:** `THREADS=2`/`CTX=1024` — balances thermal safety with throughput (14.96 tok/s at `-t 2` vs 17.94 at `-t 3`). `THREADS=3`/`CTX=2048` remains available via env override for the official eval-machine run.
+**Shipped default:** `THREADS=2`/`CTX=1024`: balances thermal safety with throughput (14.96 tok/s at `-t 2` vs 17.94 at `-t 3`). `THREADS=3`/`CTX=2048` remains available via env override for the official eval-machine run.
 
 ## 8 GB-class memory proof (cgroup `MemoryMax=7.5G`)
 
@@ -64,7 +64,7 @@ Thermal behaviour was tested across multiple configs on the build laptop (Intel 
 |---|---:|---|---|
 | `THREADS=3`/`CTX=2048` | 97 | FAIL | Default before 2026-08-07 |
 | `THREADS=2`/`CTX=2048` | 93 | FAIL | Still too hot at full context |
-| `THREADS=2`/`CTX=1024` | 84→89 | PASS→FAIL | Passed 2026-08-06; failed re-run 2026-08-10 |
+| `THREADS=2`/`CTX=1024` | 84 to 89 | PASS then FAIL | Passed 2026-08-06; failed re-run 2026-08-10 |
 
 The shipped default (`THREADS=2`/`CTX=1024`) showed a thin 1 °C margin on the build laptop that did not reproduce. The eval machine typically runs cooler. Thermal mitigation (CPU affinity pinning, micro-batch reduction, adaptive guard) is implemented in `scripts/start_llama_server.sh` and `scripts/thermal_guard.sh`.
 
@@ -72,9 +72,9 @@ The shipped default (`THREADS=2`/`CTX=1024`) showed a thin 1 °C margin on the b
 
 | Target | Status |
 |---|---|
-| Peak RSS < 5.5 GB | **Pass** — 1826.23 MB, well under limit |
-| TPS >= 15 tok/s | **Pass** — 17.35 tok/s (profiler), up to 17.94 (llama-bench) |
-| Thermal < 85 C | **Pending** — FAIL on build laptop; official verdict on eval machine |
+| Peak RSS < 5.5 GB | **Pass** (1826.23 MB, well under limit) |
+| TPS >= 15 tok/s | **Pass** (17.35 tok/s profiler, up to 17.94 llama-bench) |
+| Thermal < 85 C | **Pending** (FAIL on build laptop; official verdict on eval machine) |
 
 ## Model choice
 

@@ -10,11 +10,11 @@
 
 ## Problem
 
-A shop owner in Douala leaves her nephew running the counter. A regular customer asks, "Can I take three crates on credit?" The nephew does not know the credit limit. He cannot reach the owner. He guesses — and the shop loses money.
+A shop owner in Douala leaves her nephew running the counter. A regular customer asks, "Can I take three crates on credit?" The nephew does not know the credit limit. He cannot reach the owner. He guesses, and the shop loses money.
 
 This is the everyday reality for African MSME counters: credit, supplier payables, and stock questions that only the owner can answer. Cloud POS systems require connectivity. Chatbots invent balances. Spreadsheets need a laptop and training. None of these work when the owner is away and the staff member has a feature phone and a question.
 
-**DukaBind** is an offline assistant that answers these questions from a local SQLite ledger. Staff ask in English, French, or Swahili. Answers come from allowlisted database queries — never from the model's memory. Missing data produces a hard refusal. Change a ledger row, and the answer changes. The model is optional polish; the ledger is the source of truth.
+**DukaBind** is an offline assistant that answers these questions from a local SQLite ledger. Staff ask in English, French, or Swahili. Answers come from allowlisted database queries, never from the model's memory. Missing data produces a hard refusal. Change a ledger row, and the answer changes. The model is optional polish; the ledger is the source of truth.
 
 ---
 
@@ -36,7 +36,7 @@ Rejected alternatives: 7B models (RSS risk), vector RAG / embeddings (RAM), LLM-
 
 ### Language
 
-English, French, and Swahili (`language_scope: ["en","fr","sw"]`). Binder messages are deterministic in all three. Narration (optional model polish) is English and French only — the 1.5B model does not narrate Swahili reliably, so Swahili answers use the binder message directly.
+English, French, and Swahili (`language_scope: ["en","fr","sw"]`). Binder messages are deterministic in all three. Narration (optional model polish) is English and French only, because the 1.5B model does not narrate Swahili reliably, so Swahili answers use the binder message directly.
 
 ### Runtime
 
@@ -46,7 +46,7 @@ llama.cpp + GGUF only, as required by the contest rules. The model runs on CPU w
 
 ## Constraints
 
-- **Hardware:** ADTC Standard Laptop — 8 GB RAM, integrated GPU, Intel i5 or AMD Ryzen 5.
+- **Hardware:** ADTC Standard Laptop: 8 GB RAM, integrated GPU, Intel i5 or AMD Ryzen 5.
 - **Connectivity:** 100% offline during evaluation. No API calls, no telemetry, no cloud.
 - **Memory:** Peak RSS self-limit < 5.5 GB. OOM or crash is disqualification.
 - **Thermal:** Sustained load must stay < 85 °C (else −10 penalty). The official verdict is the ADTC eval machine.
@@ -63,8 +63,8 @@ Participant measurements on the build laptop (Intel i7-8650U, 23.3 GB RAM, Ubunt
 |---|---|---:|---:|
 | Peak RSS (full stack) | **1826.23 MB** | < 5.5 GB | S_eff = 74.5 |
 | Generation speed | **17.35 tok/s** | ≥ 15 tok/s | S_perf = 100 |
-| Time to first token | 8175.55 ms | — | — |
-| Accuracy (`arc_easy`, 50 samples) | **74.0%** | — | Toolchain evidence only |
+| Time to first token | 8175.55 ms | n/a | n/a |
+| Accuracy (`arc_easy`, 50 samples) | **74.0%** | n/a | Toolchain evidence only |
 
 **Score projection** (from `adtc-profiler` formula, excluding S_acc which is judge-evaluated):
 
@@ -96,7 +96,7 @@ The full stack runs under a 7.5 GiB cgroup cap with 6.73 GiB headroom:
 | 4 | 16.57 | 76 °C |
 | 8 | 7.53 | 85 °C |
 
-**Shipped default:** `THREADS=2`/`CTX=1024` — balances thermal safety with throughput.
+**Shipped default:** `THREADS=2`/`CTX=1024`: balances thermal safety with throughput.
 
 ---
 
@@ -104,7 +104,7 @@ The full stack runs under a 7.5 GiB cgroup cap with 6.73 GiB headroom:
 
 S_acc (50% of total score) is judge-evaluated on 6 prompts: 2 participant prompts (tp_001, tp_002), 2 domain prompts (generated for `corporate_enterprise`), and 2 hidden prompts (to test overfitting). Documentation quality also contributes.
 
-**Why we expect strong S_acc:** The binder computes answers deterministically from allowlisted SQL. The model narrates wording, not numbers. So the system's accuracy equals the binder's accuracy — which is 100% on all tested prompts.
+**Why we expect strong S_acc:** The binder computes answers deterministically from allowlisted SQL. The model narrates wording, not numbers. So the system's accuracy equals the binder's accuracy, which is 100% on all tested prompts.
 
 ### Held-out evidence
 
@@ -119,24 +119,24 @@ S_acc (50% of total score) is judge-evaluated on 6 prompts: 2 participant prompt
 | Total stock value | 3 | Sums on_hand × unit_price across all SKUs |
 | Total outstanding debt | 3 | Sums outstanding across all active customers |
 | Total supplier payables | 3 | Sums balance_owed across all suppliers |
-| NULL refusals | 4 | Missing fields → named refusal, never invent |
-| Adversarial | 5 | Jailbreak attempts → refuse correctly |
-| Cross-shop non-leak | 4 | Entity from shop B asked in shop A → refuse |
-| Ledger-flip proofs | 3 | Edit row → same question → new answer |
+| NULL refusals | 4 | Missing fields produce a named refusal, never invent |
+| Adversarial | 5 | Jailbreak attempts are refused correctly |
+| Cross-shop non-leak | 4 | Entity from shop B asked in shop A is refused |
+| Ledger-flip proofs | 3 | Edit row, ask the same question, get a new answer |
 
-**40/40 checks pass.** Bind/refuse accuracy: **37/37 = 100.0%** (target ≥ 90%). Ledger-flip proofs: **3/3** — answers follow the live ledger when rows change.
+**40/40 checks pass.** Bind/refuse accuracy: **37/37 = 100.0%** (target ≥ 90%). Ledger-flip proofs: **3/3**: answers follow the live ledger when rows change.
 
 ### Submission prompt independence
 
-The two submission prompts (`metadata.json`) are independent of the held-out set: `tp_001` (Esther Tchamba, NULL credit limit) and `tp_002` (Sucre 25kg stock query) use entities and products not present in any held-out prompt. CI enforces this via `tests/test_metadata.py` — the test fails if a submission prompt string appears in the held-out file.
+The two submission prompts (`metadata.json`) are independent of the held-out set: `tp_001` (Esther Tchamba, NULL credit limit) and `tp_002` (Sucre 25kg stock query) use entities and products not present in any held-out prompt. CI enforces this via `tests/test_metadata.py`. The test fails if a submission prompt string appears in the held-out file.
 
 ### Why the held-out results predict strong S_acc
 
-1. **The binder is deterministic.** Same input → same output, every time. No model variance.
+1. **The binder is deterministic.** Same input produces the same output, every time. No model variance.
 2. **8 intents cover the likely prompt space.** Credit, headroom, supplier, stock, 3 aggregates, and refuse. Domain prompts will likely ask about one of these.
 3. **2 shop ledgers provide evidence against overfitting.** Marché Akwa (Douala) and duka_b (Yaoundé) use disjoint names and numbers. The binder handles both.
 4. **Adversarial resistance.** 5 jailbreak attempts (ignore instructions, forget instructions, secret password, etc.) all produce correct refusals.
-5. **NULL refusal is fail-closed.** Missing `credit_limit`, `outstanding`, or `balance_owed` → named refusal. No invented figures.
+5. **NULL refusal is fail-closed.** Missing `credit_limit`, `outstanding`, or `balance_owed` produces a named refusal. No invented figures.
 
 Full evidence: [`evals/heldout/REPORT.md`](evals/heldout/REPORT.md).
 
@@ -144,4 +144,4 @@ Full evidence: [`evals/heldout/REPORT.md`](evals/heldout/REPORT.md).
 
 ## African use case claim
 
-`african_alpha_claim: true` — this is a **use-case** claim, not a language model claim. The product is an offline MSME shop ledger assistant designed from Cameroon reality: Douala market context, XAF currency, English/French/Swahili binder tracks, commodity 8 GB laptops, intermittent connectivity, owner-absent shifts. The model narrates in English and French; Swahili is binder-only.
+`african_alpha_claim: true`. This is a **use-case** claim, not a language model claim. The product is an offline MSME shop ledger assistant designed from Cameroon reality: Douala market context, XAF currency, English/French/Swahili binder tracks, commodity 8 GB laptops, intermittent connectivity, owner-absent shifts. The model narrates in English and French; Swahili is binder-only.
